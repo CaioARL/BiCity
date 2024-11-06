@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import MapView, { Geojson } from "react-native-maps";
 import { StyleSheet, View, Text, Button } from "react-native";
 import * as Location from 'expo-location';
+import mapCase from '../../data/cicloMapSP.json'
 
 export default function App() {
   const [location, setLocation] = useState(null);
@@ -21,29 +22,29 @@ export default function App() {
       setLocation(location);
 
       // Carregar dados GeoJSON
-      const data = {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            id: "way/4331570",
-            properties: {
-              name: "Rua das Juntas Provisórias",
-              id: "way/4331570",
-              type: "Ciclofaixa",
-            },
-            geometry: {
-              type: "LineString",
-              coordinates: [
-                [-46.5993709, -23.6024512],
-                [-46.5993227, -23.6023959],
-                [-46.5990883, -23.6021271],
-              ],
-            },
-          },
-        ],
-      };
-      setGeoJsonData(data);
+      // const data = {
+      //   type: "FeatureCollection",
+      //   features: [
+      //     {
+      //       type: "Feature",
+      //       id: "way/4331570",
+      //       properties: {
+      //         name: "Rua das Juntas Provisórias",
+      //         id: "way/4331570",
+      //         type: "Ciclofaixa",
+      //       },
+      //       geometry: {
+      //         type: "LineString",
+      //         coordinates: [
+      //           [-46.5993709, -23.6024512],
+      //           [-46.5993227, -23.6023959],
+      //           [-46.5990883, -23.6021271],
+      //         ],
+      //       },
+      //     },
+      //   ],
+      // };
+      setGeoJsonData(mapCase);
     })();
   }, []);
 
