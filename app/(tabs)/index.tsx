@@ -1,14 +1,81 @@
-import React, { useEffect, useState } from "react";
-import MapView, { Geojson } from "react-native-maps";
-import { StyleSheet, View, Text, Button } from "react-native";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import MapView, { Geojson, Marker, Region } from "react-native-maps";
+import { StyleSheet, View, Text, Button, SafeAreaView, ScrollView } from "react-native";
 import * as Location from 'expo-location';
-import mapCase from '../../data/cicloMapSP.json'
+import mapCase from '../../data/cicloMapSP.json';
 
-export default function App() {
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [geoJsonData, setGeoJsonData] = useState(null);
-  const mapRef = React.useRef(null);
+// Define types for GeoJSON data
+import { Feature, Geometry, GeoJsonProperties, Position } from 'geojson';
+
+interface GeoJSONFeature extends Feature<Geometry, GeoJsonProperties> {
+  properties: {
+    type: string;
+  };
+  geometry: {
+    type: "MultiPolygon";
+    coordinates: Position[][][];
+  };
+}
+
+interface GeoJSON {
+  type: "FeatureCollection";
+  features: GeoJSONFeature[];
+}
+
+interface ProcessedData {
+  [key: string]: GeoJSON;
+}
+
+interface LocationObject {
+  coords: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+// Pré-processamento dos dados do GeoJSON por tipo
+const processGeoJSON = (data: GeoJSON) => {
+  const processed: ProcessedData = {};
+  const types = new Set<string>();
+  
+  data.features.forEach((feature: GeoJSONFeature) => {
+    const type = feature.properties.type;
+    types.add(type);
+    
+    if (!processed[type]) {
+      processed[type] = {
+        type: "FeatureCollection",
+        features: []
+      };
+    }
+    processed[type].features.push(feature);
+  });
+  
+  return { processed, types: Array.from(types) };
+};
+
+const { processed: processedData, types: pathTypes } = processGeoJSON(mapCase as GeoJSON);
+
+const App = () => {
+  const [location, setLocation] = useState<LocationObject | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<{ [key: string]: boolean }>(
+    Object.fromEntries(pathTypes.map(type => [type, true]))
+  );
+  const mapRef = React.useRef<MapView>(null);
+
+  const pathColors: { [key: string]: string } = {
+    "Ciclofaixa": "#FF4444",
+    "Calçada compartilhada": "#33B5E5",
+    "Ciclovia": "#00C851"
+  };
+
+  const initialRegion: Region = {
+    latitude: -23.55052,
+    longitude: -46.633308,
+    latitudeDelta: 0.1,
+    longitudeDelta: 0.1,
+  };
 
   useEffect(() => {
     (async () => {
@@ -18,86 +85,129 @@ export default function App() {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-
-      // Carregar dados GeoJSON
-      // const data = {
-      //   type: "FeatureCollection",
-      //   features: [
-      //     {
-      //       type: "Feature",
-      //       id: "way/4331570",
-      //       properties: {
-      //         name: "Rua das Juntas Provisórias",
-      //         id: "way/4331570",
-      //         type: "Ciclofaixa",
-      //       },
-      //       geometry: {
-      //         type: "LineString",
-      //         coordinates: [
-      //           [-46.5993709, -23.6024512],
-      //           [-46.5993227, -23.6023959],
-      //           [-46.5990883, -23.6021271],
-      //         ],
-      //       },
-      //     },
-      //   ],
-      // };
-      setGeoJsonData(mapCase);
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced
+      });
+      setLocation(location as LocationObject);
     })();
   }, []);
 
-  const handlePress = async () => {
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location);
-    mapRef.current.animateToRegion({
+  const visibleLayers = useMemo(() => 
+    Object.entries(selectedTypes)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([type]) => type),
+    [selectedTypes]
+  );
+
+  const handlePress = useCallback(async () => {
+    let location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced
+    });
+    setLocation(location as LocationObject);
+    
+    mapRef.current?.animateToRegion({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     });
-  };
+  }, []);
+
+  const togglePathType = useCallback((type: string) => {
+    setSelectedTypes(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  }, []);
 
   if (errorMsg) {
-    return <View style={styles.container}><Text>{errorMsg}</Text></View>;
+    return <Text>{errorMsg}</Text>;
   }
 
-  if (!location || !geoJsonData) {
-    return <View style={styles.container}><Text>Loading...</Text></View>;
+  if (!location) {
+    return <Text>Loading...</Text>;
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={{
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
+        initialRegion={initialRegion}
+        maxZoomLevel={18}
+        minZoomLevel={10}
+        moveOnMarkerPress={false}
+        loadingEnabled={true}
+        loadingIndicatorColor="#666666"
+        loadingBackgroundColor="#eeeeee"
       >
-        <Geojson 
-          geojson={geoJsonData} 
-          strokeColor="red" 
-          strokeWidth={10} 
+        <Marker
+          coordinate={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          }}
+          title="Você está aqui"
+          flat={true}
+          tracksViewChanges={false}
         />
+        
+        {visibleLayers.map(type => (
+          <Geojson
+            key={type}
+            geojson={processedData[type]}
+            strokeColor={pathColors[type]}
+            strokeWidth={2}
+            tappable={false}
+          />
+        ))}
       </MapView>
-      <Button title="Voltar à Localização Atual" onPress={handlePress} />
-    </View>
+
+      <ScrollView 
+        horizontal 
+        style={styles.filterContainer}
+        showsHorizontalScrollIndicator={false}
+      >
+        {pathTypes.map(type => (
+          <View key={type} style={styles.buttonContainer}>
+            <Button
+              title={`${type} ${selectedTypes[type] ? '✓' : '✗'}`}
+              onPress={() => togglePathType(type)}
+              color={selectedTypes[type] ? pathColors[type] : "#666666"}
+            />
+          </View>
+        ))}
+      </ScrollView>
+
+      <View style={styles.locationButtonContainer}>
+        <Button 
+          title="Minha Localização" 
+          onPress={handlePress}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   map: {
     width: "100%",
-    height: "90%",
+    height: "85%",
   },
+  filterContainer: {
+    height: 50,
+    flexDirection: 'row',
+    padding: 5,
+    backgroundColor: '#f5f5f5',
+  },
+  buttonContainer: {
+    marginHorizontal: 5,
+  },
+  locationButtonContainer: {
+    padding: 10,
+  }
 });
+
+export default React.memo(App);
