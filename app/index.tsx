@@ -5,11 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Index() {
   return (
-    <SafeAreaView className='bg-blue-500'>
+    <SafeAreaView>
       <ScrollView contentContainerStyle={{ height: '100%' }} >
-        <View className='flex-1 items-center justify-center bg-blue-500'>
-          <Text className='text-3xl' > BICITY </Text>
-          <Link href='/home' > Go to HOME</Link>
+        <View className='flex-1 items-center justify-center bg-white'>
+          <Text className='text-5xl' > BICITY </Text>
+          <Link href='/sign-in' className='text-3xl text-blue-600'> Go to Sign in</Link>
         </View>
       </ScrollView>
     </SafeAreaView>

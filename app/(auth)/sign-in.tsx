@@ -1,10 +1,39 @@
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import FormField from '../../components/FormField'
 
 export default function SignIn() {
+
+  const [form, setForm] = React.useState({
+    email: '',
+    password: ''
+  })
+
+
+
   return (
-    <View>
-      <Text>SignIn</Text>
-    </View>
+    <SafeAreaView className='h-full'>
+      <ScrollView>
+          <View className='w-full bg-white h-full justify-center min-h-[85vh] px-4 my-6'>
+            <Text>SignIn</Text>
+            <FormField
+              title='Email'
+              value={form.email}
+              handleChangeText={(e : string) => setForm({ ...form, email: e })}
+              otherStyles='mb-4'
+              keyboardType='email-address'
+              placeholder='email@email.com'
+            />
+            <FormField
+              title='Password'
+              value={form.password}
+              handleChangeText={(e : string) => setForm({ ...form, password: e })}
+              otherStyles='mb-4'
+              placeholder='insert your password'
+            />
+          </View>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
