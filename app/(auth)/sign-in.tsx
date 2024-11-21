@@ -15,7 +15,8 @@ export default function SignIn() {
   return (
     <SafeAreaView className='h-full'>
       <ScrollView>
-          <View className='w-full bg-white h-full justify-center min-h-[85vh] px-4 my-6'>
+        
+          <View className=''>
             <Text>SignIn</Text>
             <FormField
               title='Email'
@@ -33,6 +34,7 @@ export default function SignIn() {
               placeholder='insert your password'
             />
           </View>
+
       </ScrollView>
     </SafeAreaView>
   )

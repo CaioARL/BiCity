@@ -18,8 +18,8 @@ export default function FormField({ title, value, placeholder, handleChangeText,
 
   return (
     <View className={`space-y-2 ${otherStyles}`}>
-      <Text className='text-base text-gray-100'>{title}</Text>
-      <View className='border-2 border-red-500 w-full h-16 px-4 rounded-2xl bg-gray-500 focus:border-blue-300 items-center'>
+      <Text className='text-base'>{title}</Text>
+      <View className='border-4 border-black w-full h-16 px-4 rounded-2xl bg-slate-950 focus:border-blue-300 items-center'>
         <TextInput
           className='flex-1 text-base'
           value={value}

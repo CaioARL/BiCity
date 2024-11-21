@@ -12,10 +12,10 @@ export default function AuthLayout() {
             headerShown: false
            }}
         />
-        <Stack.Screen name='sign-out'
+        <Stack.Screen name='sign-up'
           options={{ 
             title: 'Sign Up',
-            headerShown: false
+            headerShown: false  
            }}
         />
       </Stack>
