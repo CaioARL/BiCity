@@ -1,8 +1,8 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, ScrollView, FlatList } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export default function Profile() {
+export default function Events() {
   return (
     <SafeAreaView className='h-full'>
       <FlatList 
@@ -16,12 +16,11 @@ export default function Profile() {
 
         ListHeaderComponent={() => (
           <View className='items-center justify-center'>
-            <Text className='text-xl color-rose-600'>Profile</Text>
+            <Text className='text-xl color-rose-600'>Events</Text>
             </View>
             )}
       >
       </FlatList>
     </SafeAreaView>
-
   )
 }

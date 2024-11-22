@@ -20,7 +20,7 @@ const TabIcon = ({icon, color, name, focused}: TabIconProps) => {
                 tintColor={color}
                 className='w-6 h-6'
             />
-            <Text className={`${focused? '':''} text-xs`}>
+            <Text className={`${focused? '':''} text-xs text-nowrap`}>
                 {name}
             </Text>
         </View>
@@ -49,6 +49,22 @@ export default function TabsLayout() {
                         focused={focused} />
                     )
                     
+                }
+            }
+        />
+        <Tabs.Screen 
+            name="events" 
+            options={
+                {
+                    title: 'Events',
+                    headerShown: false,
+                    tabBarIcon: ({color, focused}) => (
+                        <TabIcon 
+                        icon={icons.icon} 
+                        color={color} 
+                        name='Events' 
+                        focused={focused} />
+                    )
                 }
             }
         />
