@@ -10,7 +10,9 @@ export default function Index() {
     <SafeAreaView className='bg-white h-full'>
       <ScrollView contentContainerStyle={{ height: '100%' }} >
         <View className='flex-1 items-center justify-center px-4'>
-          <Text className='text-5xl' > BICITY </Text>
+          <Text className='text-5xl font-robotobold' > BICITY </Text>
+          <Text className='text-5xl font-robotolight' > BICITY </Text>
+          <Text className='text-5xl font-robotomedium' > BICITY </Text>
           {/* <Link href='/sign-in' className='text-3xl text-blue-600'> Go to Sign in</Link> */}
           
           <CustomButton
