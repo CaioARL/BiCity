@@ -17,7 +17,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
        checkout main
        merge feature-estrutura-inicial id: "410f627"
        checkout feature-fluxo-de-cadastro-de-usuario
-       commit id: "3"
+       commit id: "35ba65b"
        commit id: "5"
 
 ```
