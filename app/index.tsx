@@ -8,10 +8,9 @@ import { StatusBar } from 'expo-status-bar'
 export default function Index() {
   useEffect(() => {
     const timeout = setTimeout(() => {
-      router.push('/sign-in');
+      router.replace('/sign-in');
     }, 3000);
-
-
+    
     return () => clearTimeout(timeout);
   }, []);
 
@@ -21,7 +20,6 @@ export default function Index() {
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-5xl text-primary_green font-robotobold"> BICITY </Text>
           {/* <Link href='/sign-in' className='text-3xl text-blue-600'> Go to Sign in</Link> */}
-          
           
           {/*<CustomButton
             title="Go to sign in"

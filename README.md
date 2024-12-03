@@ -2,6 +2,29 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+
+```mermaid
+    gitGraph
+       commit id: "dbd6712"
+       commit id: "28ce906"
+       branch feature-estrutura-inicial
+       commit id: "df5d0cc"
+       commit id: "9d8c059"
+       commit id: "9b6e6b7"
+       commit id: "941d395"
+       commit id: "ea47313"
+       branch feature-fluxo-de-cadastro-de-usuario
+       checkout main
+       merge feature-estrutura-inicial id: "410f627"
+       checkout feature-fluxo-de-cadastro-de-usuario
+       commit id: "35ba65b"
+       commit id: " " tag: "axios" tag: "zod"
+
+```
+
+
+
+
 ## Get started
 
 1. Install dependencies

@@ -1,36 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
+import { masks } from '../../util/masks';
+import { valid } from '../../util/validationSchemas';
+import { getCep } from '../../api/external-api';
 
-// Função para formatar CPF
-const formatCPF = (value: string) => {
-  return value
-    .replace(/\D/g, '') 
-    .replace(/(\d{3})(\d)/, '$1.$2') 
-    .replace(/(\d{3})(\d)/, '$1.$2') 
-    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-};
 
-// Função para formatar CNPJ
-const formatCNPJ = (value: string) => {
-  return value
-    .replace(/\D/g, '') 
-    .replace(/(\d{2})(\d)/, '$1.$2') 
-    .replace(/(\d{3})(\d)/, '$1.$2') 
-    .replace(/(\d{3})(\d)/, '$1/$2') 
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
-};
+
 
 export default function SignUp() {
-  const [cpfCnpj, setCpfCnpj] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [step, setStep] = useState(1);  
-  const [emailEditable, setEmailEditable] = useState(false); 
+  const [cpfCnpj, setCpfCnpj] = useState('')
+  const [cep, setCep] = useState('')
+  const [rua, setRua] = useState('')	
+  const [numero, setNumero] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
+  const [estado, setEstado] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [step, setStep] = useState(1)
+  const [emailEditable, setEmailEditable] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Funções para avançar ou voltar entre as etapas
   const nextStep = () => {
@@ -63,11 +58,55 @@ export default function SignUp() {
   // Função para formatar CPF ou CNPJ após a atualização do campo
   const formatInput = (input: string) => {
     if (input.length <= 14) {
-      return formatCPF(input); 
+      return masks.CPF(input); 
     } else {
-      return formatCNPJ(input);
+      return masks.CNPJ(input);
     }
   };
+
+
+
+  
+
+
+  // Função para formatar CEP
+  const handleCepChange = (text: string) => {
+    const cepText = text.replace('-','')
+    console.log("TEXT ", text)
+    console.log("CEPTEXT ", cepText)
+
+    const result = valid.cepSchema.safeParse(cepText) 
+      
+      if (result.success) {
+        console.log('CEP válido:', text)
+        setCep(cepText)
+        abortControllerRef.current?.abort()
+        abortControllerRef.current = new AbortController()
+          getCep(cepText , abortControllerRef.current)
+            .then((response) => {
+              console.log(response)
+              console.log(response.street)
+              setRua(response.street)
+              setBairro(response.neighborhood)
+              setCidade(response.city)
+              setEstado(response.state)
+            })
+            .catch((error) => {
+
+            })
+            .finally(() => {
+            })
+        
+      } else {
+        // setErrorMapCep(result.error.message)
+        
+        setCep(text);
+        console.log('CEP inválido:', text)
+      }
+
+
+  };
+
 
   // Função para alternar entre editar e salvar o email
   const toggleEmailEditable = () => {
@@ -104,6 +143,13 @@ export default function SignUp() {
               placeholder="Digite seu CPF ou CNPJ"
               handleChangeText={handleCpfCnpjChange}  
             />
+            <FormField
+              title='CEP'
+              value={masks.CEP(cep)}
+              placeholder='Digite seu CEP'
+              handleChangeText={handleCepChange}
+            />
+
             <CustomButton
               title="Next"
               handlePress={nextStep}
