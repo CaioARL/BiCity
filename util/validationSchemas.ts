@@ -4,7 +4,9 @@ import { z } from 'zod';
 
 // -------- Input Schemas
 export const valid = {
-    cepSchema : z.string().min(8).max(8)
+    cepSchema : z.string().min(8).max(8),
+    emailSchema: z.string().email(),
+    cepSchemaRegex: z.string().min(8).max(8).regex(new RegExp('^[0-9]*$'))
 
 }
 

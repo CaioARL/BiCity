@@ -12,6 +12,7 @@ import { getCep } from '../../api/external-api';
 export default function SignUp() {
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [cep, setCep] = useState('')
+  const [cepError, setCepError ] = useState('')
   const [rua, setRua] = useState('')	
   const [numero, setNumero] = useState('')
   const [complemento, setComplemento] = useState('')
@@ -29,8 +30,10 @@ export default function SignUp() {
 
   // Funções para avançar ou voltar entre as etapas
   const nextStep = () => {
+    
+
     if (step === 1) {
-      if (email.trim() === '') {
+      if (!valid.emailSchema.safeParse(email).success) {
         alert('Please enter a valid email');
         return;
       }
@@ -75,9 +78,11 @@ export default function SignUp() {
     console.log("TEXT ", text)
     console.log("CEPTEXT ", cepText)
 
-    const result = valid.cepSchema.safeParse(cepText) 
-      
-      if (result.success) {
+
+    valid.cepSchemaRegex.parseAsync(cepText)
+    .then(
+      () => {
+        
         console.log('CEP válido:', text)
         setCep(cepText)
         abortControllerRef.current?.abort()
@@ -92,17 +97,20 @@ export default function SignUp() {
               setEstado(response.state)
             })
             .catch((error) => {
-
+    
             })
             .finally(() => {
             })
-        
-      } else {
-        // setErrorMapCep(result.error.message)
-        
-        setCep(text);
-        console.log('CEP inválido:', text)
       }
+    )
+    .catch((error) => {
+      setCepError(error.message)
+      setCep(text);
+      console.log('CEP inválido:', text)
+
+    })
+    
+  
 
 
   };
@@ -147,8 +155,29 @@ export default function SignUp() {
               title='CEP'
               value={masks.CEP(cep)}
               placeholder='Digite seu CEP'
+              msg={cepError}
               handleChangeText={handleCepChange}
             />
+            <FormField
+              title='Cidade'
+              value={cidade}
+              placeholder='Digite seu CEP'
+              handleChangeText={handleCepChange}
+            />
+            <FormField
+              title='Estado'
+              value={estado}
+              placeholder='Digite seu CEP'
+              handleChangeText={handleCepChange}
+            />
+            <FormField
+              title='Bairro'
+              value={bairro}
+              placeholder='Digite seu CEP'
+              handleChangeText={handleCepChange}
+            />
+
+
 
             <CustomButton
               title="Next"

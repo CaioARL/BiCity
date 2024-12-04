@@ -4,6 +4,7 @@ import React, {useState} from 'react'
 interface FormFieldProps {
     title: string
     value: string
+    msg?: string
     placeholder?: string
     handleChangeText: (e : string) => void
     otherStyles?: string
@@ -15,7 +16,7 @@ interface FormFieldProps {
 
 
 
-export default function FormField({ title, value, placeholder, handleChangeText, otherStyles, keyboardType } : FormFieldProps) {
+export default function FormField({ title, value, placeholder, handleChangeText, otherStyles, keyboardType, msg } : FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
 
 
@@ -40,6 +41,8 @@ export default function FormField({ title, value, placeholder, handleChangeText,
           </Text>
         )}
         </View>
+        {msg && (<Text className='text-sm text-color-red'>{msg}</Text>)}
+        
     </View>
   )
 }
