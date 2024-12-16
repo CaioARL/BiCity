@@ -5,6 +5,6 @@ import ENDPOINTS from "./endpoints";
 
 
 export const createUser = async (data: CriarUsuarioRequest): Promise<CriarUsuarioResponse> => {
-    const response = await api.post<CriarUsuarioResponse>(ENDPOINTS.USERS, data)
+    const response = await api.post<CriarUsuarioResponse>(ENDPOINTS.USUARIO_CADASTRO, data)
     return response.data
 }

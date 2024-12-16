@@ -1,2 +1,2 @@
 export * from './usuario';
-export * from './external-api';
+export * from './endereco';

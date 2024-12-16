@@ -19,7 +19,10 @@ module.exports = {
         colors: {
             primary_green: "#C3FF00",
             secondary_black: "#333",
+            color_red_error: "#E81123",
+            color_green_success: "#00A300",
             color__lightGray: "#818181",
+            color_lightGray: "#D9D9D9",
         },
 
         /* ===== Container Responsivel ===== */

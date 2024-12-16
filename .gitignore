@@ -30,8 +30,11 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
-.env
+
+# non-permanent docs
+todo-list.md

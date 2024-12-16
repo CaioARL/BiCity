@@ -75,7 +75,12 @@ export const masks = {
     .replace(/[^a-zA-Z,-\d\s]/g, '')
     .replace(/\s+/g,' ')
     .replace(/^\s+/g, '')
+  },
+  EMAIL(value : string) {
+    return value
+    .replace(/[^a-zA-Z0-9@.]/g, '')
   }
+  
 
 
 

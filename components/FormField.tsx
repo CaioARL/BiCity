@@ -1,29 +1,32 @@
-import { View, Text, TextInput } from 'react-native'
+import { View, Text, TextInput, ActivityIndicator } from 'react-native'
 import React, {useState} from 'react'
 
 interface FormFieldProps {
     title: string
     value: string
     msg?: string
+    isValid?: boolean
     placeholder?: string
     handleChangeText: (e : string) => void
+    validantionCheck?: () => void
     otherStyles?: string
     keyboardType?: 'email-address' | 'default'
     secureTextEntry?: boolean;
-    editable?: boolean;
-    
-}
+    disableEdit?: boolean;
+    isLoading?: boolean;
+    maxLength?: number;
+  }
 
 
 
-export default function FormField({ title, value, placeholder, handleChangeText, otherStyles, keyboardType, msg } : FormFieldProps) {
+export default function FormField({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, msg, disableEdit, isLoading , isValid, maxLength} : FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
 
 
   return (
     <View className={`space-y-2 ${otherStyles}`}>
       <Text className='text-base color-secondary_black'>{title}</Text>
-      <View className='border-2 border-color__lightGray w-full h-16 px-4 rounded-[2px] bg-orange-5001e focus:border-blue-300 items-center flex-row'>
+      <View className={`border-2 ${disableEdit==true &&  'bg-color_lightGray'} ${msg? 'border-color_red_error': isValid? 'border-color_green_success': 'border-color__lightGray' }  w-full h-16 px-4 rounded-[2px] bg-orange-5001e focus:border-blue-300 items-center flex-row`}>
         <TextInput
           className='flex-1 text-base w-full'
           value={value}
@@ -31,6 +34,9 @@ export default function FormField({ title, value, placeholder, handleChangeText,
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
           secureTextEntry={title === 'Password' && !showPassword}
+          editable={!disableEdit}
+          onEndEditing={validantionCheck}
+          maxLength={maxLength}
         />
         {title === 'Password' && (
           <Text
@@ -40,8 +46,15 @@ export default function FormField({ title, value, placeholder, handleChangeText,
             {showPassword ? 'Hide' : 'Show'}
           </Text>
         )}
+        {isLoading && (
+          <ActivityIndicator
+            size='small'
+            color='#0000ff'
+          />    
+        )}
+
         </View>
-        {msg && (<Text className='text-sm text-color-red'>{msg}</Text>)}
+        {msg && (<Text className='text-sm text-color_red_error'>{msg}</Text>)}
         
     </View>
   )
