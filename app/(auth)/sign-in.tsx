@@ -38,6 +38,7 @@ export default function SignIn() {
               handleChangeText={(e: string) => setForm({ ...form, password: e })}
               otherStyles="mb-4"
               placeholder="Insert your password"
+              secureTextEntry={true}
             />
 
             <View className="flex-row justify-between mb-6">

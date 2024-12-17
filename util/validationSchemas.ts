@@ -19,7 +19,13 @@ export const valid = {
     cpfSchema: z.string().min(11, {message: 'Cpf deve ter pelo ao menos 11 caracteres' }).max(11, {message: 'Cpf deve ter no maximo 11 caracteres' }).regex(new RegExp('^[0-9]*$'), {message: 'Cpf deve conter apenas numeros'}),
 
     cnpjSchema: z.string().min(14, {message: 'Cnpj deve ter pelo ao menos 14 caracteres' }).max(14, {message: 'Cnpj deve ter no maximo 14 caracteres' }).regex(new RegExp('^[0-9]*$'), {message: 'Cnpj deve conter apenas numeros'}),
-    
+   
+    passwordSchema: z.string().regex(
+        new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!-@#\$%\^&\*])(?=.{6,20})'), 
+        {message: 'Senha deve conter pelo menos uma letra maiuscula, uma letra minuscula, um numero e um caracter especial'}
+    ).min(6, {message: 'Senha deve ter pelo ao menos 6 caracteres' }).max(20, {message: 'Senha deve ter no maximo 20 caracteres' }),
+
+
 }
 
 

@@ -6,10 +6,14 @@ import { masks } from '../../util/masks';
 import { valid } from '../../util/validationSchemas';
 import { getCep } from '../../api/endereco';
 import { NivelHabilidade } from '../../types/nivel-habilidade';
+import FormFieldSelectList from '../../components/FormFieldSelectList';
+import { getNivelHabilidade } from '../../api/nivel-habilidade';
 
 
-
-
+interface ListNivelHabilidade {
+  label: string
+  value: NivelHabilidade
+}
 
 
 export default function SignUp() {
@@ -53,7 +57,14 @@ export default function SignUp() {
   
   
   const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [isValidPassword, setIsValidPassword] = useState(false)
+
+
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
+  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState(false)
+
   
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [cpfError, setCpfError] = useState('')
@@ -63,6 +74,9 @@ export default function SignUp() {
 
   
   const [nivelHabilidade, setNivelHabilidade] = useState<NivelHabilidade>()
+  const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
+  const [nivelHabilidadeError, setNivelHabilidadeError] = useState('')
+
 
   
   const [step, setStep] = useState(1)
@@ -75,20 +89,52 @@ export default function SignUp() {
     if (step === 1) {
       setStep(2)
     } else if (step === 2) {
+      setStep(3)
+    } else if (step === 3) {
       if (password !== confirmPassword) {
         alert('Passwords do not match')
         return
       }
-      setStep(3)
-    } else if (step === 3) {
       setStep(4)
-      
     }
   };
 
   const prevStep = () => {
     setStep(step - 1)
   }
+
+
+
+ 
+
+
+  useEffect(() => {
+    setNivelHabilidadeError('')
+    getNivelHabilidade()
+    .then((response) => {
+      setListNivelHabilidade([])
+      response.map((nivel) => {
+        setListNivelHabilidade((prevList) => {
+          return [
+            ...prevList,
+            {
+              label: nivel.nome,
+              value: nivel
+            }
+          ]
+        })
+      })
+      
+      
+    }
+    
+  )
+  .catch((response) => { 
+    setNivelHabilidadeError('Erro ao carregar niveis de habilidade: '+ response.message)
+  })
+
+  }, [])
+
 
 
 
@@ -113,11 +159,6 @@ export default function SignUp() {
 
 
   }
-
-
-
-
-
 
 
   // Função para formatar CEP
@@ -226,6 +267,33 @@ export default function SignUp() {
       } 
     }
 
+    const checkPassword = () => {
+      const result = valid.passwordSchema.safeParse(password)
+      setIsValidPassword(result.success)
+      if (!result.success) {
+        result.error.issues.map((issue) => {
+          setPasswordError(issue.message)
+        })
+      } else {
+        setPasswordError('')
+      } 
+    }
+
+
+    const checkConfirmPassword = () => {
+      const result = valid.passwordSchema.safeParse(confirmPassword)
+      setIsValidConfirmPassword(result.success)
+      if (!result.success) {
+        result.error.issues.map((issue) => {
+          setConfirmPasswordError(issue.message)
+        })
+      } else {
+        setConfirmPasswordError('')
+      } 
+    }
+
+  
+    
   
 
   return (
@@ -260,6 +328,14 @@ export default function SignUp() {
               msg={userNameError}
               isValid={isValidUserName}
               validantionCheck={checkUsername}
+            />
+
+            <FormFieldSelectList
+              title='Nivel de habilidade'
+              selectedValue={nivelHabilidade}
+              options={listNivelHabilidade}
+              handleChange={setNivelHabilidade}
+              msg={nivelHabilidadeError}
             />
            
             <CustomButton
@@ -365,6 +441,9 @@ export default function SignUp() {
             placeholder="Digite sua senha"
             secureTextEntry={true}
             handleChangeText={setPassword}
+            msg={passwordError}
+            isValid={isValidPassword}
+            validantionCheck={checkPassword}
           />
           <FormField
             title="Confirmar Senha"
@@ -372,6 +451,10 @@ export default function SignUp() {
             placeholder="Confirme sua senha"
             secureTextEntry={true}
             handleChangeText={setConfirmPassword}
+            msg={confirmPasswordError}
+            isValid={isValidConfirmPassword}
+            validantionCheck={checkConfirmPassword}
+            maxLength={20}
           />
           <CustomButton
             title="Next"

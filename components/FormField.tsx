@@ -19,7 +19,7 @@ interface FormFieldProps {
 
 
 
-export default function FormField({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, msg, disableEdit, isLoading , isValid, maxLength} : FormFieldProps) {
+export default function FormField({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength} : FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
 
 
@@ -33,12 +33,12 @@ export default function FormField({ title, value, placeholder, handleChangeText,
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
-          secureTextEntry={title === 'Password' && !showPassword}
+          secureTextEntry={secureTextEntry && !showPassword}
           editable={!disableEdit}
           onEndEditing={validantionCheck}
           maxLength={maxLength}
         />
-        {title === 'Password' && (
+        {secureTextEntry && (
           <Text
             onPress={() => setShowPassword(!showPassword)}
             className='text-base'
