@@ -2,7 +2,7 @@ import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { Tabs } from 'expo-router'
 import icons from '../../constants/icons'
-
+import {TabBar} from '../../components/TabBar';
 
 interface TabIconProps {
     icon: any;
@@ -30,33 +30,16 @@ const TabIcon = ({icon, color, name, focused}: TabIconProps) => {
 export default function TabsLayout() {
   return (
     <>
-    <Tabs
+    <Tabs tabBar={props => <TabBar {...props} />}
         screenOptions={{
-            tabBarShowLabel: false,
+            tabBarShowLabel: true,
         }}
     >
-        <Tabs.Screen 
-            name="home" 
-            options={
-                {
-                    title: 'Home',
-                    headerShown: false,
-                    tabBarIcon: ({color, focused}) => (
-                        <TabIcon 
-                        icon={icons.icon} 
-                        color={color} 
-                        name='Home' 
-                        focused={focused} />
-                    )
-                    
-                }
-            }
-        />
         <Tabs.Screen 
             name="events" 
             options={
                 {
-                    title: 'Events',
+                    title: 'Eventos',
                     headerShown: false,
                     tabBarIcon: ({color, focused}) => (
                         <TabIcon 
@@ -69,10 +52,27 @@ export default function TabsLayout() {
             }
         />
         <Tabs.Screen 
+            name="mapView" 
+            options={
+                {
+                    title: 'Mapa',
+                    headerShown: false,
+                    tabBarIcon: ({color, focused}) => (
+                        <TabIcon 
+                        icon={icons.icon} 
+                        color={color} 
+                        name='Mapa' 
+                        focused={focused} />
+                    )
+                    
+                }
+            }
+        />
+        <Tabs.Screen 
             name="profile" 
             options={
                 {
-                    title: 'Profile',
+                    title: 'Perfil',
                     headerShown: false,
                     tabBarIcon: ({color, focused}) => (
                         <TabIcon 

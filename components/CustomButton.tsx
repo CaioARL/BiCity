@@ -20,7 +20,7 @@ export default function CustomButton({title, handlePress, containerStyles, textS
       disabled={isLoading}
       >
       
-      <Text className={`text-lg ${textStyles} font-robotobold `}>{title}</Text>
+      <Text className={`text-lg ${textStyles} font-robotobold text-secondary_black`}>{title}</Text>
     </TouchableOpacity>
   )
 }

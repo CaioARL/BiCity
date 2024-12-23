@@ -18,7 +18,8 @@ module.exports = {
         /* ===== Colors ===== */
         colors: {
             primary_green: "#C3FF00",
-            secondary_black: "#333",
+            secondary_black: "#1f2937",
+            secondary_black_sub_title: "#6b7280",
             color_red_error: "#E81123",
             color_green_success: "#00A300",
             color__lightGray: "#818181",

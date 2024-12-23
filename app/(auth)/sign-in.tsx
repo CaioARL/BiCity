@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, StatusBar } from 'react-native';
 import React, { useState } from 'react';
+import { View, Text, ScrollView, ImageBackground, Image  } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
@@ -13,16 +13,29 @@ export default function SignIn() {
     password: '',
   });
 
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png'); 
+  //const gradientImage = require('../../assets/greengradient.png');
   const submitForm = () => {
     console.log('form', form);
-    router.push('home');
+    router.push('events');
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView className="container  w-full h-full">
-          <View className="flex-1 min-h-screen h-full">
-            <Text className="text-[14px] font-bold text-center text-secondary_black mb-24">Sign In</Text>
+    <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}>
+     <ImageBackground 
+      source={backgroundImage} 
+      style={{ flex: 1, position: 'absolute', width: '100%', top: -200, height: '100%', }} 
+      resizeMode="contain"
+    />
+      {/* <Image
+        source={gradientImage} 
+        style={{ position: 'absolute', width: 415, height: 665, bottom: -20, opacity: 0.5 }} // Adicionando transparência
+        resizeMode="cover"
+      /> */}
+
+        <ScrollView className="container  w-full h-full ">
+          <View className="flex-1 min-h-screen h-full ">
+            <Text className="text-[14px] font-bold text-center text-secondary_black mb-24">Login</Text>
             <Text className="text-2xl font-bold text-center text-secondary_black mb-4">BICITY</Text>
             <FormField
               title="Email"
@@ -30,14 +43,14 @@ export default function SignIn() {
               handleChangeText={(e: string) => setForm({ ...form, email: e })}
               otherStyles="mb-4"
               keyboardType="email-address"
-              placeholder="email@email.com"
+              placeholder="Bicity@email.com"
             />
             <FormField
-              title="Password"
+              title="Senha"
               value={form.password}
               handleChangeText={(e: string) => setForm({ ...form, password: e })}
               otherStyles="mb-4"
-              placeholder="Insert your password"
+              placeholder="Insira sua senha"
               secureTextEntry={true}
             />
 
@@ -59,24 +72,24 @@ export default function SignIn() {
                   </View>
 
                   {/* Nome do ícone abaixo da bola */}
-                  <Text className="text-xs text-secondary_black">{icon}</Text>
+                  <Text className="text-xs text-secondary_black_sub_title">{icon}</Text>
                 </View>
               ))}
             </View>
 
-            <CustomButton
-              title="Sign In"
+            <CustomButton 
+              title="Entrar"
               handlePress={() => submitForm()}
               containerStyles="mt-4"
               isLoading={isSubmittingForm}
             />
             <View className="flex-row justify-center mt-4">
-              <Text>Don't have an account? </Text>
+              <Text className="text-secondary_black_sub_title">Não tem uma conta? </Text>
               <Text
                 onPress={() => router.push('sign-up')}
                 className="text-blue-500 font-bold"
               >
-                Sign Up
+                Inscrever-se
               </Text>
             </View>
           </View>

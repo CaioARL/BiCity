@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef, useState} from 'react';
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground  } from 'react-native';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 import { masks } from '../../util/masks';
@@ -8,84 +8,69 @@ import { getCep } from '../../api/endereco';
 import { NivelHabilidade } from '../../types/nivel-habilidade';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ListNivelHabilidade {
   label: string
   value: NivelHabilidade
 }
 
-
 export default function SignUp() {
   const [userName, setUserName] = useState('')
   const [userNameError, setUserNameError] = useState('')
   const [isValidUserName, setIsValidUserName] = useState(false)
 
-
   const [firstName, setFirstName] = useState('')
   const [fristNameError, setFirstNameError] = useState('')
   const [isValidFirstName, setIsValidFirstName] = useState(false)
 
-
   const [lastName, setLastName] = useState('')
   const [lastNameError, setLastNameError] = useState('')
   const [isValidLastName, setIsValidLastName] = useState(false)
-
 
   const [cep, setCep] = useState('')
   const [cepError, setCepError ] = useState('')
   const [isCepLoading, setIsCepLoading] = useState(false)
   const [isValidCep, setIsValidCep] = useState(false)
   
-
   const [estado, setEstado] = useState('')
   const [cidade, setCidade] = useState('')
   const [bairro, setBairro] = useState('')
   const [rua, setRua] = useState('')	
 
-  
   const [numero, setNumero] = useState('')
   const [numberError, setNumberError] = useState('')
   const [isValidNumber, setIsValidNumber] = useState(false)
 
-
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [isValidEmail, setIsValidEmail] = useState(false)
-
-
-  
   
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [isValidPassword, setIsValidPassword] = useState(false)
 
-
   const [confirmPassword, setConfirmPassword] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
   const [isValidConfirmPassword, setIsValidConfirmPassword] = useState(false)
-
   
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [cpfError, setCpfError] = useState('')
   const [isValidCpf, setIsValidCpf] = useState(false)
   const [cnpjError, setCnpjError] = useState('')
   const [isValidCnpj, setIsValidCnpj] = useState(false)
-
   
   const [nivelHabilidade, setNivelHabilidade] = useState<NivelHabilidade>()
   const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
   const [nivelHabilidadeError, setNivelHabilidadeError] = useState('')
-
-
   
   const [step, setStep] = useState(1)
   const abortControllerRef = useRef<AbortController | null>(null)
 
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png'); 
+
   // Funções para avançar ou voltar entre as etapas
   const nextStep = () => {
-    
-
     if (step === 1) {
       setStep(2)
     } else if (step === 2) {
@@ -102,12 +87,6 @@ export default function SignUp() {
   const prevStep = () => {
     setStep(step - 1)
   }
-
-
-
- 
-
-
   useEffect(() => {
     setNivelHabilidadeError('')
     getNivelHabilidade()
@@ -124,19 +103,13 @@ export default function SignUp() {
           ]
         })
       })
-      
-      
     }
-    
   )
   .catch((response) => { 
     setNivelHabilidadeError('Erro ao carregar niveis de habilidade: '+ response.message)
   })
 
   }, [])
-
-
-
 
 
   const checkUsername = () => { 
@@ -152,14 +125,9 @@ export default function SignUp() {
       }  
   }  
   
-
-
   const handleSubmit = () => {
 
-
-
   }
-
 
   // Função para formatar CEP
   const checkCep = () => {
@@ -192,115 +160,113 @@ export default function SignUp() {
     }
   }
 
+  const checkEmail = () => { 
+    const result = valid.emailSchema.safeParse(email)
+    setIsValidEmail(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setEmailError(issue.message)
+      })
+    } else {
+      setEmailError('')
+    } 
+  }
+  const checkFirstName = () => { 
+    const result = valid.nameSchema.safeParse(firstName)
+    setIsValidFirstName(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setFirstNameError(issue.message)
+      })
+    } else {
+      setFirstNameError('')
+    } 
+  }
+  const checkLastName = () => { 
+    const result = valid.nameSchema.safeParse(lastName)
+    setIsValidLastName(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setLastNameError(issue.message)
+      })
+    } else {
+      setLastNameError('')
+    } 
+  }
 
+  const checkNumber = () => {
+    const result = valid.houseNumberSchema.safeParse(numero)
+    setIsValidNumber(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setNumberError(issue.message)
+      })
+    } else {
+      setNumberError('')
+    } 
+  }
 
-    const checkEmail = () => { 
-      const result = valid.emailSchema.safeParse(email)
-      setIsValidEmail(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setEmailError(issue.message)
-        })
-      } else {
-        setEmailError('')
-      } 
-    }
-    const checkFirstName = () => { 
-      const result = valid.nameSchema.safeParse(firstName)
-      setIsValidFirstName(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setFirstNameError(issue.message)
-        })
-      } else {
-        setFirstNameError('')
-      } 
-    }
-    const checkLastName = () => { 
-      const result = valid.nameSchema.safeParse(lastName)
-      setIsValidLastName(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setLastNameError(issue.message)
-        })
-      } else {
-        setLastNameError('')
-      } 
-    }
+  const checkCpf = () => {
+    const cpfText = cpfCnpj.replace('.','').replace('.','').replace('-','')
+    const result = valid.cpfSchema.safeParse(cpfText)
+    setIsValidCpf(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setCpfError(issue.message)
+      })
+    } else {
+      setCpfError('')
+    } 
+  }
 
-    const checkNumber = () => {
-      const result = valid.houseNumberSchema.safeParse(numero)
-      setIsValidNumber(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setNumberError(issue.message)
-        })
-      } else {
-        setNumberError('')
-      } 
-    }
+  const checkCnpj = () => {
+    const cnpjText = cpfCnpj.replace('.','').replace('.','').replace('/','').replace('-','')
+    const result = valid.cnpjSchema.safeParse(cnpjText)
+    setIsValidCnpj(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setCnpjError(issue.message)
+      })
+    } else {
+      setCnpjError('')
+    } 
+  }
 
+  const checkPassword = () => {
+    const result = valid.passwordSchema.safeParse(password)
+    setIsValidPassword(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setPasswordError(issue.message)
+      })
+    } else {
+      setPasswordError('')
+    } 
+  }
 
-    const checkCpf = () => {
-      const cpfText = cpfCnpj.replace('.','').replace('.','').replace('-','')
-      const result = valid.cpfSchema.safeParse(cpfText)
-      setIsValidCpf(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setCpfError(issue.message)
-        })
-      } else {
-        setCpfError('')
-      } 
-    }
-
-    const checkCnpj = () => {
-      const cnpjText = cpfCnpj.replace('.','').replace('.','').replace('/','').replace('-','')
-      const result = valid.cnpjSchema.safeParse(cnpjText)
-      setIsValidCnpj(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setCnpjError(issue.message)
-        })
-      } else {
-        setCnpjError('')
-      } 
-    }
-
-    const checkPassword = () => {
-      const result = valid.passwordSchema.safeParse(password)
-      setIsValidPassword(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setPasswordError(issue.message)
-        })
-      } else {
-        setPasswordError('')
-      } 
-    }
-
-
-    const checkConfirmPassword = () => {
-      const result = valid.passwordSchema.safeParse(confirmPassword)
-      setIsValidConfirmPassword(result.success)
-      if (!result.success) {
-        result.error.issues.map((issue) => {
-          setConfirmPasswordError(issue.message)
-        })
-      } else {
-        setConfirmPasswordError('')
-      } 
-    }
-
-  
-    
-  
+  const checkConfirmPassword = () => {
+    const result = valid.passwordSchema.safeParse(confirmPassword)
+    setIsValidConfirmPassword(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setConfirmPasswordError(issue.message)
+      })
+    } else {
+      setConfirmPasswordError('')
+    } 
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView className='container'>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} >
+      <ImageBackground 
+        source={backgroundImage} 
+        style={{ flex: 1, position: 'absolute', width: '100%', top: -200, height: '100%', }} 
+        resizeMode="contain"
+      />
+
+      <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
         {step === 1 && (
-          <View>
+          <View className="flex-1 justify-center">
             <FormField
               title="Primeiro Nome"
               value={firstName}
@@ -346,7 +312,7 @@ export default function SignUp() {
         )}
 
         {step === 2 && (
-          <View>
+          <View className="flex-1 justify-center">
         
             <FormField
               title='CEP'
@@ -410,7 +376,7 @@ export default function SignUp() {
         )}
 
         {step === 3 && (
-          <View>
+          <View className="flex-1 justify-center">
             {cpfCnpj.length <= 14 ? (
               <FormField
                 title="CPF ou CNPJ"
@@ -468,7 +434,7 @@ export default function SignUp() {
         )}
 
         {step === 4 && (
-          <View>
+          <View className="flex-1 justify-center">
              <FormField
               title="Email"
               value={masks.EMAIL(email)}
