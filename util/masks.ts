@@ -80,6 +80,15 @@ export const masks = {
     return value
     .replace(/[^a-zA-Z0-9@.]/g, '')
   },
+  NUMBER(value : string) {
+    return value
+    .replace(/[^0-9]/g, '')
+  },
+  CODIGO(value : string) {
+    return value
+      .replace(/[^\d]/g, '')
+      .replace(/(\d{6})\d+?$/, '$1')
+  }
 
 
 

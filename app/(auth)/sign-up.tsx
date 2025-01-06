@@ -9,6 +9,7 @@ import { NivelHabilidade } from '../../types/nivel-habilidade';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { validateCPF } from '../../api/usuario';
 
 interface ListNivelHabilidade {
   label: string
@@ -56,13 +57,24 @@ export default function SignUp() {
   
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [cpfError, setCpfError] = useState('')
+  const [isCpfLoading, setIsCpfLoading] = useState(false)
   const [isValidCpf, setIsValidCpf] = useState(false)
   const [cnpjError, setCnpjError] = useState('')
   const [isValidCnpj, setIsValidCnpj] = useState(false)
+
+
+
+  const [codigo, setCodigo] = useState('')
+  const [codigoError, setCodigoError] = useState('')
+  const [isValidCodigo, setIsValidCodigo] = useState(false)
+  const [isCodigoLoading, setIsCodigoLoading] = useState(false)	
+
+
   
   const [nivelHabilidade, setNivelHabilidade] = useState<NivelHabilidade>()
   const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
   const [nivelHabilidadeError, setNivelHabilidadeError] = useState('')
+ 
   
   const [step, setStep] = useState(1)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -72,23 +84,77 @@ export default function SignUp() {
   // Funções para avançar ou voltar entre as etapas
   const nextStep = () => {
     if (step === 1) {
-      setStep(2)
-    } else if (step === 2) {
-      setStep(3)
-    } else if (step === 3) {
-      if (password !== confirmPassword) {
-        alert('Passwords do not match')
+      /*
+      First name
+      Last name
+      Username
+      Nivel habilidade
+
+      */
+      if (!isValidFirstName || !isValidLastName || !isValidUserName || !nivelHabilidade) {
+        alert('Preencha todos os campos corretamente')
         return
       }
+
+      setStep(2)
+    } else if (step === 2) {
+      /*
+      CEP
+      Cidade
+      Estado
+      Rua
+      Numero
+      Bairro
+      */
+      if (!isValidCep || !isValidNumber) {
+        alert('Preencha todos os campos corretamente')
+        return
+      }
+
+
+      setStep(3)
+    } else if (step === 3) {
+      /* 
+      CPF ou CNPJ
+      Senha
+      Confirmar senha
+      */
+      if (!isValidCpf && !isValidCnpj || !isValidPassword || !isValidConfirmPassword) {
+        alert('Preencha todos os campos corretamente')
+        return
+      }
+
+      if (password !== confirmPassword) {
+        alert('As senhas não são iguais')
+        return
+      }
+
+
       setStep(4)
+    } else if (step === 4) {  
+
+        if (!isValidEmail) {
+          alert('Preencha todos os campos corretamente')
+          return
+        }
+        setStep(5)
+    
+    } else if (step === 5) {
+      if (!isValidCodigo) {
+        alert('Preencha todos os campos corretamente')
+        return
+      }
+      handleSubmit()
     }
+
+
+
   };
 
   const prevStep = () => {
     setStep(step - 1)
   }
   useEffect(() => {
-    setNivelHabilidadeError('')
     getNivelHabilidade()
     .then((response) => {
       setListNivelHabilidade([])
@@ -126,6 +192,7 @@ export default function SignUp() {
   }  
   
   const handleSubmit = () => {
+    alert('Cadastro realizado com sucesso')
 
   }
 
@@ -168,9 +235,38 @@ export default function SignUp() {
         setEmailError(issue.message)
       })
     } else {
-      setEmailError('')
+      setIsCpfLoading(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+      validateCPF(cpfCnpj, abortControllerRef.current)
+      .then(() => {
+        setEmailError('')
+      })
+      .catch((response) => {
+        setEmailError(response)
+      })
+      .finally(() => {
+        setIsCpfLoading(false)
+      })
     } 
   }
+
+  const checkCodigo = () => {
+    const result = valid.codeUserValidationSchema.safeParse(codigo)
+    setIsValidCodigo(result.success)
+    if (!result.success) {
+      result.error.issues.map((issue) => {
+        setCodigoError(issue.message)
+      })
+    } else {
+      setCodigoError('')
+    } 
+  }
+
+
+
+
+
   const checkFirstName = () => { 
     const result = valid.nameSchema.safeParse(firstName)
     setIsValidFirstName(result.success)
@@ -384,6 +480,7 @@ export default function SignUp() {
                 placeholder="Digite seu CPF"
                 msg={cpfError}
                 isValid={isValidCpf}
+                isLoading={isCpfLoading}
                 handleChangeText={setCpfCnpj}
                 validantionCheck={checkCpf}
               />
@@ -445,8 +542,8 @@ export default function SignUp() {
               validantionCheck={checkEmail}
             />
             <CustomButton
-              title="Submit"
-              handlePress={handleSubmit}
+              title="Next"
+              handlePress={ nextStep }
             />
             <CustomButton
               title="Back"
@@ -454,6 +551,27 @@ export default function SignUp() {
             />
           </View>
         )}
+
+        {step === 5 && (
+          <View className="flex-1 justify-center">
+            <FormField
+              title="Código de confirmação"
+              value={masks.CODIGO(codigo)}
+              placeholder="Digite o código de confirmação"
+              msg={codigoError}
+              isValid={isValidCodigo}
+              handleChangeText={setCodigo}
+              validantionCheck={checkCodigo}
+            />
+            
+            <CustomButton
+              title="Confirma"
+              handlePress={nextStep}
+            />
+          </View>
+        )}
+
+
       </ScrollView>
     </SafeAreaView>
   );

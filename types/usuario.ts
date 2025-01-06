@@ -43,7 +43,7 @@ export interface CriarUsuarioResponse {
 
 
 
-export interface UserEndereco {
+export interface EnderecoUsuario {
     endereco: {
       rua: string,
       numero: number,

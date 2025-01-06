@@ -6,6 +6,8 @@ import { z } from 'zod';
 export const valid = {
     cepSchema : z.string().min(8).max(8),
 
+    codeUserValidationSchema: z.string().min(6, {message: "Deve ter no minimo 6 digitos numericos"}).max(6, {message: "Deve ter no maximo 6 digitos numericos"}),
+
     emailSchema: z.string().email({message: 'Examplo de email valido: nome@domain.com'}),
 
     cepSchemaRegex: z.string().min(8 ,{message: 'Cep deve conter no minimo 8 numeros, por exemplo: 00000-000'}).max(8, {message: 'Cep deve conter no maximo 8 numeros, por exemplo: 00000-000'}).regex(new RegExp('^[0-9]*$')),

@@ -91,7 +91,7 @@ export default function Events() {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
   const [modalVisible, setModalVisible] = useState(false);
 
   const getFilteredEvents = () => {
@@ -124,7 +124,7 @@ export default function Events() {
   };
   
   // Função para formatar a data
-  const formatDateInput = (input) => {
+  const formatDateInput = (input : any) => {
     // Remove todos os caracteres que não são dígitos
     const numbers = input.replace(/\D/g, '');
 

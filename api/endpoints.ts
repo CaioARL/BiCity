@@ -3,6 +3,10 @@ const ENDPOINTS = {
     USUARIO_RECUPERAR_SENHA: '/login/recover',
     USUARIO_CADASTRO: '/usuario/create',
     USUARIO_GET: '/usuario/get',
+    USUARIO_VALIDAR_CPF: '/usuario/validate/cpf',
+
+    TOKEN_VALIDAR: '/token/sendToken',
+    TOKEN_CHECK: '/token/isValidToken',
 
     NIVEL_GET: '/nivel-habilidade/list',
     NIVEL_POST: '/nivel-habilidade/create',
