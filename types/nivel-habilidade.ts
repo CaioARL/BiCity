@@ -1,5 +1,5 @@
 export interface NivelHabilidade {
-    id: string
+    id: number
     nome: string
     descricao: string
 }

@@ -9,7 +9,9 @@ import { NivelHabilidade } from '../../types/nivel-habilidade';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { validateCPF } from '../../api/usuario';
+import { createUser, validateCPF } from '../../api/usuario';
+import { CriarUsuarioRequest } from '../../types';
+import { checkToken, sendToken } from '../../api/token';
 
 interface ListNivelHabilidade {
   label: string
@@ -50,7 +52,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [isValidPassword, setIsValidPassword] = useState(false)
-
+  
   const [confirmPassword, setConfirmPassword] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
   const [isValidConfirmPassword, setIsValidConfirmPassword] = useState(false)
@@ -61,17 +63,18 @@ export default function SignUp() {
   const [isValidCpf, setIsValidCpf] = useState(false)
   const [cnpjError, setCnpjError] = useState('')
   const [isValidCnpj, setIsValidCnpj] = useState(false)
-
-
-
+  
+  
+  
   const [codigo, setCodigo] = useState('')
   const [codigoError, setCodigoError] = useState('')
   const [isValidCodigo, setIsValidCodigo] = useState(false)
+  const [isEmailCodeLoading, setIsEmailCodeLoading] = useState(false)
   const [isCodigoLoading, setIsCodigoLoading] = useState(false)	
 
 
   
-  const [nivelHabilidade, setNivelHabilidade] = useState<NivelHabilidade>()
+  const [habilidade, setHabilidade] = useState<NivelHabilidade>({id: 1, nome: '', descricao: ''})
   const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
   const [nivelHabilidadeError, setNivelHabilidadeError] = useState('')
  
@@ -91,7 +94,7 @@ export default function SignUp() {
       Nivel habilidade
 
       */
-      if (!isValidFirstName || !isValidLastName || !isValidUserName || !nivelHabilidade) {
+      if (!isValidFirstName || !isValidLastName || !isValidUserName || !habilidade) {
         alert('Preencha todos os campos corretamente')
         return
       }
@@ -137,7 +140,29 @@ export default function SignUp() {
           alert('Preencha todos os campos corretamente')
           return
         }
-        setStep(5)
+        setIsEmailCodeLoading(true)
+        abortControllerRef.current?.abort()
+        abortControllerRef.current = new AbortController()
+        sendToken(email, abortControllerRef.current)
+        .then((response) => {
+          alert(response + ' Verifique seu email.')
+          setStep(5)
+          
+
+
+        })
+        .catch(
+          (response) => {
+            alert('Erro ao enviar código: '+ response.message)
+          }
+        )
+        .finally(() => {
+          setIsEmailCodeLoading(false)
+
+        })
+
+
+
     
     } else if (step === 5) {
       if (!isValidCodigo) {
@@ -192,7 +217,51 @@ export default function SignUp() {
   }  
   
   const handleSubmit = () => {
-    alert('Cadastro realizado com sucesso')
+
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = new AbortController()
+    setIsCodigoLoading(true)
+    checkToken(codigo, email, abortControllerRef.current)
+    .then(() => {
+      const novoUsuario: CriarUsuarioRequest = {
+        nome: firstName + ' ' + lastName,
+        nomeUsuario: userName,
+        endereco: {
+          cep: cep,
+          estado: estado,
+          cidade: cidade,
+          bairro: bairro,
+          rua: rua,
+          numero: parseInt(numero)
+        },
+        email: email,
+        senha: password,
+        cpf: cpfCnpj.length <= 14 ? cpfCnpj : '',
+        cnpj: cpfCnpj.length > 14 ? cpfCnpj : '',
+        nivelHabilidade: habilidade.id
+      }
+  
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+      createUser(novoUsuario, abortControllerRef.current)
+      .then(() => {
+        alert('Cadastro realizado com sucesso')
+      })
+      .catch((response) => {
+        alert('Erro ao cadastrar: '+ response.message)
+      })
+
+
+    })
+    .catch((response) => {
+      alert('Erro ao validar código: '+ response.message)
+    })
+    .finally(() => {
+      setIsCodigoLoading(false)
+    })
+
+
+
 
   }
 
@@ -227,29 +296,20 @@ export default function SignUp() {
     }
   }
 
-  const checkEmail = () => { 
+
+
+  const checkEmail = () =>{
     const result = valid.emailSchema.safeParse(email)
     setIsValidEmail(result.success)
-    if (!result.success) {
+    if(!result.success){
       result.error.issues.map((issue) => {
         setEmailError(issue.message)
       })
     } else {
-      setIsCpfLoading(true)
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      validateCPF(cpfCnpj, abortControllerRef.current)
-      .then(() => {
-        setEmailError('')
-      })
-      .catch((response) => {
-        setEmailError(response)
-      })
-      .finally(() => {
-        setIsCpfLoading(false)
-      })
-    } 
+      setEmailError('')
+    }
   }
+
 
   const checkCodigo = () => {
     const result = valid.codeUserValidationSchema.safeParse(codigo)
@@ -308,10 +368,22 @@ export default function SignUp() {
     setIsValidCpf(result.success)
     if (!result.success) {
       result.error.issues.map((issue) => {
-        setCpfError(issue.message)
+        setCepError(issue.message)
       })
     } else {
-      setCpfError('')
+      setIsCpfLoading(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+      validateCPF(cpfCnpj, abortControllerRef.current)
+      .then(() => {
+        setCepError('')
+      })
+      .catch((response) => {
+        setCepError(response)
+      })
+      .finally(() => {
+        setIsCpfLoading(false)
+      })
     } 
   }
 
@@ -394,9 +466,9 @@ export default function SignUp() {
 
             <FormFieldSelectList
               title='Nivel de habilidade'
-              selectedValue={nivelHabilidade}
+              selectedValue={habilidade}
               options={listNivelHabilidade}
-              handleChange={setNivelHabilidade}
+              handleChange={setHabilidade}
               msg={nivelHabilidadeError}
             />
            
@@ -562,10 +634,11 @@ export default function SignUp() {
               isValid={isValidCodigo}
               handleChangeText={setCodigo}
               validantionCheck={checkCodigo}
+              maxLength={4}
             />
             
             <CustomButton
-              title="Confirma"
+              title="Confirma Código"
               handlePress={nextStep}
             />
           </View>

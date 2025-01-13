@@ -31,13 +31,13 @@ export default function FormFieldSelectList({
       <Text className='text-base color-secondary_black'>{title}</Text>
       <TouchableOpacity
         onPress={() => !disableEdit && setModalVisible(true)}
-        className='border-2 border-color__lightGray h-[64px] px-16 border-radious-[2px] items-center flex-row'
+        className='border-2 border-color__lightGray h-[64px] px-16 rounded-[20px] items-center flex-row'
         
       >
         <Text>{options.find(option => option.value === selectedValue)?.label || 'Select an option'}</Text>
       </TouchableOpacity>
       {isLoading && (
-        <ActivityIndicator
+        <ActivityIndicator 
           size='small'
           color='#0000ff'
         />
@@ -48,8 +48,8 @@ export default function FormFieldSelectList({
         transparent={true}
         animationType="slide"
       >
-        <View  className='flex-1 justify-center items-center bg-black bg-opacity-50'>
-          <View className='w-[80%] bg-white border-radius-[10px] p-4'>
+        <View  className='flex-1 justify-center items-center bg-black opacity-90'>
+          <View className='w-[80%] bg-primary_green rounded-[10px] p-4'>
             <FlatList
               data={options}
               keyExtractor={item => item.value}
@@ -60,14 +60,14 @@ export default function FormFieldSelectList({
                     setModalVisible(false)
                   }}
                   
-                  className='border-t-2 border-color__lightGray'
+                  className='border-t-2 border-black'
                 >
-                  <Text>{item.label}</Text>
+                  <Text className='text-xl'>{item.label}</Text>
                 </TouchableOpacity>
               )}
             />
-            <TouchableOpacity onPress={() => setModalVisible(false)}  className='border-t-2 border-color__lightGray'>
-              <Text style={{ color: 'blue' }}>Close</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)}  className='border-t-2 border-black'>
+              <Text className='text-xl'>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

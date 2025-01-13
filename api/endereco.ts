@@ -15,5 +15,5 @@ export const getCep = async (cep: string, abortSignal: AbortController): Promise
         } 
     ) 
 
-    return response.data;
+    return response.data
 }

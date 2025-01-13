@@ -17,14 +17,14 @@ export default function SignIn() {
   //const gradientImage = require('../../assets/greengradient.png');
   const submitForm = () => {
     console.log('form', form);
-    router.push('events');
+    router.replace('mapView');
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}>
+    <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}> 
      <ImageBackground 
       source={backgroundImage} 
-      style={{ flex: 1, position: 'absolute', width: '100%', top: -200, height: '100%', }} 
+      style={{ flex: 1, position: 'absolute', width: '100%', top: -200, height: '100%' }} // Adicionando transparência }} 
       resizeMode="contain"
     />
       {/* <Image
@@ -53,7 +53,7 @@ export default function SignIn() {
               placeholder="Insira sua senha"
               secureTextEntry={true}
             />
-
+            {/* 
             <View className="flex-row justify-between mb-6">
               {['Facebook', 'Gmail', 'Linkedin'].map((icon, index) => (
                 <View key={index} className="flex-col items-center">
@@ -71,11 +71,11 @@ export default function SignIn() {
                     </Svg>
                   </View>
 
-                  {/* Nome do ícone abaixo da bola */}
+                  Nome do ícone abaixo da bola
                   <Text className="text-xs text-secondary_black_sub_title">{icon}</Text>
                 </View>
               ))}
-            </View>
+            </View> */}
 
             <CustomButton 
               title="Entrar"

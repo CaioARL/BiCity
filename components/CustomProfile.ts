@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 
+
 const CustomProfile = StyleSheet.create({
   profileCard: {
     backgroundColor: 'white',

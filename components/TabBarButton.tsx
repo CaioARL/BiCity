@@ -11,7 +11,7 @@ interface TabBarButtonProps {
     isFocused: boolean;
     routeName: string;
     color: string;
-    label: string | undefined;
+    label: any;
 }
 
 const icons = {
@@ -20,14 +20,15 @@ const icons = {
   profile: "person-outline"
 } as const;
 
-const TabBarButton: React.FC<TabBarButtonProps> = ({ 
+const TabBarButton = ({
     onPress, 
     onLongPress, 
     isFocused, 
     routeName, 
     color, 
     label 
-}) => {
+}: TabBarButtonProps ) => {
+
   const scale = useSharedValue(0);
 
   useEffect(() => {

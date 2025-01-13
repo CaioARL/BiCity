@@ -86,8 +86,8 @@ export const masks = {
   },
   CODIGO(value : string) {
     return value
-      .replace(/[^\d]/g, '')
-      .replace(/(\d{6})\d+?$/, '$1')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .replace(/(.{4})\d+?$/, '$1')
   }
 
 

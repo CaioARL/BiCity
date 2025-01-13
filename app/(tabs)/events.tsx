@@ -4,6 +4,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../components/CustomEvents';
 import * as ImagePicker from 'expo-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface EventItem {
   id: string;
@@ -93,6 +94,8 @@ export default function Events() {
   });
   const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
   const [modalVisible, setModalVisible] = useState(false);
+
+  
 
   const getFilteredEvents = () => {
     const currentDate = new Date();
@@ -219,9 +222,14 @@ export default function Events() {
   };
 
   return (
+
+    <SafeAreaView>
+
+
     <View className='container' style={{ backgroundColor: 'white' }}>
 
       {/* Perfil, busca e filtro */}
+      
       <View style={CustomEvents.evento}>
         <View style={CustomEvents.location}>
           <Image
@@ -230,12 +238,13 @@ export default function Events() {
           />
 
           <View style={{ flexDirection: 'column' }}>
-            <Text style={CustomEvents.locationText}>Lahore, Pakistan</Text>
+            <Text style={CustomEvents.locationText}>USERNAME</Text>
             <View style={{ flexDirection: 'row' }}>
               <Feather name="map-pin" size={18} color="#555" />
-              <Text style={CustomEvents.locationText}>Lahore, Pakistan</Text>
-              <Feather name="chevron-down" size={18} color="#555" />
+              <Text style={CustomEvents.locationText}>LOCATION</Text>
+              {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
             </View>
+              <Text style={CustomEvents.locationText}>⭐⭐⭐⭐⭐</Text>
           </View>
         </View>
 
@@ -251,7 +260,7 @@ export default function Events() {
         </View>
 
         <View style={CustomEvents.filterContainer}>
-          {["Todos", "Ativos", "Realizados", "Pendentes"].map((item) => (
+          {["Ativos",  "Realizados"].map((item) => (
             <TouchableOpacity 
               key={item} 
               onPress={() => setFilter(item as FilterType)}
@@ -263,7 +272,7 @@ export default function Events() {
                     fontWeight: "bold",
                     color: "black",
                     backgroundColor: "#C3FF00",
-                    borderColor: "white"
+                    borderColor: "white",
                   }
                 ]}
               >
@@ -299,14 +308,14 @@ export default function Events() {
                   imageStyle={{ borderRadius: 10 }}
                 >
                   <View style={CustomEvents.overlay}>
-                    <View>
+                    {/* <View>
                       <TouchableOpacity 
                         style={CustomEvents.customButtonSave} 
                         onPress={() => handleSave(item)}
                       >
                         <Ionicons name="bookmarks-outline" size={20} color="white" />
                       </TouchableOpacity>
-                    </View>
+                    </View> */}
                     <View style={CustomEvents.cardInfo}>
                       <View style={{ 
                         flexDirection: 'row', 
@@ -336,14 +345,14 @@ export default function Events() {
                     </View>
                   </View>
 
-                  <View>
+                  {/* <View>
                     <TouchableOpacity 
                       style={CustomEvents.customButtonToShare} 
                       onPress={() => handleShare(item)}
                     >
                       <Ionicons name="return-up-forward" size={20} color="#555" />
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
 
                   <View style={CustomEvents.containerButton}>
                     <TouchableOpacity 
@@ -353,13 +362,13 @@ export default function Events() {
                       <Ionicons name="location-outline" size={20} color="white" />
                       <Text style={CustomEvents.customButtonText}>Localizada</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    {/* <TouchableOpacity 
                       style={CustomEvents.customButton} 
                       onPress={() => handleFavorite(item)}
                     >
                       <Ionicons name="star-outline" size={20} color="white" />
-                      <Text style={CustomEvents.customButtonText}>Favoritar</Text>
-                    </TouchableOpacity>
+                      <Text style={CustomEvents.customButtonText}>DAR O LIKE TIU</Text>
+                    </TouchableOpacity> */}
                   </View>
                 </ImageBackground>
               </TouchableOpacity>
@@ -424,6 +433,16 @@ export default function Events() {
               onChangeText={(text) => updateEventField('eventName', text)}
             />
 
+            {/* <TextInput
+              style={{ borderBottomWidth: 1, marginBottom: 10 }}
+              placeholder="WEBSITE"
+              value={newEvent.website || ''}
+              onChangeText={(text) => updateEventField('website', text)}
+            /> */}
+
+
+            
+
             <TextInput
               style={{ borderBottomWidth: 1, marginBottom: 10 }}
               placeholder="Descrição do Evento"
@@ -445,6 +464,17 @@ export default function Events() {
                 ? `Latitude: ${selectedLocation.latitude}, Longitude: ${selectedLocation.longitude}`
                 : 'Nenhuma localização selecionada'}
             </Text>
+
+
+
+
+
+
+
+
+
+
+
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
               <TouchableOpacity
@@ -483,5 +513,9 @@ export default function Events() {
         </View>
       </Modal>
     </View>
+
+
+    </SafeAreaView>
+
   );
 }

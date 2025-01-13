@@ -1,4 +1,4 @@
-import api from "."
+import api from "./index"
 import ENDPOINTS from "./endpoints"
 
 
@@ -15,8 +15,8 @@ export const checkToken = async (token: string, email: string, abortSignal: Abor
 }
 
 
-export const sendToken = async (email: string, abortSignal: AbortController) => {
-    const response = await api.post<string>(ENDPOINTS.TOKEN_VALIDAR, {
+export const sendToken = async (email: string, abortSignal: AbortController) : Promise<string> => {
+    const response = await api.post<string>(ENDPOINTS.TOKEN_VALIDAR, {} ,{
         params: {
             email: email
         },

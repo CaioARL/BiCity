@@ -33,7 +33,7 @@ const CustomEvents = StyleSheet.create({
   // Filtro
   filterContainer: { 
     flexDirection: "row", 
-    justifyContent: "space-between", 
+    justifyContent: "flex-start", 
     marginTop: 10, 
     width: "100%", 
     paddingHorizontal: 10

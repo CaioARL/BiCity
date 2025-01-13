@@ -6,7 +6,7 @@ const api = axios.create({
         'access-token': process.env.EXPO_PUBLIC_API_KEY,
         "Content-Type": "application/json",
     },
-    timeout: 10000,     
+    timeout: 30000,     
 });
 
 
