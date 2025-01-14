@@ -2,11 +2,11 @@ import { StyleSheet } from 'react-native';
 import CustomButton from './CustomButton';
 
 const CustomEvents = StyleSheet.create({
-  evento: {margin: 0, padding: 0, paddingTop: 10},
-  location: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  userImage: {width: 60, height: 60, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10},
-  locationText: { fontSize: 16, fontWeight: "500", marginHorizontal: 5 },
-
+  evento: {margin: 0, paddingBottom: 0, paddingTop: 30, },
+  location: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  userImage: {width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10},
+  locationText: { fontSize: 15.5, fontWeight: "500", marginHorizontal: 5 },
+  nivelText: { fontSize: 14, fontWeight: "500", marginHorizontal: 5, color: "#555", opacity: 0.8 },
   // SearchBox
   searchBox: {
     flexDirection: "row",
@@ -42,11 +42,11 @@ const CustomEvents = StyleSheet.create({
     fontSize: 14, 
     fontWeight: "500", 
     color: "#555", paddingTop:5, 
-    paddingBottom:5, paddingLeft:12, 
-    paddingRight:12, 
+    paddingBottom:6, paddingLeft:13, 
+    paddingRight:13, 
     borderRadius: 20, 
-    backgroundColor: "#f5f5f5", 
-    borderWidth: 0.3, 
+    backgroundColor: "#f0f0f0", 
+    borderWidth: 0.2, 
     borderColor: "#555", 
     marginRight: 14, 
     marginLeft: -9
@@ -220,7 +220,7 @@ const CustomEvents = StyleSheet.create({
     shadowRadius: 10,
     shadowOpacity: 0.3,
     position: 'absolute',
-    bottom: 350,
+    bottom: '52%',
     right: 10,
     elevation: 5
   },

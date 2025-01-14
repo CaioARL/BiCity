@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 
 export default function SignIn() {
+  const backgroundImageLogo = require('../../assets/img/logo.png'); 
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [form, setForm] = useState({
     email: '',
@@ -14,7 +15,6 @@ export default function SignIn() {
   });
 
   const backgroundImage = require('../../assets/img/background-fundo-figura.png'); 
-  //const gradientImage = require('../../assets/greengradient.png');
   const submitForm = () => {
     console.log('form', form);
     router.replace('mapView');
@@ -24,18 +24,18 @@ export default function SignIn() {
     <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}> 
      <ImageBackground 
       source={backgroundImage} 
-      style={{ flex: 1, position: 'absolute', width: '100%', top: -200, height: '100%' }} // Adicionando transparência }} 
+      style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }} 
       resizeMode="contain"
     />
-      {/* <Image
-        source={gradientImage} 
-        style={{ position: 'absolute', width: 415, height: 665, bottom: -20, opacity: 0.5 }} // Adicionando transparência
-        resizeMode="cover"
-      /> */}
-
         <ScrollView className="container  w-full h-full ">
           <View className="flex-1 min-h-screen h-full ">
-            <Text className="text-[14px] font-bold text-center text-secondary_black mb-24">Login</Text>
+          <View style={{justifyContent: 'center', alignItems: 'center', marginBottom: 2, height: 220 }}>
+            <Image 
+              source={backgroundImageLogo} 
+              resizeMode="contain" 
+              style={{ width: 100, height: 100 }} 
+            />
+          </View>
             <Text className="text-2xl font-bold text-center text-secondary_black mb-4">BICITY</Text>
             <FormField
               title="Email"
@@ -53,6 +53,7 @@ export default function SignIn() {
               placeholder="Insira sua senha"
               secureTextEntry={true}
             />
+      
             {/* 
             <View className="flex-row justify-between mb-6">
               {['Facebook', 'Gmail', 'Linkedin'].map((icon, index) => (

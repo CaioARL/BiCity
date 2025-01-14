@@ -18,10 +18,11 @@ export default function Index() {
 
   return (
 
-      <SafeAreaView className="h-full bg-primary_green_milico">
+      <SafeAreaView className="h-full bg-primary_green" >
+        <View style={{flex: 1, justifyContent: 'flex-end',backgroundColor: 'rgba(0,0,0,0.2)',height: '15%'}}>
         <ScrollView contentContainerStyle={{ height: '100%' }}>
           <View className="flex-1 items-center justify-center">
-            <Text className="text-[32px] text-white font-robotobold mb-[67px]"> BICITY </Text>
+            <Text className="text-[32px] text-white font-robotobold mb-[54px]"> BICITY </Text>
             <Image 
               source={backgroundImageLogo} 
               resizeMode="contain" 
@@ -31,6 +32,7 @@ export default function Index() {
         </ScrollView>
 
         <StatusBar backgroundColor='#161622' style='light' />
+        </View>
       </SafeAreaView>
 
   );

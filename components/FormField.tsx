@@ -1,4 +1,5 @@
 import { View, Text, TextInput, ActivityIndicator } from 'react-native'
+import { Ionicons } from '@expo/vector-icons';
 import React, {useState} from 'react'
 
 interface FormFieldProps {
@@ -43,7 +44,7 @@ export default function FormField({ title, value, placeholder, handleChangeText,
             onPress={() => setShowPassword(!showPassword)}
             className='text-base'
           >
-            {showPassword ? 'Hide' : 'Show'}
+            <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="#D9D9D9" />
           </Text>
         )}
         {isLoading && (
