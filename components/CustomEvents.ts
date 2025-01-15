@@ -206,7 +206,6 @@ const CustomEvents = StyleSheet.create({
     fontSize: 12
   },
 
-
   // Evento
   addButton:{
     width: 65,

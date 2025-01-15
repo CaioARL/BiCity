@@ -5,7 +5,18 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../components/CustomEvents';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Slider  from '@react-native-community/slider';
+import FilterModal from '../../components/FilterModal';
+import EventModal from '../../components//EventModal';
+
+interface MarkedDates {
+  [date: string]: {
+    selected?: boolean;
+    marked?: boolean;
+    starting?: boolean;
+    ending?: boolean;
+    color?: string;
+  };
+}
 
 interface EventItem {
   id: string;
@@ -96,6 +107,82 @@ export default function Events() {
   const [filterDateEnd, setFilterDateEnd] = useState('');
   const [filterEventType, setFilterEventType] = useState('all'); 
   const [showEventTypeOptions, setShowEventTypeOptions] = useState(false);
+
+  // Filtro - Data Calendario
+  {{/* Aquiiiii */}} 
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState('');
+  const [selectedEndDate, setSelectedEndDate] = useState('');
+  const [markedDates, setMarkedDates] = useState<MarkedDates>({});
+
+  const formatDisplayDate = (dateString: string) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleDayPress = (day: any) => {
+    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+      // Iniciando nova seleção
+      setSelectedStartDate(day.dateString);
+      setSelectedEndDate('');
+      setFilterDateStart(formatDisplayDate(day.dateString));
+      setFilterDateEnd('');
+      
+      setMarkedDates({
+        [day.dateString]: {
+          selected: true,
+          color: '#C3FF00'
+        }
+      });
+    } else {
+      // Selecionando data final
+      if (day.dateString < selectedStartDate) {
+        // Se a data final for menor que a inicial, inverte
+        setSelectedEndDate(selectedStartDate);
+        setSelectedStartDate(day.dateString);
+        setFilterDateEnd(formatDisplayDate(selectedStartDate));
+        setFilterDateStart(formatDisplayDate(day.dateString));
+      } else {
+        setSelectedEndDate(day.dateString);
+        setFilterDateEnd(formatDisplayDate(day.dateString));
+      }
+
+      // Marcar o período inteiro
+      const markedDatesObj: MarkedDates = {};
+      let currentDate = new Date(Math.min(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
+      const endDate = new Date(Math.max(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
+
+      while (currentDate <= endDate) {
+        const dateString = currentDate.toISOString().split('T')[0];
+        if (dateString === selectedStartDate) {
+          markedDatesObj[dateString] = {
+            selected: true,
+            color: '#C3FF00',
+            starting: true
+          };
+        } else if (dateString === day.dateString) {
+          markedDatesObj[dateString] = {
+            selected: true,
+            color: '#C3FF00',
+            ending: true
+          };
+        } else {
+          markedDatesObj[dateString] = {
+            selected: true,
+            color: '#E8FFB7'
+          };
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      setMarkedDates(markedDatesObj);
+      
+      // Fechar o calendário após selecionar o período completo
+      setTimeout(() => setShowCalendar(false), 500);
+    }
+  };
+
+  {{/*----------------------------------------------------------------- */}}
 
   const [mapRegion, setMapRegion] = useState({
     latitude: -23.55052,
@@ -247,7 +334,6 @@ export default function Events() {
       <View className='container' style={{ backgroundColor: 'white' }}>
 
         {/* Perfil, busca e filtro */}
-        
         <View style={CustomEvents.evento}>
           <View style={CustomEvents.location}>
             <Image
@@ -407,281 +493,41 @@ export default function Events() {
         </TouchableOpacity>
 
         {/* Modal Criar - Eventos */}
-        <Modal visible={modalVisible} animationType="slide">
-          <View style={{ flex: 1 }}>
-          <MapView
-              style={{ flex: 1 }}
-              region={mapRegion}
-              onRegionChangeComplete={setMapRegion}
-              onPress={handleSelectLocation}
-            >
-              {selectedLocation && (
-                <Marker
-                  coordinate={{
-                    latitude: selectedLocation.latitude,
-                    longitude: selectedLocation.longitude,
-                  }}
-                  title="Local Selecionado"
-                  description="Este é o local que você selecionou"
-                  image={require('../../assets/splash-icon.png')}
-                />
-              )}
-            </MapView>
-
-            <View style={{ padding: 20 }}>
-              <TouchableOpacity
-                style={{
-                  alignItems: 'center',
-                  padding: 15,
-                  backgroundColor: '#f0f0f0',
-                  borderRadius: 8,
-                  marginBottom: 15
-                }}
-                onPress={pickImage}
-              >
-                {selectedImage ? (
-                  <Image
-                    source={{ uri: selectedImage }}
-                    style={{ width: '100%', height: 200, borderRadius: 8 }}
-                  />
-                ) : (
-                  <>
-                    <Ionicons name="image-outline" size={24} color="#333" />
-                    <Text style={{ marginTop: 8 }}>Selecionar Imagem do Evento</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-
-              <TextInput
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                placeholder="Nome do Evento"
-                value={newEvent.eventName || ''}
-                onChangeText={(text) => updateEventField('eventName', text)}
-              />
-
-              {/* <TextInput
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                placeholder="WEBSITE"
-                value={newEvent.website || ''}
-                onChangeText={(text) => updateEventField('website', text)}
-              /> */}
-
-              <TextInput
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                placeholder="Descrição do Evento"
-                value={newEvent.description || ''}
-                onChangeText={(text) => updateEventField('description', text)}
-                multiline
-              />
-
-              <TextInput
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                placeholder="Data do Evento (dd/MM/yyyy)"
-                value={formatDateInput(newEvent.date || '')} 
-                onChangeText={(text) => updateEventField('date', formatDateInput(text))}
-              />
-
-              <Text style={{ marginBottom: 10 }}>Localização Selecionada:</Text>
-              <Text>
-                {selectedLocation
-                  ? `Latitude: ${selectedLocation.latitude}, Longitude: ${selectedLocation.longitude}`
-                  : 'Nenhuma localização selecionada'}
-              </Text>
-
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                <TouchableOpacity
-                  onPress={resetForm}
-                  style={CustomEvents.CustomButtonCancelEvent}
-                >
-                  <Text style={{ color: '#FFF', fontWeight: 'bold', textAlign: 'center' }}>Cancelar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={handleSaveEvent}
-                  disabled={!selectedLocation || !newEvent.eventName || !newEvent.description || !newEvent.date}
-                  style={{
-                    backgroundColor:
-                      !selectedLocation || !newEvent.eventName || !newEvent.description || !newEvent.date
-                        ? '#CCCCCC'
-                        : '#C3FF00',
-                        width: '45%', 
-                        borderRadius: 4,
-                        paddingHorizontal: 20, 
-                        paddingVertical: 15, 
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: !selectedLocation || !newEvent.eventName || !newEvent.description || !newEvent.date ? '#666' : '#EAEAEC',
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Salvar Evento
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Modal Filtro - Eventos */}
-        <Modal
+        <EventModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          mapRegion={mapRegion}
+          setMapRegion={setMapRegion}
+          selectedLocation={selectedLocation}
+          handleSelectLocation={handleSelectLocation}
+          selectedImage={selectedImage}
+          pickImage={pickImage}
+          newEvent={newEvent}
+          updateEventField={updateEventField}
+          formatDateInput={formatDateInput}
+          resetForm={resetForm}
+          handleSaveEvent={handleSaveEvent}
+        />
+        {/* Modal Filtro - Eventos */}  
+        <FilterModal
           visible={filterModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setFilterModalVisible(false)}
-        >
-          <View style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-          }}>
-            <View style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              minHeight: '50%'
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 20
-              }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Filtros</Text>
-                <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-                  <Ionicons name="close" size={24} color="#555" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Event Type Filter */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>Tipo de Evento</Text>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: '#ddd',
-                    borderRadius: 8,
-                    padding: 10,
-                  }}
-                  onPress={() => setShowEventTypeOptions(!showEventTypeOptions)}
-                >
-                  <Text style={{ color: '#555', flex: 1 }}>
-                    {filterEventType === 'all' ? 'Todos' : filterEventType === 'paid' ? 'Pago' : 'Gratuito'}
-                  </Text>
-                
-                  <Ionicons
-                    name="chevron-down" // Ícone de seta para baixo
-                    size={20}
-                    color="#555"
-                  />
-                </TouchableOpacity>
-
-                {/* Dropdown Menu */}
-                {showEventTypeOptions && (
-                  <View
-                    style={{
-                      position: 'absolute', 
-                      top: 70,
-                      left: 0,
-                      right: 0,
-                      borderWidth: 1,
-                      borderColor: '#ddd',
-                      borderRadius: 8,
-                      marginTop: 10,
-                      padding: 10,
-                      backgroundColor: 'white', 
-                      zIndex: 10,
-                    }}
-                  >
-                    {['all', 'paid', 'free'].map((type) => (
-                      <TouchableOpacity
-                        key={type}
-                        onPress={() => {
-                          setFilterEventType(type);
-                          setShowEventTypeOptions(false); 
-                        }}
-                        style={{
-                          padding: 10,
-                        }}
-                      >
-                        <Text style={{ color: '#555', textTransform: 'capitalize' }}>
-                          {type === 'all' ? 'Todos' : type === 'paid' ? 'Pago' : 'Gratuito'}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Date Range Filter */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>Período</Text>
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      borderWidth: 1,
-                      borderColor: '#ddd',
-                      borderRadius: 8,
-                      padding: 10
-                    }}
-                    placeholder="Data inicial"
-                    value={filterDateStart}
-                    onChangeText={(text) => setFilterDateStart(formatDateInput(text))}
-                  />
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      borderWidth: 1,
-                      borderColor: '#ddd',
-                      borderRadius: 8,
-                      padding: 10
-                    }}
-                    placeholder="Data final"
-                    value={filterDateEnd}
-                    onChangeText={(text) => setFilterDateEnd(formatDateInput(text))}
-                  />
-                </View>
-              </View>
-
-              {/* Distance Slider */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>
-                  Distância: {filterDistance}km
-                </Text>
-                <Slider
-                  style={{ width: '100%', height: 40 }}
-                  minimumValue={1}
-                  maximumValue={100}
-                  value={filterDistance}
-                  onValueChange={setFilterDistance}
-                  minimumTrackTintColor="#C3FF00"
-                  maximumTrackTintColor="#ddd"
-                  thumbTintColor="#C3FF00"
-                />
-              </View>
-
-              {/* Apply Button */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#C3FF00',
-                  padding: 15,
-                  borderRadius: 8,
-                  alignItems: 'center'
-                }}
-                onPress={() => {
-                  setFilterModalVisible(false);
-                }}
-              >
-                <Text style={{ fontWeight: 'bold' }}>Aplicar Filtros</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setFilterModalVisible(false)}
+          filterDistance={filterDistance}
+          setFilterDistance={setFilterDistance}
+          filterDateStart={filterDateStart}
+          setFilterDateStart={setFilterDateStart}
+          filterDateEnd={filterDateEnd}
+          setFilterDateEnd={setFilterDateEnd}
+          markedDates={markedDates}
+          handleDayPress={handleDayPress}
+          filterEventType={filterEventType}
+          setFilterEventType={setFilterEventType}
+          showEventTypeOptions={showEventTypeOptions}
+          setShowEventTypeOptions={setShowEventTypeOptions}
+          showCalendar={showCalendar} 
+          setShowCalendar={setShowCalendar}
+        />
+      
       </View>
     </SafeAreaView>
   );
