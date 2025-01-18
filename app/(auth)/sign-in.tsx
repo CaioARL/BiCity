@@ -25,7 +25,7 @@ export default function SignIn() {
      <ImageBackground 
       source={backgroundImage} 
       style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }} 
-      resizeMode="contain"
+      resizeMode="cover"
     />
         <ScrollView className="container  w-full h-full ">
           <View className="flex-1 min-h-screen h-full ">

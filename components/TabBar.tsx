@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import CustomTabBar from './CustomTabBar'; 
@@ -16,6 +16,11 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       width: e.nativeEvent.layout.width,
     });
   };
+
+  useEffect(() => {
+    const buttonWidth = dimensions.width / state.routes.length;
+    tabPositionX.value = withSpring(buttonWidth * state.index, { damping: 20, stiffness: 100 });
+  }, [state.index, dimensions.width]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

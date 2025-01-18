@@ -429,7 +429,7 @@ export default function SignUp() {
       <ImageBackground 
         source={backgroundImage} 
         style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
-        resizeMode="contain"
+        resizeMode="cover"
       />
 
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
