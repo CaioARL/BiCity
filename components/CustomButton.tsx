@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
 
 
@@ -20,7 +20,19 @@ export default function CustomButton({title, handlePress, containerStyles, textS
       disabled={isLoading}
       >
       
-      <Text className={`text-lg ${textStyles} font-robotobold text-secondary_black`}>{title}</Text>
+      {isLoading?(
+        <View>
+          <Text>
+            <ActivityIndicator
+              size='small'
+              color='#0000ff'
+            />
+          </Text>
+        </View>
+        ) : (
+          <Text className={`text-lg ${textStyles} font-robotobold text-secondary_black`}>{title}</Text>
+        )}
+        
     </TouchableOpacity>
   )
 }

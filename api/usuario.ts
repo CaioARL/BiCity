@@ -1,5 +1,5 @@
 import api from ".";
-import { CriarUsuarioRequest, CriarUsuarioResponse } from "../types";
+import { CriarUsuarioRequest, CriarUsuarioResponse, Usuario, UsuarioLoginRequest } from "../types";
 import ENDPOINTS from "./endpoints";
 
 
@@ -18,6 +18,24 @@ export const validateCPF = async (cpf: string , abortSignal: AbortController) =>
             cpf: cpf
         },
         signal: abortSignal.signal
+    })
+    return response.data
+}
+
+
+export const loginUser = async (usuarioLogin: UsuarioLoginRequest, abortSignal: AbortController) => {
+    const response = await api.post<Usuario>(ENDPOINTS.USUARIO_LOGIN, usuarioLogin, {
+        signal: abortSignal.signal
+    })
+    return response.data
+}
+
+
+export const getUserById = async (id: number ) => {
+    const response = await api.get<Usuario>(ENDPOINTS.USUARIO_GET, {
+        params: {
+            id: id
+        }
     })
     return response.data
 }

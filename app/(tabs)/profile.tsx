@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, TextInput, } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import CustomProfile from '../../components/CustomProfile';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuthProvider } from '../context/AuthProvider';
+import { replace } from 'expo-router/build/global-state/routing';
+import { router } from 'expo-router';
+import { Usuario } from '../../types';
+import { set } from 'zod';
 
 interface DadosdoUsuário {
   id: string;
@@ -31,6 +37,11 @@ const nearbyPlaces: DadosdoUsuário[] = [
 ];
 
 const Profile = () => {
+
+  const {onLogout, authState} = useAuthProvider()
+
+  const [usuario, setUsuario] = useState<Usuario | null>(null); //not used but impl for test
+    
   const user = nearbyPlaces[0];
   const [image, setImage] = useState(require('../../assets/img/logo-perfil.png'));
   const [isEditing, setIsEditing] = useState(false);
@@ -42,6 +53,22 @@ const Profile = () => {
   const [cpf, setCpf] = useState(user.cpf);
   const [cnpj, setCnpj] = useState(user.cnpj);
   const [passwordVisible, setPasswordVisible] = useState(false); // Estado para controle da visibilidade da senha
+
+
+  useEffect(() => {
+    if (authState?.user) {
+      setUsuario(authState.user);
+      setNome(authState.user.nome);
+      setNomeUsuario(authState.user.nomeUsuario);
+      setEndereco(authState.user.endereco.cidade);
+      setEmail(authState.user.email);
+      setCpf(authState.user.cpf);
+      setCnpj(authState.user.cnpj);
+    }
+  } 
+  , [authState]);
+
+
 
   const pickImage = async () => {
     try {
@@ -82,105 +109,131 @@ const Profile = () => {
 
   const formattedDate = formatDate(user.dt_criacao); // Formatar a data para o formato desejado
 
+
+  const handleLogout = () => {
+   if(onLogout){
+      onLogout()
+      .then((respose)=>{
+        alert(respose)
+      })
+      .catch((error)=>{
+        alert(error)
+      })
+      router.replace('sign-in')
+   }
+  }
+
+
   return (
-    <ScrollView>
-      <View style={CustomProfile.profileCard}>
-        <View style={CustomProfile.topSection}>
-          <View style={CustomProfile.imageContainer}>
-            <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
-            <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
-              <Ionicons name="pencil" size={16} color="#1f2937" />
-            </TouchableOpacity>
-            <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
+    <SafeAreaView>
+      <TouchableOpacity onPress={handleLogout}>
+        <Text>
+          Logou (Teste)
+        </Text>
+      </TouchableOpacity>
+{/*            ------------------------              ------------------------            ------------------------------ */}
+
+      <ScrollView>
+        <View style={CustomProfile.profileCard}>
+          <View style={CustomProfile.topSection}>
+            <View style={CustomProfile.imageContainer}>
+              <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
+              <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
+                <Ionicons name="pencil" size={16} color="#1f2937" />
+              </TouchableOpacity>
+              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
+            </View>
           </View>
-        </View>
+          
 
-        {/*  Editar as informações */}
-        <View style={CustomProfile.bottomSection}>
-          {isEditing ? (
-            <>
-              <TextInput
-                style={CustomProfile.input}
-                value={nome}
-                onChangeText={setNome}
-                placeholder="Nome"
-              />
-              <TextInput
-                style={CustomProfile.input}
-                value={nomeUsuario}
-                onChangeText={setNomeUsuario}
-                placeholder="Nome de Usuário"
-              />
-              <TextInput
-                style={CustomProfile.input}
-                value={endereco}
-                onChangeText={setEndereco}
-                placeholder="Endereço"
-              />
-              <TextInput
-                style={CustomProfile.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="E-mail"
-                editable={false}
-              />
-              <TextInput
-                style={[CustomProfile.input, { opacity: 2, backgroundColor: '#f0f0f0' }]}
-                value={`${cpf || ''} ${cnpj || ''}`}
-                onChangeText={setCpf}
-                placeholder="CPF/CNPJ"
-                editable={false}
-              />
-
-              {/* Campo de Senha */}
-              <View style={CustomProfile.passwordInput}>
+          {/*  Editar as informações */}
+          <View style={CustomProfile.bottomSection}>
+            {isEditing ? (
+              <>
                 <TextInput
                   style={CustomProfile.input}
-                  value={passwordVisible ? user.senha : '●●●●●●●●'}
-                  secureTextEntry={!passwordVisible}
-                  placeholder="Senha"
+                  value={nome}
+                  onChangeText={setNome}
+                  placeholder="Nome"
                 />
-                <TouchableOpacity
-                  style={CustomProfile.eyeIcon}
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                >
-                  <Ionicons name={passwordVisible ? "eye-off" : "eye"} size={20} color="#1f2937" />
-                </TouchableOpacity>
+                <TextInput
+                  style={CustomProfile.input}
+                  value={nomeUsuario}
+                  onChangeText={setNomeUsuario}
+                  placeholder="Nome de Usuário"
+                />
+                <TextInput
+                  style={CustomProfile.input}
+                  value={endereco}
+                  onChangeText={setEndereco}
+                  placeholder="Endereço"
+                />
+                <TextInput
+                  style={CustomProfile.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="E-mail"
+                  editable={false}
+                />
+                <TextInput
+                  style={[CustomProfile.input, { opacity: 2, backgroundColor: '#f0f0f0' }]}
+                  value={`${cpf || ''} ${cnpj || ''}`}
+                  onChangeText={setCpf}
+                  placeholder="CPF/CNPJ"
+                  editable={false}
+                />
+
+                {/* Campo de Senha */}
+                <View style={CustomProfile.passwordInput}>
+                  <TextInput
+                    style={CustomProfile.input}
+                    value={passwordVisible ? user.senha : '●●●●●●●●'}
+                    secureTextEntry={!passwordVisible}
+                    placeholder="Senha"
+                  />
+                  <TouchableOpacity
+                    style={CustomProfile.eyeIcon}
+                    onPress={() => setPasswordVisible(!passwordVisible)}
+                  >
+                    <Ionicons name={passwordVisible ? "eye-off" : "eye"} size={20} color="#1f2937" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Data de Criação */}
+                <Text style={CustomProfile.title}>Data de Criação: {formattedDate}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={CustomProfile.name}>{nome}</Text>
+                <Text style={CustomProfile.title}>@{nomeUsuario}</Text>
+              </>
+            )}
+
+
+            <View style={CustomProfile.nivelHabilidadeContainer}>
+              <Text style={CustomProfile.nivelHabilidade}>Nível</Text>
+              <Ionicons name="star-half-outline" size={20} color="#ffcc00" style={{ marginTop: -5 }} />
+            </View>
+
+            {showMoreInfo && (
+              <View style={CustomProfile.informaçõesContainer}>
+                <Text>Endereço: {endereco}</Text>
+                <Text>E-mail: {email}</Text>
+                <Text>CPF: {cpf}</Text>
+                <Text>CNPJ: {cnpj}</Text>
+                <Text>Data de Criação: {formattedDate}</Text>
               </View>
-
-              {/* Data de Criação */}
-              <Text style={CustomProfile.title}>Data de Criação: {formattedDate}</Text>
-            </>
-          ) : (
-            <>
-              <Text style={CustomProfile.name}>{nome}</Text>
-              <Text style={CustomProfile.title}>@{nomeUsuario}</Text>
-            </>
-          )}
-
-          <View style={CustomProfile.nivelHabilidadeContainer}>
-            <Text style={CustomProfile.nivelHabilidade}>Nível</Text>
-            <Ionicons name="star-half-outline" size={20} color="#ffcc00" style={{ marginTop: -5 }} />
+            )}
           </View>
 
-          {showMoreInfo && (
-            <View style={CustomProfile.informaçõesContainer}>
-              <Text>Endereço: {endereco}</Text>
-              <Text>E-mail: {email}</Text>
-              <Text>CPF: {cpf}</Text>
-              <Text>CNPJ: {cnpj}</Text>
-              <Text>Data de Criação: {formattedDate}</Text>
-            </View>
-          )}
+          <View style={CustomProfile.iconSection}>
+            <TouchableOpacity style={CustomProfile.iconButton} onPress={toggleEdit}>
+              <Ionicons name="chevron-down" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <View style={CustomProfile.iconSection}>
-          <TouchableOpacity style={CustomProfile.iconButton} onPress={toggleEdit}>
-            <Ionicons name="chevron-down" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

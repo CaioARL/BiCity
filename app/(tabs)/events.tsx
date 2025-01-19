@@ -1,5 +1,5 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../components/CustomEvents';
@@ -7,6 +7,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
+import { useAuthProvider } from '../context/AuthProvider';
+import { Usuario } from '../../types';
+import { set } from 'zod';
 
 interface MarkedDates {
   [date: string]: {
@@ -96,6 +99,7 @@ const nearbyPlaces: EventItem[] = [
 
 export default function Events() {
   const [filter, setFilter] = useState<FilterType>("Ativos");
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -115,11 +119,37 @@ export default function Events() {
   const [selectedEndDate, setSelectedEndDate] = useState('');
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
 
+  
+  const  { authState }  = useAuthProvider()
+  
+  
+  
+  useEffect(() => {
+    if(authState?.authenticated){
+      setUsuario(authState.user)
+    }
+
+  }, [])
+  
+  
+  
+  
+  
+  
+  
+  
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
   };
+
+
+
+
+
+
+
 
   const handleDayPress = (day: any) => {
     if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
@@ -342,15 +372,15 @@ export default function Events() {
             />
 
             <View style={{ flexDirection: 'column' }}>
-              <Text style={CustomEvents.locationText}>USERNAME</Text>
+              <Text style={CustomEvents.locationText}>{usuario?.nomeUsuario}</Text>
               <View style={{ flexDirection: 'row' }}>
                 <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
-                <Text style={CustomEvents.locationText}>LOCATION</Text>
+                <Text style={CustomEvents.locationText}>{usuario?.endereco.cidade}</Text>
                 {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
               </View>
               <View style={{ flexDirection: 'row' }}>
                 <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
-                <Text style={CustomEvents.nivelText}>Initiciante</Text>   
+                <Text style={CustomEvents.nivelText}>{usuario?.nivelHabilidade.nome}</Text>   
               </View>
             </View>
           </View>
@@ -504,7 +534,7 @@ export default function Events() {
           pickImage={pickImage}
           newEvent={newEvent}
           updateEventField={updateEventField}
-          formatDateInput={formatDateInput}
+          // formatDateInput={formatDateInput}
           resetForm={resetForm}
           handleSaveEvent={handleSaveEvent}
         />

@@ -1,24 +1,78 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image  } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, ScrollView, ImageBackground, Image, ActivityIndicator  } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 import { router } from 'expo-router';
-import Svg, { Path } from 'react-native-svg';
+import { useAuthProvider } from '../context/AuthProvider';
+import { UsuarioLoginRequest } from '../../types';
+import { loginUser } from '../../api/usuario';
 
 export default function SignIn() {
-  const backgroundImageLogo = require('../../assets/img/logo.png'); 
-  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-  });
+  const backgroundImageLogo = require('../../assets/img/logo.png')
+  const { onLogin, errorLoading} = useAuthProvider()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const abortControlRef = useRef<AbortController | null>(null)
 
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png'); 
+  const [form, setForm] = useState({
+    username: '',
+    password: '',
+  })
+
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png')
+  
   const submitForm = () => {
-    console.log('form', form);
-    router.replace('mapView');
+
+    
+    
+    
+      abortControlRef.current?.abort()
+      abortControlRef.current = new AbortController
+      setIsLoading(true)
+      
+      const user: UsuarioLoginRequest = {
+        nomeUsuario: form.username,
+        email: '',
+        cpf: '',
+        cnpj: '',
+        senha: form.password
+      }
+
+
+
+
+      loginUser(user ,abortControlRef.current)
+      .then((response)=>{
+        if(onLogin) {
+          onLogin(response)
+          .then(()=> {
+            alert("Logado com sucesso"+response.nome)
+            router.replace('mapView');
+          })
+          .catch((error)=> {
+            alert("Login error registering in memory: "+error)
+          })
+        }
+      })
+      .catch((response)=>{
+        alert("Login response Error: "+response)
+      })
+      .finally(()=>{
+        setIsLoading(false)
+      })
+
+
+
   };
+
+
+
+  useEffect(() => {
+    if(errorLoading){
+      alert("Error on loading: "+errorLoading)
+    }
+  } ,[])
+
 
   return (
     <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}> 
@@ -38,12 +92,12 @@ export default function SignIn() {
           </View>
             <Text className="text-2xl font-bold text-center text-secondary_black mb-4">BICITY</Text>
             <FormField
-              title="Email"
-              value={form.email}
-              handleChangeText={(e: string) => setForm({ ...form, email: e })}
+              title="Nome de usuário"
+              value={form.username}
+              handleChangeText={(e: string) => setForm({ ...form, username: e })}
               otherStyles="mb-4"
-              keyboardType="email-address"
-              placeholder="Bicity@email.com"
+              keyboardType="default"
+              placeholder="Insira seu nome de usuário"
             />
             <FormField
               title="Senha"
@@ -53,7 +107,8 @@ export default function SignIn() {
               placeholder="Insira sua senha"
               secureTextEntry={true}
             />
-      
+
+            
             {/* 
             <View className="flex-row justify-between mb-6">
               {['Facebook', 'Gmail', 'Linkedin'].map((icon, index) => (
@@ -82,7 +137,7 @@ export default function SignIn() {
               title="Entrar"
               handlePress={() => submitForm()}
               containerStyles="mt-4"
-              isLoading={isSubmittingForm}
+              isLoading={isLoading}
             />
             <View className="flex-row justify-center mt-4">
               <Text className="text-secondary_black_sub_title">Não tem uma conta? </Text>
@@ -92,9 +147,12 @@ export default function SignIn() {
               >
                 Inscrever-se
               </Text>
+  
             </View>
           </View>
         </ScrollView>
+
+
     </SafeAreaView>
   );
 }

@@ -12,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { createUser, validateCPF } from '../../api/usuario';
 import { CriarUsuarioRequest } from '../../types';
 import { checkToken, sendToken } from '../../api/token';
+import { useAuthProvider } from '../context/AuthProvider';
+import { router } from 'expo-router';
 
 interface ListNivelHabilidade {
   label: string
@@ -81,6 +83,10 @@ export default function SignUp() {
   
   const [step, setStep] = useState(1)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  const { onRegister } = useAuthProvider()
+
+
 
   const backgroundImage = require('../../assets/img/background-fundo-figura.png'); 
 
@@ -243,9 +249,20 @@ export default function SignUp() {
   
       abortControllerRef.current?.abort()
       abortControllerRef.current = new AbortController()
+
       createUser(novoUsuario, abortControllerRef.current)
-      .then(() => {
-        alert('Cadastro realizado com sucesso')
+      .then((response) => {
+        if(onRegister){
+          onRegister(response)
+          .then((response) => {
+            alert(response)
+            router.replace('mapView')
+          })
+          .catch((response) => {
+            alert('Erro ao registrar na memoria: '+ response.message)
+          })
+
+        }
       })
       .catch((response) => {
         alert('Erro ao cadastrar: '+ response.message)
@@ -612,6 +629,7 @@ export default function SignUp() {
               isValid={isValidEmail}
               handleChangeText={setEmail}
               validantionCheck={checkEmail}
+              isLoading={isEmailCodeLoading}
             />
             <CustomButton
               title="Next"
@@ -639,6 +657,7 @@ export default function SignUp() {
             
             <CustomButton
               title="Confirma Código"
+              isLoading={isCodigoLoading}
               handlePress={nextStep}
             />
           </View>
