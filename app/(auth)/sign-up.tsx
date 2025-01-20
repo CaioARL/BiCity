@@ -16,7 +16,8 @@ import { useAuthProvider } from '../context/AuthProvider';
 import { router } from 'expo-router';
 
 interface ListNivelHabilidade {
-  label: string
+  nome: string
+  id: number
   value: NivelHabilidade
 }
 
@@ -194,7 +195,8 @@ export default function SignUp() {
           return [
             ...prevList,
             {
-              label: nivel.nome,
+              nome: nivel.nome,
+              id: nivel.id,
               value: nivel
             }
           ]

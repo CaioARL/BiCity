@@ -4,6 +4,7 @@ import { CriarUsuarioRequest, CriarUsuarioResponse, Usuario, UsuarioLoginRequest
 import { createUser, getUserById, loginUser } from '../../api/usuario'
 import * as SecureStore from 'expo-secure-store'
 import axios from 'axios'
+import { set } from 'zod'
 
 
     interface AuthProps {
@@ -62,6 +63,7 @@ export default function AuthProvider({children}: any) {
             
           } else {
             setAuthState({id: null, authenticated: false, user: authState.user})
+            setIsLoading(false)
             // axios.defaults.headers.common['Authorization'] = ''
           }
         }catch(error){

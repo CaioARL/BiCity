@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 interface FormFieldSelectListProps<T> {
   title: string
   selectedValue: T
-  options: { label: string, value: T }[]
+  options: { nome: string, id: number, value: T }[]
   handleChange: (value: T) => void
   msg?: string
   isValid?: boolean
@@ -34,7 +34,7 @@ export default function FormFieldSelectList({
         className='border-2 border-color__lightGray h-[64px] px-16 rounded-[20px] items-center flex-row'
         
       >
-        <Text>{options.find(option => option.value === selectedValue)?.label || 'Select an option'}</Text>
+        <Text>{options.find(option => option.value === selectedValue)?.nome || 'Select an option'}</Text>
       </TouchableOpacity>
       {isLoading && (
         <ActivityIndicator 
@@ -52,7 +52,7 @@ export default function FormFieldSelectList({
           <View className='w-[80%] bg-primary_green rounded-[10px] p-4'>
             <FlatList
               data={options}
-              keyExtractor={item => item.value}
+              keyExtractor={item => item.id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => {
@@ -62,7 +62,7 @@ export default function FormFieldSelectList({
                   
                   className='border-t-2 border-black'
                 >
-                  <Text className='text-xl'>{item.label}</Text>
+                  <Text className='text-xl'>{item.nome}</Text>
                 </TouchableOpacity>
               )}
             />

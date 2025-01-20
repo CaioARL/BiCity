@@ -57,13 +57,15 @@ const Profile = () => {
 
   useEffect(() => {
     if (authState?.user) {
-      setUsuario(authState.user);
-      setNome(authState.user.nome);
-      setNomeUsuario(authState.user.nomeUsuario);
-      setEndereco(authState.user.endereco.cidade);
-      setEmail(authState.user.email);
-      setCpf(authState.user.cpf);
-      setCnpj(authState.user.cnpj);
+      if(authState.user){
+        setUsuario(authState.user);
+        setNome(authState.user.nome);
+        setNomeUsuario(authState.user.nomeUsuario);
+        setEndereco(authState.user.endereco.cidade);
+        setEmail(authState.user.email);
+        setCpf(authState.user.cpf);
+        setCnpj(authState.user.cnpj);
+      }
     }
   } 
   , [authState]);

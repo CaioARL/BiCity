@@ -99,7 +99,7 @@ const nearbyPlaces: EventItem[] = [
 
 export default function Events() {
   const [filter, setFilter] = useState<FilterType>("Ativos");
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' } });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -124,11 +124,16 @@ export default function Events() {
   
   
   
-  useEffect(() => {
-    if(authState?.authenticated){
-      setUsuario(authState.user)
-    }
 
+  useEffect(() => {
+
+
+    if(authState?.user){
+      if(authState.user){
+        setUsuario(authState.user)
+      }
+    }
+      
   }, [])
   
   
