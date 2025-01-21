@@ -127,15 +127,8 @@ const Profile = () => {
 
 
   return (
-    <SafeAreaView>
-      <TouchableOpacity onPress={handleLogout}>
-        <Text>
-          Logou (Teste)
-        </Text>
-      </TouchableOpacity>
-{/*            ------------------------              ------------------------            ------------------------------ */}
-
-      <ScrollView>
+    <SafeAreaView style={{ backgroundColor: 'white', flex: 1 }}>
+      <ScrollView >
         <View style={CustomProfile.profileCard}>
           <View style={CustomProfile.topSection}>
             <View style={CustomProfile.imageContainer}>
@@ -233,6 +226,12 @@ const Profile = () => {
               <Ionicons name="chevron-down" size={24} color="white" />
             </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            style={CustomProfile.button}
+            onPress={handleLogout}
+          >
+            <Text style={{ fontWeight: 'bold' }}>Logou</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
