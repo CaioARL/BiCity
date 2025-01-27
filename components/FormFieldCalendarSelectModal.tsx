@@ -1,0 +1,65 @@
+import { View, Text, TouchableOpacity } from 'react-native'
+import React from 'react'
+import { Calendar } from 'react-native-calendars'
+import { Ionicons } from '@expo/vector-icons';
+
+
+
+interface FormFieldCalendarSelectModalProps {
+    value: string
+    handleChangeValue: (e : string) => void
+    showCalendar: boolean
+    setShowCalendar: (e : boolean) => void
+}
+
+
+
+export default function FormFieldCalendarSelectModal({ value, handleChangeValue, showCalendar, setShowCalendar }: FormFieldCalendarSelectModalProps) {
+
+
+
+  return (
+    <View className='mb-[20px]'>
+        <TouchableOpacity  
+            className='border-[1px] border-[#ddd] rounded-[8px] p-[10px] flex-row items-center justify-between' 
+            onPress={() => setShowCalendar(!showCalendar )}
+        >
+            <Text className='text-[#555] ml-[10px]'>
+            {value || 'Selecione a data do evento'}
+            </Text>
+            <Ionicons name="calendar-outline" size={20} color="#555" />
+        </TouchableOpacity>
+
+        {showCalendar && (
+            <View className='mt-[10px] border-[1px] border-[#ddd] rounded-[8px] overflow-hidden'>
+            <Calendar
+                minDate={new Date().toISOString().split('T')[0]}
+                markedDates={
+                value
+                    ? {
+                        [value]: {
+                        selected: true,
+                        selectedColor: '#C3FF00',
+                        selectedTextColor: '#000',
+                        },
+                    }: {}
+                }
+                onDayPress={
+                    (e : any)=> {
+                        handleChangeValue(e.dateString)
+                        setShowCalendar(false)
+                    }
+                }
+                theme={{
+                    selectedDayBackgroundColor: '#C3FF00',
+                    todayTextColor: '#C3FF00',
+                    arrowColor: '#C3FF00',
+                }}
+            />
+            </View>
+        )}
+
+    </View>
+
+  )
+}

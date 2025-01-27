@@ -11,8 +11,17 @@ const ENDPOINTS = {
     NIVEL_GET: '/nivel-habilidade/list',
     NIVEL_POST: '/nivel-habilidade/create',
 
+    TIPO_EVENTO_GET: '/tipo-evento/list',
+    TIPO_EVENTO_POST: '/tipo-evento/create',
+
+    EVENTO_GET: '/evento/list',
+    EVENTO_GET_BY_ID: '/evento/get',
+    EVENTO_POST: '/evento/create',
+    EVENTO_PUT: '/evento/update',
+
     ENDERECO_CEP_GET: '/endereco/getByCep',
     ENDERECO_LAT_LONG_GET: '/endereco/getLatAndLonByCepAndNumber',
+    ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/getCepByLatAndLon',
 
 } as const;
 

@@ -3,12 +3,11 @@ import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../components/CustomEvents';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Usuario } from '../../types';
+import { Evento, EventoEndereco, Usuario } from '../../types';
 import { set } from 'zod';
 
 interface MarkedDates {
@@ -103,7 +102,7 @@ export default function Events() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [newEvent, setNewEvent] = useState<Partial<EventItem>>({});
+  const [eventos, setEventos] = useState<Evento[]>([]);
   // New filter states
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filterDistance, setFilterDistance] = useState(10);
@@ -284,22 +283,7 @@ export default function Events() {
     return `${day}/${month}/${year}`;
   };
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets[0]) {
-      setSelectedImage(result.assets[0].uri);
-      setNewEvent(prev => ({
-        ...prev,
-        image: result.assets[0].uri
-      }));
-    }
-  };
+  
 
   const toggleSelection = (id: string) => {
     setSelectedItems(prev =>
@@ -323,7 +307,6 @@ export default function Events() {
 
   const handleAddEvent = () => {
     setModalVisible(true);
-    setNewEvent({});
   };
 
   const handleSelectLocation = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
@@ -331,38 +314,15 @@ export default function Events() {
     setSelectedLocation({ latitude, longitude });
   };
 
-  const handleSaveEvent = () => {
-    if (selectedLocation && newEvent.eventName && newEvent.description && newEvent.date) {
-      const eventToSave: EventItem = {
-        id: (nearbyPlaces.length + 1).toString(),
-        nameUser: newEvent.nameUser || "Novo Usuário",
-        userImage: newEvent.userImage || "https://via.placeholder.com/100",
-        eventName: newEvent.eventName,
-        description: newEvent.description,
-        date: newEvent.date,
-        image: selectedImage || 'https://via.placeholder.com/300',
-        location: `${selectedLocation.latitude}, ${selectedLocation.longitude}`,
-        status: "Aprovado"
-      };
-
-      nearbyPlaces.push(eventToSave);
-      resetForm();
-    }
-  };
+  
 
   const resetForm = () => {
     setModalVisible(false);
-    setNewEvent({});
     setSelectedImage(null);
     setSelectedLocation(null);
   };
 
-  const updateEventField = (field: keyof EventItem, value: string) => {
-    setNewEvent(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  
 
   return (
     <SafeAreaView>
@@ -528,21 +488,21 @@ export default function Events() {
         </TouchableOpacity>
 
         {/* Modal Criar - Eventos */}
-        <EventModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          mapRegion={mapRegion}
-          setMapRegion={setMapRegion}
-          selectedLocation={selectedLocation}
-          handleSelectLocation={handleSelectLocation}
-          selectedImage={selectedImage}
-          pickImage={pickImage}
-          newEvent={newEvent}
-          updateEventField={updateEventField}
-          // formatDateInput={formatDateInput}
-          resetForm={resetForm}
-          handleSaveEvent={handleSaveEvent}
-        />
+        {modalVisible && 
+        
+          <EventModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            mapRegion={mapRegion}
+            setMapRegion={setMapRegion}
+            selectedLocation={selectedLocation}
+            handleSelectLocation={handleSelectLocation}
+              
+            // formatDateInput={formatDateInput}
+            resetForm={resetForm}
+          />
+        
+        }
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}

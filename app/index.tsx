@@ -44,7 +44,8 @@ export default function Index() {
             <Image 
               source={backgroundImageLogo} 
               resizeMode="contain" 
-              style={{ width: 172, height: 135 }}
+              className='h-[172px] w-[135px]'
+               
             ></Image>
 
               {isLoading && (
@@ -52,7 +53,7 @@ export default function Index() {
                   <Text>
                     <ActivityIndicator
                       size='large'
-                      color='#0000ff'
+                      color='#fff'
                     />
                   </Text>
                 </View>
