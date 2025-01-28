@@ -1,5 +1,5 @@
 import api from "."
-import {RequestPageEvento, ResponsePageEvento, RequestCreateEvento, Evento } from "../types"
+import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento } from "../types"
 import ENDPOINTS from "./endpoints"
 
 
@@ -26,10 +26,10 @@ export const createEvento = async (evento: RequestCreateEvento, abortSignal: Abo
 }
 
 
-const getEvento = async (requestPageEvento: RequestPageEvento, abortSignal: AbortController) : Promise<ResponsePageEvento[]> => {
-    const response = await api.get<ResponsePageEvento[]>(ENDPOINTS.EVENTO_GET, {
+export const getEvento = async (requestPageEvento: RequestPageEvento, abortSignal: AbortController) : Promise<PageEvento> => {
+    const response = await api.get<PageEvento>(ENDPOINTS.EVENTO_GET, {
         params: {
-            page: requestPageEvento.page,
+            pagina: requestPageEvento.page,
             nome: requestPageEvento.nome,
             descricao: requestPageEvento.descricao,
             data: requestPageEvento.data,

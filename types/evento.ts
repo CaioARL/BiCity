@@ -62,18 +62,18 @@ export interface ResponseCreateEvento {
 
 export interface RequestPageEvento {
     page: number
-    nome: string
-    descricao: string
-    data: string
-    cidade: string
-    estado: string
+    nome: string | null
+    descricao: string | null
+    data: string | null
+    cidade: string | null
+    estado: string | null
     faixaKm: number
     tipoEvento: TipoEvento
     nivelHabilidade: NivelHabilidade
-    gratuito: boolean
+    gratuito: boolean | null
 }
 
-export interface ResponsePageEvento {
+export interface PageEvento {
     eventos: Evento[]
     totalRegistros: number
     totalPaginas: number

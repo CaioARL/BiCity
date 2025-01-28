@@ -7,8 +7,8 @@ export interface Endereco {
     location: {
         type: string,
         coordinates: {
-            longitude: string
-            latitude: string
+            longitude: number
+            latitude: number
         }   
     }
 }

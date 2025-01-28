@@ -1,47 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Modal, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
+import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
+import { ListTipoEvento, TipoEvento } from '../types';
+import { getTipoEvento } from '../api/tipo-evento';
+import { set } from 'zod';
+
+
 
 interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
-  filterDistance: number;
-  setFilterDistance: (value: number) => void;
-  filterDateStart: string;
-  setFilterDateStart: (date: string) => void;
-  filterDateEnd: string;
-  setFilterDateEnd: (date: string) => void;
-  markedDates: any;
-  handleDayPress: (day: any) => void;
-  filterEventType: string;
-  setFilterEventType: (type: string) => void;
   showEventTypeOptions: boolean;
   setShowEventTypeOptions: (show: boolean) => void;
-  showCalendar: boolean; 
-  setShowCalendar: (show: boolean) => void;
+}
+
+interface MarkedDates {
+  [date: string]: {
+    selected?: boolean;
+    marked?: boolean;
+    starting?: boolean;
+    ending?: boolean;
+    color?: string;
+  };
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
   visible,
   onClose,
-  filterDistance,
-  setFilterDistance,
-  filterDateStart,
-  setFilterDateStart,
-  filterDateEnd,
-  setFilterDateEnd,
-  markedDates,
-  handleDayPress,
-  filterEventType,
-  setFilterEventType,
   showEventTypeOptions,
   setShowEventTypeOptions,
-  showCalendar, 
-  setShowCalendar,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current; // Valor inicial da animação
+  const [filterDistance, setFilterDistance] = useState(10)
+  const [filterDateStart, setFilterDateStart] = useState('')
+  const [filterDateEnd, setFilterDateEnd] = useState('')
+  const [filterEventType, setFilterEventType] = useState('all')
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [selectedStartDate, setSelectedStartDate] = useState('')
+  const [selectedEndDate, setSelectedEndDate] = useState('')
+  const [markedDates, setMarkedDates] = useState<MarkedDates>({})
+
+  const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]>([])
+  const [filterTipoEvento, setFilterTipoEvento] = useState<TipoEvento>()
+  const [isLoadingTipoEvento, setIsLoadingTipoEvento] = useState(false)
+
 
   useEffect(() => {
     if (visible) {
@@ -59,8 +64,132 @@ const FilterModal: React.FC<FilterModalProps> = ({
       }).start();
     }
   }, [visible, fadeAnim]);
+
+
+   
+  
+  
+  useEffect(() => {
+    setIsLoadingTipoEvento(true)
+      getTipoEvento()
+      .then((response) => {
+        setListTipoEvento([])
+        response.map((tipoEvento)=>{
+          setListTipoEvento((prevList) => {
+            return [
+              ...prevList,
+              {
+                nome: tipoEvento.nome,
+                id: tipoEvento.id,
+                value: tipoEvento
+              }
+            ]
+          })
+        })
+      })
+      .catch((response)=>{
+        alert('Error ao carregar Tipos de Eventos, verifique sua conexão. \nCode error:' + response.message)
+      }).finally(()=>{
+        setIsLoadingTipoEvento(false)
+      })
+    },[])
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  const formatDisplayDate = (dateString: string) => {
+      if (!dateString) return '';
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    };
+  
+  
+  
+
+  
+  
+  
+  
+  
+    const handleDayPress = (day: any) => {
+      if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+        // Iniciando nova seleção
+        setSelectedStartDate(day.dateString);
+        setSelectedEndDate('');
+        setFilterDateStart(formatDisplayDate(day.dateString));
+        setFilterDateEnd('');
+          
+        setMarkedDates({
+          [day.dateString]: {
+            selected: true,
+            color: '#C3FF00'
+          }
+        });
+      } else {
+        // Selecionando data final
+        if (day.dateString < selectedStartDate) {
+          // Se a data final for menor que a inicial, inverte
+          setSelectedEndDate(selectedStartDate);
+          setSelectedStartDate(day.dateString);
+          setFilterDateEnd(formatDisplayDate(selectedStartDate));
+          setFilterDateStart(formatDisplayDate(day.dateString));
+        } else {
+          setSelectedEndDate(day.dateString);
+          setFilterDateEnd(formatDisplayDate(day.dateString));
+        }
+  
+        // Marcar o período inteiro
+        const markedDatesObj: MarkedDates = {};
+        let currentDate = new Date(Math.min(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
+        const endDate = new Date(Math.max(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
+  
+        while (currentDate <= endDate) {
+          const dateString = currentDate.toISOString().split('T')[0];
+          if (dateString === selectedStartDate) {
+            markedDatesObj[dateString] = {
+              selected: true,
+              color: '#C3FF00',
+              starting: true
+            };
+          } else if (dateString === day.dateString) {
+            markedDatesObj[dateString] = {
+              selected: true,
+              color: '#C3FF00',
+              ending: true
+            };
+          } else {
+            markedDatesObj[dateString] = {
+              selected: true,
+              color: '#E8FFB7'
+            };
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        setMarkedDates(markedDatesObj);
+        
+        // Fechar o calendário após selecionar o período completo
+        setTimeout(() => setShowCalendar(false), 500);
+      }
+    };
+
+
+
+
+
   return (
-    <Modal visible={visible}animationType="slide"transparent={true}onRequestClose={onClose}>
+    
+    
+    <Modal visible={visible}animationType="slide"transparent={true} onRequestClose={onClose}>
+    
+
       <Animated.View style={{ height: '100%', opacity: fadeAnim, }}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <View style={{ backgroundColor: 'white', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, minHeight: '50%' }}>
@@ -128,6 +257,15 @@ const FilterModal: React.FC<FilterModalProps> = ({
                   </View>
                 )}
               </View>
+
+                  <FormFieldDropdownSelectList
+                    options={listTipoEvento}
+                    handleChange={setFilterTipoEvento}
+                    title='Tipo de Evento'
+                    selectedValue={filterTipoEvento}
+                    isLoading={isLoadingTipoEvento}
+                  />
+
 
               {/* Date Range Filter */}
               <View style={{ marginBottom: 20 }}>
@@ -212,6 +350,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </View>
         </View>
         </Animated.View>
+     
+
     </Modal>
   );
 };

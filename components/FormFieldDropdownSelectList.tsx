@@ -12,6 +12,7 @@ interface FormFieldDropdownSelectList<T> {
     selectedValue: T
     options: { nome: string, id : number, value: T }[]
     handleChange: (value: T) => void
+    dropDownSize?: number
     msg?: string
     isValid?: boolean
     otherStyles?: string
@@ -22,7 +23,7 @@ interface FormFieldDropdownSelectList<T> {
 
 
 
-export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, msg, isValid, otherStyles, disableEdit, isLoading }: FormFieldDropdownSelectList<any> ) {
+export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, msg, isValid, otherStyles, disableEdit, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
 
 
   const [eventTypeOptionsVisible, setEventTypeOptionsVisible] = useState<boolean> (false)
@@ -32,7 +33,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
   <>
       {/* Event Type Filter */}
       <View className={`mb-[10] ${otherStyles} `}>
-      <Text  className='text-[16px] mb-5 color-[#555]' >{title}</Text>
+      <Text  className='text-[16px] mb-[2px] color-[#555]' >{title}</Text>
       <TouchableOpacity 
             className='flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px]'
             onPress={() => !disableEdit && setEventTypeOptionsVisible(true)}
@@ -52,27 +53,31 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
                 )}
       </TouchableOpacity>
       {msg && (<Text className='text-sm text-color_red_error'>{msg}</Text>)}
-      {/* Dropdown Menu */}
-      {eventTypeOptionsVisible && (
-          
-            
-            options.map((item)=>(
-              <TouchableOpacity key={item.id}
-                onPress={() => {
+      
+
+        {/* Dropdown Menu */}
+        {eventTypeOptionsVisible && (
+          <ScrollView className={`h-[${dropDownSize? dropDownSize : '50%'}]`}>
+                {options.map((item)=>(
+                  <TouchableOpacity key={item.id}
+                  onPress={() => {
                     handleChange(item.value)
                     setEventTypeOptionsVisible(false)
                   }}
-                className='py-[10px] px-[3px] border-[1px] border-[#525252] mb-[4px] rounded-[8px]'
-                >
-                  <Text>{item.nome}</Text>
-              </TouchableOpacity>
-            
-            ))
-            
-          
-          
+                  className='py-[10px] px-[3px] border-[1px] border-[#525252] mb-[4px] rounded-[8px]'
+                  >
+                          <Text>{item.nome}</Text>
+                      </TouchableOpacity>
+                    
+                  ))}
+          </ScrollView>
+          )}
 
-      )}
+      
+
+
+
+
       </View>
 
 

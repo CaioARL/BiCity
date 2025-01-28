@@ -5,3 +5,9 @@ export interface TipoEvento {
     nome: string;
     nivelHabilidade: NivelHabilidade;
 }
+
+export interface ListTipoEvento {
+    nome: string
+    id: number
+    value: TipoEvento
+  }

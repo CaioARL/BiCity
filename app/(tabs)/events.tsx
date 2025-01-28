@@ -1,5 +1,5 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../components/CustomEvents';
@@ -7,18 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, EventoEndereco, Usuario } from '../../types';
+import { Evento, EventoEndereco, RequestPageEvento, Usuario } from '../../types';
 import { set } from 'zod';
+import { getEvento } from '../../api/evento';
+import LoadingActivity from '../../components/LoadingActivity';
 
-interface MarkedDates {
-  [date: string]: {
-    selected?: boolean;
-    marked?: boolean;
-    starting?: boolean;
-    ending?: boolean;
-    color?: string;
-  };
-}
+
 
 interface EventItem {
   id: string;
@@ -49,183 +43,91 @@ const nearbyPlaces: EventItem[] = [
     image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta-amazonica.jpg",
     status: "Aprovado",
   },
-  {
-    id: "2",
-    nameUser:  "Banco Santander",
-    userImage: "https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg",
-    eventName: "Evento de Networking",
-    description: "Um evento para conectar profissionais da área financeira.",
-    date: "2023-09-30",
-    image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta-amazonica.jpg",
-    location: "Lahore, Pakistan",
-    status: "Realizado",
-  },
-  {
-    id: "3",
-    nameUser: "Banco do Brasil",
-    userImage: "https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg",
-    eventName: "Evento de Avaliação",
-    description: "Aguardando avaliação.",
-    date: "2023-10-15",
-    image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta-amazonica.jpg",
-    location: "Rio de Janeiro, Brasil",
-    status: "Aguardando",
-  },
-  {
-    id: "4",
-    nameUser:  "Banco do Brasil",
-    userImage: "https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg",
-    eventName: "2Evento de Lançamento",
-    description: "Evento de lançamento de produto.",
-    date: "2023-11-01",
-    image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta_amazonica.jpg",
-    location: "São Paulo, Brasil",
-    status: "Aprovado",
-  },
-  {
-    id: "5",
-    nameUser:  "Banco B2B",
-    userImage: "https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg",
-    eventName: "3 Evento de Lançamento",
-    description: "Evento de lançamento de produto.",
-    date: "2025-30-2025",
-    image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta_amazonica.jpg",
-    location: "São Paulo, Brasil",
-    status: "Aprovado",
-  },
-  // ... other events remain the same ...
 ];
 
 export default function Events() {
-  const [filter, setFilter] = useState<FilterType>("Ativos");
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' } });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  // New filter states
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filterDistance, setFilterDistance] = useState(10);
-  const [filterDateStart, setFilterDateStart] = useState('');
-  const [filterDateEnd, setFilterDateEnd] = useState('');
-  const [filterEventType, setFilterEventType] = useState('all'); 
+  
+  
+  //requests - api
+  const [eventos, setEventos] = useState<Evento[] | null>(null)
+  const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
+  const totalPagesRef = useRef<number>(2)
+  const totalRegistrosRef = useRef<number>()
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: 0, tipoEvento: { id:0, nivelHabilidade: {nome:'', descricao:'', id:0}, nome: '' }, nivelHabilidade: {nome:'', descricao:'', id:0}, gratuito: null})
+  const abortControllerRef = useRef<AbortController>()
+  
+  //modals - filtro e criar evento
+  const [modalVisible, setModalVisible] = useState(false)
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [filter, setFilter] = useState<FilterType>("Ativos");
+  
+
+
+
   const [showEventTypeOptions, setShowEventTypeOptions] = useState(false);
 
   // Filtro - Data Calendario
   {{/* Aquiiiii */}} 
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedStartDate, setSelectedStartDate] = useState('');
-  const [selectedEndDate, setSelectedEndDate] = useState('');
-  const [markedDates, setMarkedDates] = useState<MarkedDates>({});
+
 
   
   const  { authState }  = useAuthProvider()
   
-  
-  
-
   useEffect(() => {
-
-
     if(authState?.user){
       if(authState.user){
         setUsuario(authState.user)
       }
     }
-      
-  }, [])
+    console.log('detalhes de usuario carregados no evento')
+  },[])
+  
+
+  useEffect(() => {
+      if(requestPageEvento.page > totalPagesRef.current) return alert("Não há mais eventos para carregar")
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      console.log('requestPageEvento', requestPageEvento)
+      getEvento(requestPageEvento, abortControllerRef.current)
+      .then((response) =>{
+        totalPagesRef.current = response.totalPaginas
+        totalRegistrosRef.current = response.totalRegistros
+        eventos ? setEventos([...eventos,...response.eventos]) :
+        setEventos(response.eventos)
+      })
+      .catch((response)=>{  
+        alert("Error ao carregar eventos: "+ response.message)
+      })
+      .finally(()=>{
+        setIsContentLoading(false)
+      })
+  }, [requestPageEvento])
   
   
   
+  const loadMorePage =() =>{
+    if(requestPageEvento.page >= totalPagesRef.current) return alert("Não há mais eventos para carregar")
+    setRequestPageEvento({...requestPageEvento, page: requestPageEvento.page + 1})
+  }
   
   
+
+  const refreshContent = () => {
+        setEventos(null)
+        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: 0, tipoEvento: { id:0, nivelHabilidade: {nome:'', descricao:'', id:0}, nome: '' }, nivelHabilidade: {nome:'', descricao:'', id:0}, gratuito: null})
+  }
   
   
-  
-  const formatDisplayDate = (dateString: string) => {
-    if (!dateString) return '';
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-  };
-
-
-
-
-
-
-
-
-  const handleDayPress = (day: any) => {
-    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-      // Iniciando nova seleção
-      setSelectedStartDate(day.dateString);
-      setSelectedEndDate('');
-      setFilterDateStart(formatDisplayDate(day.dateString));
-      setFilterDateEnd('');
-      
-      setMarkedDates({
-        [day.dateString]: {
-          selected: true,
-          color: '#C3FF00'
-        }
-      });
-    } else {
-      // Selecionando data final
-      if (day.dateString < selectedStartDate) {
-        // Se a data final for menor que a inicial, inverte
-        setSelectedEndDate(selectedStartDate);
-        setSelectedStartDate(day.dateString);
-        setFilterDateEnd(formatDisplayDate(selectedStartDate));
-        setFilterDateStart(formatDisplayDate(day.dateString));
-      } else {
-        setSelectedEndDate(day.dateString);
-        setFilterDateEnd(formatDisplayDate(day.dateString));
-      }
-
-      // Marcar o período inteiro
-      const markedDatesObj: MarkedDates = {};
-      let currentDate = new Date(Math.min(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
-      const endDate = new Date(Math.max(new Date(selectedStartDate).getTime(), new Date(day.dateString).getTime()));
-
-      while (currentDate <= endDate) {
-        const dateString = currentDate.toISOString().split('T')[0];
-        if (dateString === selectedStartDate) {
-          markedDatesObj[dateString] = {
-            selected: true,
-            color: '#C3FF00',
-            starting: true
-          };
-        } else if (dateString === day.dateString) {
-          markedDatesObj[dateString] = {
-            selected: true,
-            color: '#C3FF00',
-            ending: true
-          };
-        } else {
-          markedDatesObj[dateString] = {
-            selected: true,
-            color: '#E8FFB7'
-          };
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      setMarkedDates(markedDatesObj);
-      
-      // Fechar o calendário após selecionar o período completo
-      setTimeout(() => setShowCalendar(false), 500);
-    }
-  };
+ 
 
   {{/*----------------------------------------------------------------- */}}
 
-  const [mapRegion, setMapRegion] = useState({
-    latitude: -23.55052,
-    longitude: -46.633308,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
-  const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
-  const [modalVisible, setModalVisible] = useState(false);
+
+  
 
   
 
@@ -293,8 +195,8 @@ export default function Events() {
     );
   };
 
-  const handleSave = (item: EventItem) => {
-    console.log('Evento salvo:', item.eventName);
+  const handleSave = (item: Evento) => {
+    console.log('Evento salvo:', item.nome);
   };
 
   // const handleShare = (item: EventItem) => {
@@ -309,19 +211,9 @@ export default function Events() {
     setModalVisible(true);
   };
 
-  const handleSelectLocation = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
-    const { latitude, longitude } = e.nativeEvent.coordinate;
-    setSelectedLocation({ latitude, longitude });
-  };
+
 
   
-
-  const resetForm = () => {
-    setModalVisible(false);
-    setSelectedImage(null);
-    setSelectedLocation(null);
-  };
-
   
 
   return (
@@ -390,96 +282,109 @@ export default function Events() {
         {/* Box - Eventos */}
         <View>
           <Text style={CustomEvents.placesContainer}>Eventos</Text>
-          <FlatList
-            style={{ minHeight: "100%" }}
-            contentContainerStyle={{ paddingBottom: 200 }}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={getFilteredEvents()}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              const isSelected = selectedItems.includes(item.id);
-              return (
-                <TouchableOpacity
-                  style={[
-                    CustomEvents.card,
-                    isSelected && { backgroundColor: "#d3e5ff" }
-                  ]}
-                  onPress={() => toggleSelection(item.id)}
-                >
-                  <ImageBackground 
-                    source={{ uri: item.image }} 
-                    style={CustomEvents.cardImage} 
-                    imageStyle={{ borderRadius: 10 }}
+
+
+          
+           {eventos && (
+            <FlatList
+              style={{ minHeight: "100%" }}
+              contentContainerStyle={{ paddingBottom: 200 }}
+              onEndReached={loadMorePage}
+              onEndReachedThreshold={0.1}
+              refreshing={isContentLoading}
+              onRefresh={refreshContent}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false} 
+              data={eventos}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => {
+                const isSelected = selectedItems.includes(item.id.toString());
+                return (
+                  <TouchableOpacity
+                    style={[
+                      CustomEvents.card,
+                      isSelected && { backgroundColor: "#d3e5ff" }
+                    ]}
+                    onPress={() => toggleSelection(item.id.toString())}
                   >
-                    <View style={CustomEvents.overlay}>
-                      {/* <View>
-                        <TouchableOpacity 
-                          style={CustomEvents.customButtonSave} 
-                          onPress={() => handleSave(item)}
-                        >
-                          <Ionicons name="bookmarks-outline" size={20} color="white" />
-                        </TouchableOpacity>
-                      </View> */}
-                      <View style={CustomEvents.cardInfo}>
-                        <View style={{ 
-                          flexDirection: 'row', 
-                          alignItems: 'center', 
-                          zIndex: 3, 
-                          position: 'relative', 
-                          top: 10 
-                        }}>
-                          <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} />
-                          <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text>
-                        </View>
-
-                        <View style={CustomEvents.cardLine}/>
-
-                        <View style={CustomEvents.cardInfoBox}>
-                          <Text style={CustomEvents.cardTitle}>{item.eventName}</Text>
-                          <Text style={CustomEvents.cardLocation}>{item.location}</Text>
-                          <Text 
-                            style={CustomEvents.cardDescription} 
-                            numberOfLines={2} 
-                            ellipsizeMode="tail"
+                    <ImageBackground 
+                      // source={{ uri: item.image }} 
+                      style={CustomEvents.cardImage} 
+                      imageStyle={{ borderRadius: 10 }}
+                    >
+                      <View style={CustomEvents.overlay}>
+                        {/* <View>
+                          <TouchableOpacity 
+                            style={CustomEvents.customButtonSave} 
+                            onPress={() => handleSave(item)}
                           >
-                            {item.description}
-                          </Text>
-                          <Text style={CustomEvents.cardDate}>{item.date}</Text>
+                            <Ionicons name="bookmarks-outline" size={20} color="white" />
+                          </TouchableOpacity>
+                        </View> */}
+                        <View style={CustomEvents.cardInfo}>
+                          <View style={{ 
+                            flexDirection: 'row', 
+                            alignItems: 'center', 
+                            zIndex: 3, 
+                            position: 'relative', 
+                            top: 10 
+                          }}>
+                            {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
+                            {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
+                          </View>
+
+                          <View style={CustomEvents.cardLine}/>
+
+                          <View style={CustomEvents.cardInfoBox}>
+                            <Text style={CustomEvents.cardTitle}>{item.nome}</Text>
+                            <Text style={CustomEvents.cardLocation}>{item.endereco.bairro}</Text>
+                            <Text 
+                              style={CustomEvents.cardDescription} 
+                              numberOfLines={2} 
+                              ellipsizeMode="tail"
+                            >
+                              {item.descricao}
+                            </Text>
+                            <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
+                      
 
-                    {/* <View>
-                      <TouchableOpacity 
-                        style={CustomEvents.customButtonToShare} 
-                        onPress={() => handleShare(item)}
-                      >
+                      {/* <View>
+                        <TouchableOpacity 
+                          style={CustomEvents.customButtonToShare} 
+                          onPress={() => handleShare(item)}
+                        >
                         <Ionicons name="return-up-forward" size={20} color="#555" />
-                      </TouchableOpacity>
-                    </View> */}
+                        </TouchableOpacity>
+                        </View> */}
 
-                    <View style={CustomEvents.containerButton}>
-                      <TouchableOpacity 
-                        style={CustomEvents.customButton} 
-                        onPress={() => handleSave(item)}
-                      >
-                        <Ionicons name="location-outline" size={20} color="white" />
-                        <Text style={CustomEvents.customButtonText}>Localizada</Text>
-                      </TouchableOpacity>
-                      {/* <TouchableOpacity 
-                        style={CustomEvents.customButton} 
-                        onPress={() => handleFavorite(item)}
-                      >
-                        <Ionicons name="star-outline" size={20} color="white" />
-                        <Text style={CustomEvents.customButtonText}>DAR O LIKE TIU</Text>
-                      </TouchableOpacity> */}
-                    </View>
-                  </ImageBackground>
-                </TouchableOpacity>
-              );
-            }}
-          />
+                      <View style={CustomEvents.containerButton}>
+                        <TouchableOpacity 
+                          style={CustomEvents.customButton} 
+                          onPress={() => handleSave(item)}
+                          >
+                          <Ionicons name="location-outline" size={20} color="white" />
+                          <Text style={CustomEvents.customButtonText}>Localizada</Text>
+                        </TouchableOpacity>
+                        {/* <TouchableOpacity 
+                          style={CustomEvents.customButton} 
+                          onPress={() => handleFavorite(item)}
+                          >
+                          <Ionicons name="star-outline" size={20} color="white" />
+                          <Text style={CustomEvents.customButtonText}>DAR O LIKE TIU</Text>
+                          </TouchableOpacity> */}
+                      </View>
+                    </ImageBackground>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
+          
+
+
         </View>
 
         {/* Add - Eventos */}
@@ -489,41 +394,21 @@ export default function Events() {
 
         {/* Modal Criar - Eventos */}
         {modalVisible && 
-        
           <EventModal
             visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            mapRegion={mapRegion}
-            setMapRegion={setMapRegion}
-            selectedLocation={selectedLocation}
-            handleSelectLocation={handleSelectLocation}
-              
-            // formatDateInput={formatDateInput}
-            resetForm={resetForm}
+            closeModal={ () => setModalVisible(!modalVisible)}
           />
-        
         }
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}
           onClose={() => setFilterModalVisible(false)}
-          filterDistance={filterDistance}
-          setFilterDistance={setFilterDistance}
-          filterDateStart={filterDateStart}
-          setFilterDateStart={setFilterDateStart}
-          filterDateEnd={filterDateEnd}
-          setFilterDateEnd={setFilterDateEnd}
-          markedDates={markedDates}
-          handleDayPress={handleDayPress}
-          filterEventType={filterEventType}
-          setFilterEventType={setFilterEventType}
           showEventTypeOptions={showEventTypeOptions}
           setShowEventTypeOptions={setShowEventTypeOptions}
-          showCalendar={showCalendar} 
-          setShowCalendar={setShowCalendar}
         />
       
       </View>
+
     </SafeAreaView>
   );
 }

@@ -1,16 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Animated, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, Animated, ScrollView} from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
-import { Calendar } from 'react-native-calendars';
-import axios from 'axios';
-import { TipoEvento } from '../types/tipo-evento';
+import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
-import { set } from 'zod';
 import { getCep } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
 import { createEvento } from '../api/evento';
@@ -18,44 +13,20 @@ import FormFieldModal from './FormFieldModal';
 import FormSelectFieldModal from './FormSelectFieldModal';
 import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
 import LoadingActivity from './LoadingActivity';
+import ButtonModal from './ButtonModal';
 
 
 
 
-interface EventItem {
-  eventName: string;
-  description: string;
-  date: string;
-  isFree: boolean;
-  address?: string;
-  cep?: string;
-  routeDistance?: string;
-}
-
-interface ListTipoEvento {
-  nome: string
-  id: number
-  value: TipoEvento
-}
 
 interface EventModalProps {
-  visible: boolean;
-  onClose: () => void;
-  mapRegion: any;
-  setMapRegion: (region: any) => void;
-  selectedLocation: { latitude: number; longitude: number } | null;
-  handleSelectLocation: (e: any) => void;
-  resetForm: () => void;
+  visible: boolean
+  closeModal: () => void
 }
 
 const EventModal: React.FC<EventModalProps> = ({
   visible,
-  onClose,
-  mapRegion,
-  setMapRegion,
-  selectedLocation,
-  handleSelectLocation,
-  resetForm,
+  closeModal,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [showCalendar, setShowCalendar] = useState(false);
@@ -143,6 +114,20 @@ const EventModal: React.FC<EventModalProps> = ({
   },[])
 
 
+  const [mapRegion, setMapRegion] = useState({
+    latitude: -23.55052,
+    longitude: -46.633308,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
+  const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
+
+  const handleSelectLocation = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setSelectedLocation({ latitude, longitude });
+  };
+
+  
 
 
   // const handleMapPress = async (e: any) => {
@@ -224,10 +209,6 @@ const EventModal: React.FC<EventModalProps> = ({
       }) 
   }
 
-  const handleDayPress = (day: any) => {
-    updateCampoNovoEvento('data', day.dateString);
-    setShowCalendar(false);
-  };
 
 
 
@@ -274,7 +255,7 @@ const EventModal: React.FC<EventModalProps> = ({
     createEvento(novoEvento, abortControllerRef.current)
     .then((response)=>{
       alert('Evento: ' + response.nome + ' criado com sucesso')
-
+      closeModal()
     })
     .catch((response)=>{
       alert('falha na criação do Evento. \n Code error: ' + response.message)
@@ -288,7 +269,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, //desatualizado ImagePicker.MediaTypeOptions.All (VERIFICAR NA DOCUMENTAÇÃO UM MÉTODO MAIS RECENTE)
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -334,17 +315,20 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
   return (
-    <SafeAreaView>
+    <>
 
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.overlay}>
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={closeModal}>
+      <View className='flex-row bg-[rgba(0,0,0,0.5)] justify-center'>
         <ScrollView>
-          <View style={styles.modalContainer}>
+          <View className='bg-white flex-[1] rounded-[10px] p-[20px] m-[20px]'>
             <Animated.View style={{ opacity: fadeAnim }}>
+
+
                {/* Mapa do Evento */}
-               <View style={{ marginBottom: 2 }}>
+               <View  className='mb-[2px]'>
                   <MapView
                     style={{ height: 200, width: '100%', marginBottom: 20 }}
+                    className='h-[200px] w-full mb-[20px]'
                     region={mapRegion}
                     onRegionChangeComplete={setMapRegion}
                     // onPress={handleMapPress}
@@ -396,7 +380,8 @@ const EventModal: React.FC<EventModalProps> = ({
                 maxLength={8}
                 keyboardType='numeric'
                 isLoading={isCepLoading}
-                msg={novoEventoError.endereco.cep}
+                msg={cepError? cepError : novoEventoError.endereco.cep}
+                
               />
               
               <FormFieldModal
@@ -511,7 +496,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
               
               <View className='mb-[20px]'>
-                <Text style={styles.locationText}>Localização Selecionada:</Text>
+                <Text className='mt-[10px] text-[14px] text-[#666]' >Localização Selecionada:</Text>
                 <Text>
                   {selectedLocation
                     ? `Latitude: ${selectedLocation.latitude}, Longitude: ${selectedLocation.longitude}`
@@ -520,32 +505,28 @@ const EventModal: React.FC<EventModalProps> = ({
               </View>
 
                   
-                
-                {saveError && (
-                  <Text className='text-color_red_error  my-2'>{'*'+saveError}</Text>
-                )}
+              
+              {saveError && (
+                <Text className='text-color_red_error  my-2'>{'*'+saveError}</Text>
+              )}
 
-              {/* Botões Cancelar e Salvar */}
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={resetForm} style={styles.cancelButton}>
-                  <Text style={styles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={handleSaveEvento}
+
+
+              <View className='flex-row justify-between mt-[20px]'>
+            
+                <ButtonModal
+                  title='Cancelar'
+                  handlePress={closeModal}
+                  customStyles='bg-[#FF0000]'
+                />
+
+                <ButtonModal
+                  title='Salvar Evento'
+                  handlePress={handleSaveEvento}
                   disabled={!selectedLocation || !novoEvento.nome || !novoEvento.descricao || !novoEvento.data}
-                  style={[
-                    styles.saveButton,
-                    {
-                      backgroundColor:
-                        !selectedLocation || !novoEvento.nome || !novoEvento.descricao || !novoEvento.data
-                          ? '#CCC'
-                          : '#C3FF00',
-                    },
-                  ]}
-                >
-                  <Text style={styles.buttonText}>Salvar Evento</Text>
-                </TouchableOpacity>
+                />
+                  
               </View>
 
 
@@ -561,101 +542,10 @@ const EventModal: React.FC<EventModalProps> = ({
       <LoadingActivity />
     )}
     
-    </SafeAreaView>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 16, 
-    marginBottom: 5,
-    color: '#555',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    margin: 20,
-    padding: 20,
-  },
-  input: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-  },
-  multilineInput: {
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  datePicker: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dateText: {
-    marginLeft: 10,
-    color: '#555',
-  },
-  calendarOverlay: {
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    overflow: 'hidden'
-  },
-  priceTypeContainer: {},
-  priceTypeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '50%',
-    marginBottom: 15,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  priceTypeButtonActive: {},
-  priceTypeButtonText: {
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  locationText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#666',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  cancelButton: {
-    backgroundColor: '#FF0000',
-    padding: 10,
-    borderRadius: 5,
-    width: '45%',
-  },
-  saveButton: {
-    padding: 10,
-    borderRadius: 5,
-    width: '45%',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+
 
 export default EventModal;
