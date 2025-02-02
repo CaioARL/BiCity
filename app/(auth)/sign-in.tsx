@@ -47,7 +47,7 @@ export default function SignIn() {
           onLogin(response)
           .then(()=> {
             alert("Logado com sucesso"+response.nome)
-            router.replace('mapView');
+            router.replace('home');
           })
           .catch((error)=> {
             alert("Login error registering in memory: "+error)
