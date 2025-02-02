@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { Calendar } from 'react-native-calendars'
 import { Ionicons } from '@expo/vector-icons';
 
@@ -8,20 +8,21 @@ import { Ionicons } from '@expo/vector-icons';
 interface FormFieldCalendarSelectModalProps {
     value: string
     handleChangeValue: (e : string) => void
-    showCalendar: boolean
-    setShowCalendar: (e : boolean) => void
+    disabled?: boolean
 }
 
 
 
-export default function FormFieldCalendarSelectModal({ value, handleChangeValue, showCalendar, setShowCalendar }: FormFieldCalendarSelectModalProps) {
+export default function FormFieldCalendarSelectModal({ value, handleChangeValue, disabled}: FormFieldCalendarSelectModalProps) {
 
+    const [showCalendar, setShowCalendar] = useState(false)
 
 
   return (
     <View className='mb-[20px]'>
         <TouchableOpacity  
             className='border-[1px] border-[#ddd] rounded-[8px] p-[10px] flex-row items-center justify-between' 
+            disabled={disabled}
             onPress={() => setShowCalendar(!showCalendar )}
         >
             <Text className='text-[#555] ml-[10px]'>

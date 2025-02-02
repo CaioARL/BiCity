@@ -2,48 +2,36 @@ import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Ima
 import React, { useEffect, useRef, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
-import CustomEvents from '../../components/CustomEvents';
+import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, EventoEndereco, RequestPageEvento, Usuario } from '../../types';
+import { Evento, EventoEndereco, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { set } from 'zod';
 import { getEvento } from '../../api/evento';
 import LoadingActivity from '../../components/LoadingActivity';
+import EventView from '../../view/EventView';
 
 
 
-interface EventItem {
-  id: string;
-  nameUser: string;
-  userImage: string;
-  eventName: string;
-  description: string;
-  date: string;
-  image: string;
-  location: string;
-  status: string;
-  isPast?: boolean;
-}
+// interface EventItem {
+//   id: string;
+//   nameUser: string;
+//   userImage: string;
+//   eventName: string;
+//   description: string;
+//   date: string;
+//   image: string;
+//   location: string;
+//   status: string;
+//   isPast?: boolean;
+// }
 // Versão original
 //type FilterType = "Todos" | "Ativos" | "Realizados" | "Pendentes";
 
 type FilterType = "Ativos" | "Realizados" ;
 
-const nearbyPlaces: EventItem[] = [
-  {
-    id: "1",
-    nameUser:  "Banco Itau",
-    userImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEC3xi3ITmg6ExgDPUiR_5dvX90EuMAnK8eg&s",
-    eventName: "Evento de Networking",
-    location: "São Paulo, Brasil",
-    description: "Um evento para conectar profissionais da área financeira com bicicletas.",
-    date: "21/12/2024",
-    image: "https://s5.static.brasilescola.uol.com.br/be/2022/10/vista-floresta-amazonica.jpg",
-    status: "Aprovado",
-  },
-];
 
 export default function Events() {
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' } });
@@ -56,12 +44,17 @@ export default function Events() {
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
   const totalPagesRef = useRef<number>(2)
   const totalRegistrosRef = useRef<number>()
-  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: 0, tipoEvento: { id:0, nivelHabilidade: {nome:'', descricao:'', id:0}, nome: '' }, nivelHabilidade: {nome:'', descricao:'', id:0}, gratuito: null})
+  const currentPageRef = useRef<number>(0)
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   const abortControllerRef = useRef<AbortController>()
   
   //modals - filtro e criar evento
   const [modalVisible, setModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
+
+
+
   const [filter, setFilter] = useState<FilterType>("Ativos");
   
 
@@ -87,7 +80,7 @@ export default function Events() {
   
 
   useEffect(() => {
-      if(requestPageEvento.page > totalPagesRef.current) return alert("Não há mais eventos para carregar")
+      if(requestPageEvento.page === currentPageRef.current ) return 
       abortControllerRef.current?.abort()
       abortControllerRef.current = new AbortController
       setIsContentLoading(true)
@@ -96,6 +89,7 @@ export default function Events() {
       .then((response) =>{
         totalPagesRef.current = response.totalPaginas
         totalRegistrosRef.current = response.totalRegistros
+        currentPageRef.current = requestPageEvento.page
         eventos ? setEventos([...eventos,...response.eventos]) :
         setEventos(response.eventos)
       })
@@ -110,7 +104,7 @@ export default function Events() {
   
   
   const loadMorePage =() =>{
-    if(requestPageEvento.page >= totalPagesRef.current) return alert("Não há mais eventos para carregar")
+    if(requestPageEvento.page >= totalPagesRef.current) return //alert removed
     setRequestPageEvento({...requestPageEvento, page: requestPageEvento.page + 1})
   }
   
@@ -118,72 +112,25 @@ export default function Events() {
 
   const refreshContent = () => {
         setEventos(null)
-        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: 0, tipoEvento: { id:0, nivelHabilidade: {nome:'', descricao:'', id:0}, nome: '' }, nivelHabilidade: {nome:'', descricao:'', id:0}, gratuito: null})
+        currentPageRef.current = 0
+        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   }
   
-  
+
+  const setFilteredEvents = (tipoEvento: TipoEvento, faixaKm: number | null, data: string| null) => {
+    setEventos(null)
+    currentPageRef.current = 0
+    console.log('tipoEvento', tipoEvento)
+    console.log('faixaKm', faixaKm)
+    console.log('data', data)
+    setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
+  }
  
 
   {{/*----------------------------------------------------------------- */}}
 
 
   
-
-  
-
-  const getFilteredEvents = () => {
-    const currentDate = new Date();
-
-    return nearbyPlaces.filter((event) => {
-      const eventDate = new Date(event.date);
-      const isSearchMatch =
-        event.eventName.toLowerCase().includes(searchText.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchText.toLowerCase()) ||
-        event.nameUser.toLowerCase().includes(searchText.toLowerCase());
-
-        // Versão original
-      // switch (filter) {
-      //   case "Ativos":
-      //     const thirtyDaysAgo = new Date();
-      //     thirtyDaysAgo.setDate(currentDate.getDate() - 1);
-      //     return eventDate >= thirtyDaysAgo && event.status === "Aprovado" && isSearchMatch;
-      //   case "Pendentes":
-      //     return eventDate < currentDate && event.status === "Aguardando" && isSearchMatch;
-      //   case "Realizados":
-      //     return eventDate < currentDate && event.status === "Realizado" && isSearchMatch;
-      //   case "Todos":
-      //   default:
-      //     return isSearchMatch;
-      // }
-      switch (filter) {
-          case "Ativos":
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(currentDate.getDate() - 1);
-            return eventDate >= thirtyDaysAgo && event.status === "Aprovado" && isSearchMatch;
-          case "Realizados":
-            return eventDate < currentDate && event.status === "Realizado" && isSearchMatch;
-            return isSearchMatch;
-        }
-    }).map(event => ({
-      ...event,
-      isPast: new Date(event.date) < currentDate
-    }));
-  };
-  
-  // Função para formatar a data
-  const formatDateInput = (input : any) => {
-    // Remove todos os caracteres que não são dígitos
-    const numbers = input.replace(/\D/g, '');
-
-    // Formata a data no formato dd/MM/yyyy
-    const day = numbers.slice(0, 2);
-    const month = numbers.slice(2, 4);
-    const year = numbers.slice(4, 8);
-
-    if (numbers.length < 2) return day;
-    if (numbers.length < 4) return `${day}/${month}`;
-    return `${day}/${month}/${year}`;
-  };
 
   
 
@@ -223,10 +170,19 @@ export default function Events() {
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
           <View style={CustomEvents.location}>
-            <Image
-              source={{ uri: 'https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg' }}
-              style={CustomEvents.userImage}
-            />
+            {
+            //   <Image
+            //   source={{ uri: 'https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg' }}
+            //   style={CustomEvents.userImage}
+            // />
+            //width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10
+
+            }
+            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+
+            </View>
+
 
             <View style={{ flexDirection: 'column' }}>
               <Text style={CustomEvents.locationText}>{usuario?.nomeUsuario}</Text>
@@ -305,9 +261,9 @@ export default function Events() {
                       CustomEvents.card,
                       isSelected && { backgroundColor: "#d3e5ff" }
                     ]}
-                    onPress={() => toggleSelection(item.id.toString())}
+                    onPress={() => setModalViewEvento(item)}
                   >
-                    <ImageBackground 
+                    <ImageBackground  
                       // source={{ uri: item.image }} 
                       style={CustomEvents.cardImage} 
                       imageStyle={{ borderRadius: 10 }}
@@ -378,12 +334,11 @@ export default function Events() {
                       </View>
                     </ImageBackground>
                   </TouchableOpacity>
-                );
+              );
               }}
             />
           )}
           
-
 
         </View>
 
@@ -396,16 +351,25 @@ export default function Events() {
         {modalVisible && 
           <EventModal
             visible={modalVisible}
-            closeModal={ () => setModalVisible(!modalVisible)}
+            closeModal={ () => {setModalVisible(!modalVisible) ; refreshContent()}}
           />
         }
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}
           onClose={() => setFilterModalVisible(false)}
-          showEventTypeOptions={showEventTypeOptions}
-          setShowEventTypeOptions={setShowEventTypeOptions}
+          setFilterEntity={setFilteredEvents}
         />
+
+        {/* Modal Visualizar - Eventos */}  
+        {modalViewEvento && 
+          <EventView
+            closeModal={ () => setModalViewEvento(null) }
+            evento={modalViewEvento}
+          />
+        }
+
+
       
       </View>
 

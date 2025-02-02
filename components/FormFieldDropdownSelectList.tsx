@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +12,7 @@ interface FormFieldDropdownSelectList<T> {
     selectedValue: T
     options: { nome: string, id : number, value: T }[]
     handleChange: (value: T) => void
-    dropDownSize?: number
+    dropDownSize?: DimensionValue
     msg?: string
     isValid?: boolean
     otherStyles?: string
@@ -36,11 +36,12 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
       <Text  className='text-[16px] mb-[2px] color-[#555]' >{title}</Text>
       <TouchableOpacity 
             className='flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px]'
-            onPress={() => !disableEdit && setEventTypeOptionsVisible(true)}
+            onPress={() => setEventTypeOptionsVisible(true)}
+            disabled={disableEdit}
             >
 
           <Text className='color-[#555] flex-1'>
-          {options.find(option => option.value === selectedValue)?.nome || 'Select an option'}
+          {selectedValue.nome? selectedValue.nome : 'Selecione uma opção'}
           
           </Text>
           {isLoading ? (
@@ -57,7 +58,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
 
         {/* Dropdown Menu */}
         {eventTypeOptionsVisible && (
-          <ScrollView className={`h-[${dropDownSize? dropDownSize : '50%'}]`}>
+          <ScrollView className={`border-[1px] border-[#ddd] rounded-[8] bg-white shadow-[2px]`} style={{maxHeight: dropDownSize || '100%'}}>
                 {options.map((item)=>(
                   <TouchableOpacity key={item.id}
                   onPress={() => {

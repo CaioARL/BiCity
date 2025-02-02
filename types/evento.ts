@@ -27,7 +27,41 @@ export interface RequestCreateEvento {
     tipoEvento: TipoEvento
 }
 
+export interface RequestUpdateEvento {   
+    id: number
+    nome: string
+    descricao: string
+    data: string
+    endereco: EventoEndereco
+    faixaKm: number
+    gratuito: boolean
+    tipoEvento: TipoEvento
+}
+
+
+
+
+
 export interface RequestCreateEventoError {
+    
+    nome: string
+    descricao: string
+    data: string
+    endereco: {
+        cep: string
+        estado: string
+        cidade: string
+        bairro: string
+        rua: string
+        numero: string
+    }
+    faixaKm: string
+    gratuito: string
+    tipoEvento: string
+}
+
+
+export interface RequestUpdateEventoError {
     
     nome: string
     descricao: string
@@ -67,9 +101,9 @@ export interface RequestPageEvento {
     data: string | null
     cidade: string | null
     estado: string | null
-    faixaKm: number
-    tipoEvento: TipoEvento
-    nivelHabilidade: NivelHabilidade
+    faixaKm: number | null
+    tipoEvento: TipoEvento | null
+    nivelHabilidade: NivelHabilidade | null
     gratuito: boolean | null
 }
 

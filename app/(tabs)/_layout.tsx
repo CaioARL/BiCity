@@ -25,7 +25,7 @@ export default function TabsLayout() {
             }
         />
         <Tabs.Screen 
-            name="mapView" 
+            name="home" 
             options={
                 {
                     title: 'Mapa',

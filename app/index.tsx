@@ -14,7 +14,7 @@ export default function Index() {
   useEffect(() => {
     const loading = async () => {
       if (authState?.authenticated) {
-        router.replace('/mapView') // Redirect to the main app if user is logged in
+        router.replace('/home') // Redirect to the main app if user is logged in
       } else {
         router.replace('/sign-in') // Redirect to the sign-in page
       } 

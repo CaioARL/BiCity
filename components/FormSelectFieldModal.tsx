@@ -9,11 +9,11 @@ interface FormSelectFieldModalProps {
     option_1: string
     option_2: string
     customStyles?: string
-
+    disableEdit?: boolean
 }
 
 
-export default function FormSelectFieldModal({ handleChangeValue, value , title, option_1 , option_2}: FormSelectFieldModalProps) {
+export default function FormSelectFieldModal({ handleChangeValue, value , title, option_1 , option_2, disableEdit}: FormSelectFieldModalProps) {
   return (
     <View >
         <Text className='text-[16px] text-[#555] mb-[5px]'>{title}</Text>
@@ -21,6 +21,7 @@ export default function FormSelectFieldModal({ handleChangeValue, value , title,
                 <TouchableOpacity
                     className={`flex-row items-center w-[50%] mb-[15px] py-[10px] ${value && ''}`}
                     onPress={() => handleChangeValue(true)}
+                    disabled={disableEdit}
                 >
                     <Ionicons 
                     name={value ? "checkmark-circle" : "square-outline"} 
@@ -32,6 +33,7 @@ export default function FormSelectFieldModal({ handleChangeValue, value , title,
                 <TouchableOpacity
                     className={`flex-row items-center w-[50%] mb-[15px] py-[10px] ${!value && ''}`}
                     onPress={() => handleChangeValue(false)}
+                    disabled={disableEdit}
                 >
                     <Ionicons 
                     name={!value ? "checkmark-circle" : "square-outline"} 

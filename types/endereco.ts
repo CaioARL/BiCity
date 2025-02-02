@@ -22,7 +22,24 @@ export interface EventoEndereco {
     bairro: string
     rua: string
     numero: number
+    latitude: number
+    longitude: number
 }
 
 
 
+export interface CepInfo {
+    cep: string
+    logradouro: string
+    complemento: string
+    unidade: string
+    bairro: string
+    localidade: string
+    uf: string
+    estado: string
+    regiao: string
+    ibge: string
+    gia: string
+    ddd: string
+    siafi: string
+}

@@ -142,7 +142,7 @@ export default function SignIn() {
             <View className="flex-row justify-center mt-4">
               <Text className="text-secondary_black_sub_title">Não tem uma conta? </Text>
               <Text
-                onPress={() => router.push('sign-up')}
+                onPress={() => router.push('terms')}
                 className="text-blue-500 font-bold"
               >
                 Inscrever-se

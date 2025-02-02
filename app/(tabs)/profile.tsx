@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, TextInput, } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import CustomProfile from '../../components/CustomProfile';
+import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthProvider } from '../context/AuthProvider';
 import { replace } from 'expo-router/build/global-state/routing';
@@ -132,11 +132,15 @@ const Profile = () => {
         <View style={CustomProfile.profileCard}>
           <View style={CustomProfile.topSection}>
             <View style={CustomProfile.imageContainer}>
-              <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
+              {/* <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
               <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
                 <Ionicons name="pencil" size={16} color="#1f2937" />
               </TouchableOpacity>
-              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
+              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
+              <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
+                  <Text className='text-[245px]'>{usuario && usuario.nome[0]}</Text>
+              </View>
+              
             </View>
           </View>
           
@@ -230,7 +234,7 @@ const Profile = () => {
             style={CustomProfile.button}
             onPress={handleLogout}
           >
-            <Text style={{ fontWeight: 'bold' }}>Logou</Text>
+            <Text style={{ fontWeight: 'bold' }}>Logout</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

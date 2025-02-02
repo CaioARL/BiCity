@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import CustomButton from './CustomButton';
+import CustomButton from '../components/CustomButton'
 
 const CustomEvents = StyleSheet.create({
   evento: {margin: 0, paddingBottom: 0, paddingTop: 30, },

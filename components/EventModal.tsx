@@ -6,7 +6,7 @@ import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
 import { NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep } from '../api/endereco';
+import { getCep, getViaCep } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
 import { createEvento } from '../api/evento';
 import FormFieldModal from './FormFieldModal';
@@ -29,7 +29,6 @@ const EventModal: React.FC<EventModalProps> = ({
   closeModal,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const abortControllerRef = useRef(new AbortController())
 
@@ -59,7 +58,7 @@ const EventModal: React.FC<EventModalProps> = ({
   
 
 
-  const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0 }, faixaKm: 0, gratuito: false, tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: ''}}})
+  const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false, tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: ''}}})
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
 
 
@@ -490,8 +489,7 @@ const EventModal: React.FC<EventModalProps> = ({
               <FormFieldCalendarSelectModal
                 value={novoEvento.data}
                 handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
-                showCalendar={showCalendar}
-                setShowCalendar={setShowCalendar}
+                
               />
 
               

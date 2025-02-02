@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Pressable, Text } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
-import CustomTabBar from './CustomTabBar';
+import CustomTabBar from '../css/CustomTabBar';
 import { useSharedValue, withSpring, useAnimatedStyle, interpolate } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
 
@@ -16,7 +16,7 @@ interface TabBarButtonProps {
 
 const icons = {
   events: "albums-outline",
-  mapView: "map-outline",
+  home: "map-outline",
   profile: "person-outline"
 } as const;
 

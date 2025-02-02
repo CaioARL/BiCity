@@ -4,7 +4,7 @@ import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 import { masks } from '../../util/masks';
 import { valid } from '../../util/validationSchemas';
-import { getCep } from '../../api/endereco';
+import { getCep, getViaCep } from '../../api/endereco';
 import { NivelHabilidade } from '../../types/nivel-habilidade';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
@@ -186,6 +186,9 @@ export default function SignUp() {
   const prevStep = () => {
     setStep(step - 1)
   }
+
+
+  
   useEffect(() => {
     getNivelHabilidade()
     .then((response) => {
@@ -258,7 +261,7 @@ export default function SignUp() {
           onRegister(response)
           .then((response) => {
             alert(response)
-            router.replace('mapView')
+            router.replace('home')
           })
           .catch((response) => {
             alert('Erro ao registrar na memoria: '+ response.message)
@@ -298,12 +301,12 @@ export default function SignUp() {
         setIsCepLoading(true)
         abortControllerRef.current?.abort()
         abortControllerRef.current = new AbortController()
-        getCep(cepText , abortControllerRef.current)
+        getViaCep(cepText , abortControllerRef.current)
           .then((response) => {
-            setRua(response.street)
-            setBairro(response.neighborhood)
-            setCidade(response.city)
-            setEstado(response.state)
+            setRua(response.logradouro)
+            setBairro(response.bairro)
+            setCidade(response.localidade)
+            setEstado(response.estado)
             setCepError('')   
           })
           .catch((response) => {

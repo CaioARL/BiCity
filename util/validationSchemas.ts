@@ -73,3 +73,32 @@ export const createEventSchema = z.object(
         })
     }
 )
+
+
+
+export const upateEventSchema = z.object(
+    {
+        nome: z.string().min(5, { message: 'Nome: deve ter pelo ao menos 5 caracteres' }),
+        descricao: z.string().min(10, { message: 'Descrição: deve ter pelo ao menos 10 caracteres' }),
+        data: z.string({message: 'Data: deve selecionar uma data'}).min(10, {message: 'Data: deve conter no minimo 10 caracteres 0000-00-00 '}),
+        endereco: z.object({
+            cep: z.string().min(8, {message: 'Cep: deve digitar um cep com 8 digitos '}).max(8, {message: 'Cep: deve digitar um cep com 8 digitos '}),
+            estado: z.string({message: 'Estado: deve conter estado'}).min(2, {message: 'Estado: deve conter no mínimo 2 digitos'}),
+            cidade: z.string({message: 'Cidade: deve conter cidade'}).min(4 , {message: 'Cidade: deve conter no mínimo 4 digitos'}),
+            bairro: z.string({message: 'Bairro: deve conter bairro'}).min(4, {message: 'Bairro: deve conter no mínimo 4 digitos'}),
+            rua: z.string({message: 'Rua: deve conter rua'}).min(4, {message: 'Rua: deve conter no mínimo 4 digitos'}),
+            numero: z.number(  { message: 'Numero: deve conter numero de endereço' } ).min(1),
+        }),
+        faixaKm: z.number().max(200, {message: 'faixa em KM de no máximo até 200km'}).min(1, {message: 'faixa em KM de no mínimo 1km'}),
+        gratuito: z.boolean({message: 'Gratuito: deve selecionar se é gratuito ou não'}),
+        tipoEvento: z.object({
+            id: z.number({message: ' Tipo de evento: deve selecionar um tipo de evento'}),
+            nome: z.string( { message: '' } ),
+            nivelHabilidade: z.object({
+                id: z.number( { message: '' } ),
+                nome: z.string( { message: '' } ),
+                descricao: z.string( { message: '' } )
+            })
+        })
+    }
+)

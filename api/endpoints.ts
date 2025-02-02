@@ -20,6 +20,7 @@ const ENDPOINTS = {
     EVENTO_PUT: '/evento/update',
 
     ENDERECO_CEP_GET: '/endereco/getByCep',
+    ENDERECO_VIACEP_GET: 'https://viacep.com.br/ws/',
     ENDERECO_LAT_LONG_GET: '/endereco/getLatAndLonByCepAndNumber',
     ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/getCepByLatAndLon',
 

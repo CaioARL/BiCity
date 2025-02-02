@@ -36,8 +36,8 @@ export const getEvento = async (requestPageEvento: RequestPageEvento, abortSigna
             cidade: requestPageEvento.cidade,
             estado: requestPageEvento.estado,
             faixaKm: requestPageEvento.faixaKm,
-            tipoEvento: requestPageEvento.tipoEvento.id,
-            nivelHabilidade: requestPageEvento.nivelHabilidade.id,
+            tipoEvento: requestPageEvento.tipoEvento?.id,
+            nivelHabilidade: requestPageEvento.nivelHabilidade?.id,
             gratuito: requestPageEvento.gratuito
         }, 
         signal: abortSignal.signal
