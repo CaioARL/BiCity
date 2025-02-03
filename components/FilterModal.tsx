@@ -13,7 +13,7 @@ import ButtonModal from './ButtonModal';
 interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
-  setFilterEntity: (filterTipoEvento: TipoEvento, filterDistance: number | null, data: string | null ) => void;
+  setFilterEntity: (filterTipoEvento: TipoEvento | null, filterDistance: number | null, data: string | null ) => void;
 }
 
 
@@ -29,7 +29,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]>([])
-  const [filterTipoEvento, setFilterTipoEvento] = useState<TipoEvento>({id: 0, nome: '', nivelHabilidade: {id: 0, nome: '', descricao: ''}})
+  const [filterTipoEvento, setFilterTipoEvento] = useState<TipoEvento | null>(null)
   const [isLoadingTipoEvento, setIsLoadingTipoEvento] = useState(false)
   
   const [filterData, setFilterData]= useState<string>('')
@@ -85,7 +85,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   
     const cleanFilters = () => {
       setFilterDistance(0)
-      setFilterTipoEvento({id: 0, nome: '', nivelHabilidade: {id: 0, nome: '', descricao: ''}})
+      setFilterTipoEvento(null)
       setFilterData('')
     }
   
@@ -95,7 +95,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   
     const handleApplyFilters = () => {
       setFilterEntity(
-        filterTipoEvento,
+        filterTipoEvento ,
         filterDistance !== 0 ? filterDistance : null, 
         filterData !== '' ? filterData : null
       )

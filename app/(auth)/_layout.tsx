@@ -16,7 +16,12 @@ export default function AuthLayout() {
             headerShown: false,
            }}
         />
-      </Stack>
+        <Stack.Screen name='terms'
+          options={{ 
+            headerShown: false,
+          }}
+          />
+        </Stack>
 
       <StatusBar style='light' backgroundColor='#161622'/>
     </>

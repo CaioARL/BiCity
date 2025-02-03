@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -9,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface FormFieldDropdownSelectList<T> {
     title: string
-    selectedValue: T
+    selectedValue: T | null
     options: { nome: string, id : number, value: T }[]
     handleChange: (value: T) => void
     dropDownSize?: DimensionValue
@@ -41,7 +40,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
             >
 
           <Text className='color-[#555] flex-1'>
-          {selectedValue.nome? selectedValue.nome : 'Selecione uma opção'}
+          {selectedValue?.nome ? selectedValue.nome : 'Selecione uma opção'}
           
           </Text>
           {isLoading ? (

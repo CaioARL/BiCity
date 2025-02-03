@@ -11,11 +11,11 @@ interface FormFieldProps {
     handleChangeText: (e : string) => void
     validantionCheck?: () => void
     otherStyles?: string
-    keyboardType?: 'email-address' | 'default'
-    secureTextEntry?: boolean;
-    disableEdit?: boolean;
-    isLoading?: boolean;
-    maxLength?: number;
+    keyboardType?: 'email-address' | 'default' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad' 
+    secureTextEntry?: boolean
+    disableEdit?: boolean
+    isLoading?: boolean
+    maxLength?: number
   }
 
 

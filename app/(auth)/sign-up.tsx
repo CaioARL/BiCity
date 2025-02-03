@@ -514,6 +514,7 @@ export default function SignUp() {
               isValid={isValidCep}
               validantionCheck={checkCep}
               maxLength={9}
+              keyboardType='numeric'
             />
             <FormField
               title='Cidade'
@@ -535,6 +536,7 @@ export default function SignUp() {
               placeholder='Digite seu rua'
               handleChangeText={setRua}
               disableEdit={true}
+              keyboardType='numeric'
             />
             <FormField
               title='Numero'
@@ -577,6 +579,7 @@ export default function SignUp() {
                 isLoading={isCpfLoading}
                 handleChangeText={setCpfCnpj}
                 validantionCheck={checkCpf}
+                keyboardType='numeric'
               />
             ) : (
               <FormField
@@ -588,6 +591,7 @@ export default function SignUp() {
                 handleChangeText={setCpfCnpj}
                 validantionCheck={checkCnpj}
                 maxLength={18}
+                keyboardType='numeric'
               />
             )  
           }
@@ -635,6 +639,7 @@ export default function SignUp() {
               handleChangeText={setEmail}
               validantionCheck={checkEmail}
               isLoading={isEmailCodeLoading}
+              keyboardType='email-address'
             />
             <CustomButton
               title="Next"

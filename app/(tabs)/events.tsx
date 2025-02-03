@@ -7,10 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, EventoEndereco, RequestPageEvento, TipoEvento, Usuario } from '../../types';
-import { set } from 'zod';
+import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { getEvento } from '../../api/evento';
-import LoadingActivity from '../../components/LoadingActivity';
 import EventView from '../../view/EventView';
 
 
@@ -47,12 +45,13 @@ export default function Events() {
   const currentPageRef = useRef<number>(0)
   const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   const abortControllerRef = useRef<AbortController>()
-  
+
+
   //modals - filtro e criar evento
   const [modalVisible, setModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
   const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
-
+  
 
 
   const [filter, setFilter] = useState<FilterType>("Ativos");
@@ -112,12 +111,13 @@ export default function Events() {
 
   const refreshContent = () => {
         setEventos(null)
+        setSearchText('')
         currentPageRef.current = 0
         setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   }
   
 
-  const setFilteredEvents = (tipoEvento: TipoEvento, faixaKm: number | null, data: string| null) => {
+  const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
     setEventos(null)
     currentPageRef.current = 0
     console.log('tipoEvento', tipoEvento)
@@ -126,6 +126,12 @@ export default function Events() {
     setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
   }
  
+  const searchName = () => {
+    setEventos(null)
+    currentPageRef.current = 0
+    setRequestPageEvento({...requestPageEvento, nome: searchText, page: 1})
+  }
+
 
   {{/*----------------------------------------------------------------- */}}
 
@@ -201,10 +207,11 @@ export default function Events() {
           <View style={CustomEvents.searchBox}>
             <Ionicons name="search-outline" size={20} color="#555"/>
             <TextInput
-              placeholder="Where do you wanna go?"
+              placeholder="Digite o nome do evento"
               style={CustomEvents.input}
               value={searchText}
               onChangeText={setSearchText}
+              onEndEditing={() => searchName()}
             />
             <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
                 <Ionicons name="options-outline" size={20} color="#555" />
@@ -365,6 +372,7 @@ export default function Events() {
         {modalViewEvento && 
           <EventView
             closeModal={ () => setModalViewEvento(null) }
+            onUpdate={refreshContent}
             evento={modalViewEvento}
           />
         }

@@ -1,5 +1,5 @@
 import api from "."
-import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento } from "../types"
+import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEventoByRadius, RequestUpdateEvento } from "../types"
 import ENDPOINTS from "./endpoints"
 
 
@@ -41,6 +41,47 @@ export const getEvento = async (requestPageEvento: RequestPageEvento, abortSigna
             gratuito: requestPageEvento.gratuito
         }, 
         signal: abortSignal.signal
+    })
+    return response.data
+}
+
+
+
+export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByRadius, abortSignal: AbortController) : Promise<Evento[]> => {
+    const response = await api.get<Evento[]>(ENDPOINTS.EVENTO_GET_BY_RADIUS, {
+        params: {
+            latitude: requestEventoByRadius.latitude,
+            longitude: requestEventoByRadius.longitude,
+            raio: requestEventoByRadius.raio,
+        }, 
+        signal: abortSignal.signal
+    })
+    return response.data
+}
+
+export const updateEvento = async (requestUpdateEvento: RequestUpdateEvento, abortSignal: AbortController) : Promise<Evento> => {
+    const response = await api.put<Evento>(ENDPOINTS.EVENTO_PUT,
+        {
+            nome: requestUpdateEvento.nome,
+            descricao: requestUpdateEvento.descricao,
+            data: requestUpdateEvento.data,
+            endereco: {
+                cep: requestUpdateEvento.endereco.cep,
+                estado: requestUpdateEvento.endereco.estado,
+                cidade: requestUpdateEvento.endereco.cidade,
+                bairro: requestUpdateEvento.endereco.bairro,
+                rua: requestUpdateEvento.endereco.rua,
+                numero: requestUpdateEvento.endereco.numero,
+            },
+            faixaKm: requestUpdateEvento.faixaKm,
+            gratuito: requestUpdateEvento.gratuito,
+            idTipoEvento: requestUpdateEvento.tipoEvento.id,
+        }
+    ,{ 
+        params:{
+            id: requestUpdateEvento.id
+        }
+        , signal: abortSignal.signal 
     })
     return response.data
 }

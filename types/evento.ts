@@ -112,3 +112,11 @@ export interface PageEvento {
     totalRegistros: number
     totalPaginas: number
 }
+
+
+
+export interface RequestEventoByRadius {
+    latitude: number
+    longitude: number
+    raio: number
+}

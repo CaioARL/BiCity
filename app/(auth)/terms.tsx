@@ -80,8 +80,11 @@ COMO CONDIÇÃO INDISPENSÁVEL À UTILIZAÇÃO DE SUAS
 FUNCIONALIDADES E SERVIÇOS EM TOTALIDADE. Se você NÃO 
 CONCORDAR com algum dos termos você deve evitar qualquer uso de nossa aplicação. 
 Data da Versão do Documento: 02 de Fevereiro de 2025  </Text>
+
+    <View className='flex-row justify-between mt-[20px]' >
         <CustomButton title="Aceitar" handlePress={() => {router.replace('sign-up')}} />
         <CustomButton title="Recusar" handlePress={() => {router.back()}} />    
+    </View>
     
     </ScrollView>
   )

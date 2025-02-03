@@ -15,6 +15,7 @@ const ENDPOINTS = {
     TIPO_EVENTO_POST: '/tipo-evento/create',
 
     EVENTO_GET: '/evento/list',
+    EVENTO_GET_BY_RADIUS: '/evento/listByRadius',
     EVENTO_GET_BY_ID: '/evento/get',
     EVENTO_POST: '/evento/create',
     EVENTO_PUT: '/evento/update',

@@ -182,21 +182,7 @@ const Profile = () => {
                   editable={false}
                 />
 
-                {/* Campo de Senha */}
-                <View style={CustomProfile.passwordInput}>
-                  <TextInput
-                    style={CustomProfile.input}
-                    value={passwordVisible ? user.senha : '●●●●●●●●'}
-                    secureTextEntry={!passwordVisible}
-                    placeholder="Senha"
-                  />
-                  <TouchableOpacity
-                    style={CustomProfile.eyeIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}
-                  >
-                    <Ionicons name={passwordVisible ? "eye-off" : "eye"} size={20} color="#1f2937" />
-                  </TouchableOpacity>
-                </View>
+                
 
                 {/* Data de Criação */}
                 <Text style={CustomProfile.title}>Data de Criação: {formattedDate}</Text>

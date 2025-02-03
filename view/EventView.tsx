@@ -8,7 +8,7 @@ import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError,
 import * as ImagePicker from 'expo-image-picker';
 import { getCep, getViaCep } from '../api/endereco';
 import { upateEventSchema } from '../util/validationSchemas';
-import { createEvento } from '../api/evento';
+import { createEvento, updateEvento } from '../api/evento';
 import FormFieldModal from '../components/FormFieldModal';
 import FormSelectFieldModal from '../components/FormSelectFieldModal';
 import FormFieldCalendarSelectModal from '../components/FormFieldCalendarSelectModal';
@@ -25,10 +25,11 @@ import MapModalView from '../components/MapModalView';
 
 interface EventModalProps {
   closeModal: () => void
+  onUpdate?: () => void
   evento : Evento
 }
 
-const EventView: React.FC<EventModalProps> = ({ closeModal, evento}) => {
+const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const abortControllerRef = useRef(new AbortController())
 
@@ -251,21 +252,22 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento}) => {
   const handleSaveEvento = () => {
     if(!checkEvento()) return alert('Revise os campos')
         console.log('Evento a ser atualizado:', eventoToUpdate)
-    // setIsSavingLoading(true)
-    // abortControllerRef.current?.abort
-    // abortControllerRef.current = new AbortController
-    // updateEvento(eventoToUpdate, abortControllerRef.current)
-    // .then((response)=>{
-    //   alert('Evento: ' + response.nome + ' criado com sucesso')
-    //   closeModal()
-    // })
-    // .catch((response)=>{
-    //   alert('falha na criação do Evento. \n Code error: ' + response.message)
-    //   setSaveError(response.message)
-    // })
-    // .finally(()=>{
-    //   setIsSavingLoading(false)
-    // })
+    setIsSavingLoading(true)
+    abortControllerRef.current?.abort
+    abortControllerRef.current = new AbortController
+    updateEvento(eventoToUpdate, abortControllerRef.current)
+    .then((response)=>{
+      alert('Evento: ' + response.nome + ' Atualizado com sucesso')
+      onUpdate && onUpdate()
+      closeModal()
+    })
+    .catch((response)=>{
+      alert('falha na atualização do Evento. \n Code error: ' + response.message)
+      setSaveError(response.message)
+    })
+    .finally(()=>{
+      setIsSavingLoading(false)
+    })
 
   }
 
