@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Modal, Animated, ScrollView} from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import MapView, { Marker, Circle, Region } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
 import { NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep, getViaCep } from '../api/endereco';
+import { getCep, getCepByLatAndLong, getViaCep } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
 import { createEvento } from '../api/evento';
 import FormFieldModal from './FormFieldModal';
@@ -14,6 +14,9 @@ import FormSelectFieldModal from './FormSelectFieldModal';
 import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
 import LoadingActivity from './LoadingActivity';
 import ButtonModal from './ButtonModal';
+import MapModalEdit from './MapModalEdit';
+import { map, set } from 'zod';
+import MapModalView from './MapModalView';
 
 
 
@@ -51,11 +54,11 @@ const EventModal: React.FC<EventModalProps> = ({
   const [saveError, setSaveError] = useState('')
 
 
-  
+  const [mapRegion, setMapRegion] = useState<Region | null>()
   const [mapPlotError, setMapPlotError] = useState('')
-  
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
+
+  const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
 
   const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false, tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: ''}}})
@@ -72,14 +75,7 @@ const EventModal: React.FC<EventModalProps> = ({
         useNativeDriver: true,
       }).start();
 
-      // Reset house number and selected location when modal opens
-      handleSelectLocation({ nativeEvent: { coordinate: { latitude: -23.55052, longitude: -46.633308 } } }); // Reset selected location to default
-      setMapRegion({
-        latitude: -23.55052, // Default latitude
-        longitude: -46.633308, // Default longitude
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
+    
     } else {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -113,62 +109,23 @@ const EventModal: React.FC<EventModalProps> = ({
   },[])
 
 
-  const [mapRegion, setMapRegion] = useState({
-    latitude: -23.55052,
-    longitude: -46.633308,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
+
   const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
 
-  const handleSelectLocation = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
-    const { latitude, longitude } = e.nativeEvent.coordinate;
-    setSelectedLocation({ latitude, longitude });
-  };
+
 
   
 
 
-  // const handleMapPress = async (e: any) => {
-  //   const { latitude, longitude } = e.nativeEvent.coordinate;
-  //   handleSelectLocation(e);
   
-  //   try {
-  //     setIsLoadingAddress(true);
-  //     setAddressError('');
-  //     setHouseNumber(''); // Reset house number when new location is selected
-      
-  //     const response = await axios.get(
-  //       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_GOOGLE_MAPS_API_KEY`
-  //     );
-  
-  //     if (response.data.results.length > 0) {
-  //       const address = response.data.results[0];
-        
-  //       const postalCode = address.address_components.find(
-  //         (component: any) => component.types.includes('postal_code')
-  //       );
-  
-  //       if (postalCode) {
-  //         const cep = postalCode.long_name.replace(/\D/g, '');
-  //         updateEventField('cep', cep);
-  //       }
-  
-  //       updateEventField('address', address.formatted_address);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in reverse geocoding:', error);
-  //     setAddressError('Erro ao buscar endereço. Tente novamente.');
-  //   } finally {
-  //     setIsLoadingAddress(false);
-  //   }
-  // };
 
   const checkCep = async (cep: string) => {
     if (cep.length !== 8) return
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController()
     setIsCepLoading(true)
+    setCepError('')
+    setMapPlotError('')
       getCep(cep, abortControllerRef.current).then((response) => {
         updateCampoNovoEventoEndereco('rua', response.street)
         setRua(response.street)
@@ -179,22 +136,15 @@ const EventModal: React.FC<EventModalProps> = ({
         updateCampoNovoEventoEndereco('estado', response.state)
         setEstado(response.state)
         if (response.location.coordinates.latitude && response.location.coordinates.longitude) {
-          const location = response.location.coordinates;
-          handleSelectLocation({
-            nativeEvent: {
-              coordinate: {
-                latitude: location.latitude,
-                longitude: location.longitude
-              }
+          //change map view here -- still need to figure out how
+          setMapViewRegion(
+            {
+              latitude: response.location.coordinates.latitude,
+              longitude: response.location.coordinates.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
             }
-          })
-  
-          setMapRegion({
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          })
+          )
           setCepError('')
         } else {
           setMapPlotError('Latitude e Longitude não foram encontrados.')
@@ -311,6 +261,43 @@ const EventModal: React.FC<EventModalProps> = ({
   }
 
 
+  useEffect(() => {
+    if(!mapRegion) return
+
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = new AbortController()
+    getCepByLatAndLong(mapRegion.latitude, mapRegion.longitude , abortControllerRef.current)
+    .then( response => {
+
+      setIsCepLoading(true)
+      abortControllerRef.current = new AbortController()
+      getCep(response.cep, abortControllerRef.current).then((response) => {
+        updateCampoNovoEventoEndereco('rua', response.street)
+        setRua(response.street)
+        updateCampoNovoEventoEndereco('bairro', response.neighborhood)
+        setBairro(response.neighborhood)
+        updateCampoNovoEventoEndereco('cidade', response.city)
+        setCidade(response.city)
+        updateCampoNovoEventoEndereco('estado', response.state)
+        setEstado(response.state)
+        updateCampoNovoEventoEndereco('cep', response.cep)
+        setCep(response.cep)
+
+      })
+      .catch((error) =>{
+        setCepError('Cep não encontrado. Tente novamente. Code Error: ' + error.message )
+      })
+      .finally(() => {
+        setIsCepLoading(false)
+      }) 
+      
+
+    })
+    .catch(error => {
+        setMapPlotError("Cep não foi encontrado." + error)
+    })
+  }, [mapRegion])
+
 
 
   return (
@@ -323,42 +310,38 @@ const EventModal: React.FC<EventModalProps> = ({
             <Animated.View style={{ opacity: fadeAnim }}>
 
 
-               {/* Mapa do Evento */}
+               
+
+
                <View  className='mb-[2px]'>
-                  <MapView
-                    style={{ height: 200, width: '100%', marginBottom: 20 }}
-                    className='h-[200px] w-full mb-[20px]'
-                    region={mapRegion}
-                    onRegionChangeComplete={setMapRegion}
-                    // onPress={handleMapPress}
-                  >
-                    {selectedLocation && (
-                      <>
-                        <Circle
-                          center={{
-                            latitude: selectedLocation.latitude,
-                            longitude: selectedLocation.longitude,
-                          }}
-                          radius={100} // Raio em metros
-                          fillColor="rgba(195, 255, 0, 0.2)" // Cor do preenchimento com transparência
-                          strokeColor="rgba(195, 255, 0, 0.8)" // Cor da borda
-                          strokeWidth={2}
+                  
+
+                  {mapViewRegion?(
+                    <>
+                      <MapModalView
+                        prop={mapViewRegion}
                         />
-                        <Marker
-                          coordinate={{
-                            latitude: selectedLocation.latitude,
-                            longitude: selectedLocation.longitude,
-                          }}
-                          title="Local Selecionado"
-                          description="Este é o local que você selecionou"
-                          image={require('../assets/splash-icon.png')}
-                        />
-                      </>
-                    )}
-                  </MapView>
+                      <ButtonModal 
+                              title='Editar'
+                              customStyles='w-full'
+                              customColor='bg-[#000]'
+                              handlePress={() => {
+                                  setMapViewRegion(null)
+                              }}   
+                               />
+                    </>
+                    
+                  ):(
+
+                    <MapModalEdit
+                      getRegion={setMapRegion}
+                    />
+                    
+                  )}
                   {mapPlotError && (
                     <Text className='text-color_red_error  my-2'>{'*'+mapPlotError}</Text>
                   )}
+                    
                   <Text>Selecione o local do evento:</Text>
                   <Text>1. Clique no mapa para selecionar o local, ou</Text>
                   <Text>2. Digite o CEP abaixo:</Text>

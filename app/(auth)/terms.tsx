@@ -7,10 +7,9 @@ import ButtonModal from '../../components/ButtonModal';
 type TermsProps = {
   visible: boolean;
   onClose: () => void;
-  setFilterEntity?: (value: any) => void;
 };
 
-export default function Terms({ visible, onClose, setFilterEntity }: TermsProps) {
+export default function Terms({ visible, onClose }: TermsProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {

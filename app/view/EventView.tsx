@@ -1,22 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Modal, Animated, ScrollView} from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
-import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
-import { getTipoEvento } from '../api/tipo-evento';
+import { ListTipoEvento, TipoEvento } from '../../types/tipo-evento';
+import { getTipoEvento } from '../../api/tipo-evento';
 
-import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError, RequestUpdateEventoError, RequestUpdateEvento } from '../types';
+import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError, RequestUpdateEventoError, RequestUpdateEvento, Region } from '../../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep, getViaCep } from '../api/endereco';
-import { upateEventSchema } from '../util/validationSchemas';
-import { createEvento, updateEvento } from '../api/evento';
-import FormFieldModal from '../components/FormFieldModal';
-import FormSelectFieldModal from '../components/FormSelectFieldModal';
-import FormFieldCalendarSelectModal from '../components/FormFieldCalendarSelectModal';
-import ButtonModal from '../components/ButtonModal';
-import LoadingActivity from '../components/LoadingActivity';
-import FormFieldDropdownSelectList from '../components/FormFieldDropdownSelectList';
-import FormFieldViewModal from '../components/FormFieldViewModal';
-import MapModalView from '../components/MapModalView';
+import { getCep, getCepByLatAndLong, getViaCep } from '../../api/endereco';
+import { upateEventSchema } from '../../util/validationSchemas';
+import { createEvento, updateEvento } from '../../api/evento';
+import FormFieldModal from '../../components/FormFieldModal';
+import FormSelectFieldModal from '../../components/FormSelectFieldModal';
+import FormFieldCalendarSelectModal from '../../components/FormFieldCalendarSelectModal';
+import ButtonModal from '../../components/ButtonModal';
+import LoadingActivity from '../../components/LoadingActivity';
+import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList';
+import FormFieldViewModal from '../../components/FormFieldViewModal';
+import MapModalView from '../../components/MapModalView';
+import MapModalEdit from '../../components/MapModalEdit';
 
 
 
@@ -39,6 +40,7 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
   const [cepError, setCepError] = useState('')
   const [isCepLoading, setIsCepLoading] = useState(false)
 
+
   const [estado, setEstado] = useState(evento.endereco.estado)
   const [cidade, setCidade] = useState(evento.endereco.cidade)
   const [bairro, setBairro] = useState(evento.endereco.bairro)
@@ -54,9 +56,11 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
   const [saveError, setSaveError] = useState('')
 
 
-  
+  const [mapRegion, setMapRegion] = useState<Region | null>()  
   const [mapPlotError, setMapPlotError] = useState('')
-  
+  const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
+
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
 
@@ -74,15 +78,6 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
         duration: 800,
         useNativeDriver: true,
       }).start();
-
-      // Reset house number and selected location when modal opens
-      handleSelectLocation({ nativeEvent: { coordinate: { latitude: -23.55052, longitude: -46.633308 } } }); // Reset selected location to default
-      setMapRegion({
-        latitude: -23.55052, // Default latitude
-        longitude: -46.633308, // Default longitude
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
     } else {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -116,12 +111,7 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
   },[])
 
 
-  const [mapRegion, setMapRegion] = useState({
-    latitude: -23.55052,
-    longitude: -46.633308,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
+ 
   const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
 
   const handleSelectLocation = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
@@ -132,76 +122,35 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
   
 
 
-  // const handleMapPress = async (e: any) => {
-  //   const { latitude, longitude } = e.nativeEvent.coordinate;
-  //   handleSelectLocation(e);
-  
-  //   try {
-  //     setIsLoadingAddress(true);
-  //     setAddressError('');
-  //     setHouseNumber(''); // Reset house number when new location is selected
-      
-  //     const response = await axios.get(
-  //       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_GOOGLE_MAPS_API_KEY`
-  //     );
-  
-  //     if (response.data.results.length > 0) {
-  //       const address = response.data.results[0];
-        
-  //       const postalCode = address.address_components.find(
-  //         (component: any) => component.types.includes('postal_code')
-  //       );
-  
-  //       if (postalCode) {
-  //         const cep = postalCode.long_name.replace(/\D/g, '');
-  //         updateEventField('cep', cep);
-  //       }
-  
-  //       updateEventField('address', address.formatted_address);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in reverse geocoding:', error);
-  //     setAddressError('Erro ao buscar endereço. Tente novamente.');
-  //   } finally {
-  //     setIsLoadingAddress(false);
-  //   }
-  // };
+
 
   const checkCep = async (cep: string) => {
     if (cep.length !== 8) return
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController()
     setIsCepLoading(true)
-      getViaCep(cep, abortControllerRef.current).then((response) => {
-        updateCampoNovoEventoEndereco('rua', response.logradouro)
-        setRua(response.logradouro)
-        updateCampoNovoEventoEndereco('bairro', response.bairro)
-        setBairro(response.bairro)
-        updateCampoNovoEventoEndereco('cidade', response.localidade)
-        setCidade(response.localidade)
-        updateCampoNovoEventoEndereco('estado', response.estado)
-        setEstado(response.estado)
-        // if (response.location.coordinates.latitude && response.location.coordinates.longitude) {
-        //   const location = response.location.coordinates;
-        //   handleSelectLocation({
-        //     nativeEvent: {
-        //       coordinate: {
-        //         latitude: location.latitude,
-        //         longitude: location.longitude
-        //       }
-        //     }
-        //   })
-  
-        //   setMapRegion({
-        //     latitude: location.latitude,
-        //     longitude: location.longitude,
-        //     latitudeDelta: 0.01,
-        //     longitudeDelta: 0.01,
-        //   })
-        //   setCepError('')
-        // } else {
-        //   setMapPlotError('Latitude e Longitude não foram encontrados.')
-        // }
+      getCep(cep, abortControllerRef.current).then((response) => {
+        updateCampoNovoEventoEndereco('rua', response.street)
+        setRua(response.street)
+        updateCampoNovoEventoEndereco('bairro', response.neighborhood)
+        setBairro(response.neighborhood)
+        updateCampoNovoEventoEndereco('cidade', response.city)
+        setCidade(response.city)
+        updateCampoNovoEventoEndereco('estado', response.state)
+        setEstado(response.state)
+        if (response.location.coordinates.latitude && response.location.coordinates.longitude) {
+          setMapViewRegion(
+            {
+              latitude: response.location.coordinates.latitude,
+              longitude: response.location.coordinates.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }
+          )
+          setCepError('')
+        } else {
+          setMapPlotError('Latitude e Longitude não foram encontrados.')
+        }
       })
       .catch((error) =>{
         setCepError('Cep não encontrado. Tente novamente. Code Error: ' + error.message )
@@ -317,6 +266,42 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
 
 
 
+  useEffect(()=>{
+    if(!mapRegion) {return}
+    abortControllerRef.current?.abort
+    abortControllerRef.current = new AbortController()
+    getCepByLatAndLong(mapRegion.latitude, mapRegion.longitude , abortControllerRef.current)
+    .then(response => {
+              setIsCepLoading(true)
+              abortControllerRef.current = new AbortController()
+              getCep(response.cep, abortControllerRef.current).then((response) => {
+                updateCampoNovoEventoEndereco('rua', response.street)
+                setRua(response.street)
+                updateCampoNovoEventoEndereco('bairro', response.neighborhood)
+                setBairro(response.neighborhood)
+                updateCampoNovoEventoEndereco('cidade', response.city)
+                setCidade(response.city)
+                updateCampoNovoEventoEndereco('estado', response.state)
+                setEstado(response.state)
+                updateCampoNovoEventoEndereco('cep', response.cep)
+                setCep(response.cep)
+        
+              })
+              .catch((error) =>{
+                setCepError('Cep não encontrado. Tente novamente. Code Error: ' + error.message )
+              })
+              .finally(() => {
+                setIsCepLoading(false)
+              })
+    })
+    .catch(error => {
+      setMapPlotError("Cep não foi encontrado." + error)
+    })
+
+  },[mapRegion])
+
+
+
 
   return (
     <>
@@ -331,37 +316,29 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
                <View  className='mb-[2px]'>
                  {isEditing?( 
                  
-                 <MapView
-                    style={{ height: 200, width: '100%', marginBottom: 20 }}
-                    className='h-[200px] w-full mb-[20px]'
-                    region={mapRegion}
-                    onRegionChangeComplete={setMapRegion}
-                    // onPress={handleMapPress}
-                  >
-                    {selectedLocation && (
+                 mapViewRegion?(
                       <>
-                        <Circle
-                          center={{
-                            latitude: selectedLocation.latitude,
-                            longitude: selectedLocation.longitude,
-                          }}
-                          radius={100} // Raio em metros
-                          fillColor="rgba(195, 255, 0, 0.2)" // Cor do preenchimento com transparência
-                          strokeColor="rgba(195, 255, 0, 0.8)" // Cor da borda
-                          strokeWidth={2}
-                        />
-                        <Marker
-                          coordinate={{
-                            latitude: selectedLocation.latitude,
-                            longitude: selectedLocation.longitude,
-                          }}
-                          title="Local Selecionado"
-                          description="Este é o local que você selecionou"
-                          image={require('../assets/splash-icon.png')}
-                        />
+                        <MapModalView
+                          prop={mapViewRegion}
+                          />
+                        <ButtonModal 
+                                title='Editar'
+                                customStyles='w-full'
+                                customColor='bg-[#000]'
+                                handlePress={() => {
+                                    setMapViewRegion(null)
+                                }}   
+                                  />
                       </>
-                    )}
-                  </MapView>
+                      
+                    ):(
+  
+                      <MapModalEdit
+                        getRegion={setMapRegion}
+                        initalRegion={eventoToUpdate.endereco}
+                      />
+                      
+                    )
                 
             ) : (
                  <MapModalView 

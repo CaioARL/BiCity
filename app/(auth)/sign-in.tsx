@@ -8,6 +8,9 @@ import { useAuthProvider } from '../context/AuthProvider';
 import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
+import MapModalEdit from '../../components/MapModalEdit';
+import { Region } from 'react-native-maps';
+import { set } from 'zod';
 
 export default function SignIn() {
   const backgroundImageLogo = require('../../assets/img/logo.png')
@@ -17,14 +20,17 @@ export default function SignIn() {
 
   // Modal Termos de Uso
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState<any>(null);
+
   
   const [form, setForm] = useState({
     username: '',
     password: '',
   })
 
+
+  
   const backgroundImage = require('../../assets/img/background-fundo-figura.png')
+ 
   
   const submitForm = () => {
 
@@ -160,9 +166,8 @@ export default function SignIn() {
         <Terms
           visible={filterModalVisible}
           onClose={() => setFilterModalVisible(false)}
-          setFilterEntity={setFilteredEvents}
-        />
 
+        />
 
     </SafeAreaView>
   );

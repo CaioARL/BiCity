@@ -43,3 +43,8 @@ export interface CepInfo {
     ddd: string
     siafi: string
 }
+
+
+export interface ResponseGetCepByLatAndLon {
+    cep : string
+}

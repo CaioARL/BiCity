@@ -1,5 +1,5 @@
 import { View, Text, ActivityIndicator } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import MapView, { Circle, Marker } from 'react-native-maps'
 import { set } from 'zod'
 
@@ -18,7 +18,7 @@ interface MapModalViewProps {
 
 
 export default function MapModalView({prop, raio}: MapModalViewProps) {
-    const [loading, setLoading] = React.useState(true)
+    const [loading, setLoading] = useState(true)
     
     const timeout = setTimeout(() => {
      setLoading(false)
@@ -41,13 +41,11 @@ export default function MapModalView({prop, raio}: MapModalViewProps) {
     <MapView
         style={{ height: 200, width: '100%', marginBottom: 20 }}
         className='h-[200px] w-full mb-[20px]'
-        initialRegion={{...prop, latitudeDelta: 2, longitudeDelta:2} }
+        initialRegion={{...prop, latitudeDelta: 0.0922, longitudeDelta:0.0421} }
     >
-        <Circle
-            center={prop}
-            radius={raio? raio : 200}
-            strokeColor="#C3FF00"
-            fillColor="rgba(195, 255, 0, 0.3)"
+        <Marker
+            coordinate={prop}
+                image={require('../assets/pins/flag_pink.png')}
             />
     </MapView>
   )

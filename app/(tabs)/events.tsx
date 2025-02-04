@@ -9,7 +9,7 @@ import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
 import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { getEvento } from '../../api/evento';
-import EventView from '../../view/EventView';
+import EventView from '../view/EventView';
 
 
 
