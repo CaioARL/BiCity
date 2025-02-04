@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { useAuthProvider } from '../context/AuthProvider';
 import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
+import Terms from './terms';
 
 export default function SignIn() {
   const backgroundImageLogo = require('../../assets/img/logo.png')
@@ -14,6 +15,10 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const abortControlRef = useRef<AbortController | null>(null)
 
+  // Modal Termos de Uso
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState<any>(null);
+  
   const [form, setForm] = useState({
     username: '',
     password: '',
@@ -142,7 +147,7 @@ export default function SignIn() {
             <View className="flex-row justify-center mt-4">
               <Text className="text-secondary_black_sub_title">Não tem uma conta? </Text>
               <Text
-                onPress={() => router.push('terms')}
+                onPress={() => setFilterModalVisible(true)}
                 className="text-blue-500 font-bold"
               >
                 Inscrever-se
@@ -151,6 +156,12 @@ export default function SignIn() {
             </View>
           </View>
         </ScrollView>
+
+        <Terms
+          visible={filterModalVisible}
+          onClose={() => setFilterModalVisible(false)}
+          setFilterEntity={setFilteredEvents}
+        />
 
 
     </SafeAreaView>
