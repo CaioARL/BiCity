@@ -223,6 +223,8 @@ const Profile = () => {
             <Text style={{ fontWeight: 'bold' }}>Logout</Text>
           </TouchableOpacity>
         </View>
+        {/* Espaço vazio ao final */}
+        <Text style={{ height: 200 }}>{' '}</Text>
       </ScrollView>
     </SafeAreaView>
   );

@@ -251,7 +251,7 @@ export default function Events() {
            {eventos && (
             <FlatList
               style={{ minHeight: "100%" }}
-              contentContainerStyle={{ paddingBottom: 200 }}
+              contentContainerStyle={{ paddingBottom: "300%" }}
               onEndReached={loadMorePage}
               onEndReachedThreshold={0.1}
               refreshing={isContentLoading}
