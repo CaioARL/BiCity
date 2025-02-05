@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Marker, Overlay } from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -149,29 +149,26 @@ export default function Home() {
             {eventos?.map((evento) => {
               return (
               
-                 
                 /* <Circle
                 fillColor={evento.gratuito? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)'}
                 strokeColor={evento.gratuito? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)'}
                 center={evento.endereco}
                 radius={evento.faixaKm*100}
                 /> */
-                <Marker
-                key={evento.id}
-                coordinate={evento.endereco}
-                title={evento.nome}
-                // pinColor={evento.gratuito? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)'}
-                image={evento.gratuito? require('../../assets/pins/pin_free_evento.png') : require('../../assets/pins/pin_paid_evento.png')}
+                <Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>
+                  <Image
+                    source={evento.gratuito
+                      ? require('../../assets/pins/pin_free_evento.png')
+                      : require('../../assets/pins/pin_paid_evento.png')}
+                    style={{width: 30, height: 35}} 
+                    resizeMode="contain"
+                    />
+                </Marker>
                 
-                />
-              
               )
             }
           )}
   
-            
-  
-              
            </MapView>
 
             {currentLocationError &&
@@ -188,6 +185,4 @@ export default function Home() {
             </SafeAreaView>
     )
   }
-    
-
 }

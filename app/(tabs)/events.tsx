@@ -351,7 +351,7 @@ export default function Events() {
 
         {/* Add - Eventos */}
         <TouchableOpacity style={CustomEvents.addButton} onPress={handleAddEvent}>
-          <Ionicons name="add-circle-outline" size={24} color="#333" />
+         <Ionicons name="add-circle-outline" size={24} color="#333" />
         </TouchableOpacity>
 
         {/* Modal Criar - Eventos */}

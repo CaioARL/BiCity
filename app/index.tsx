@@ -7,9 +7,7 @@ import { useAuthProvider } from './context/AuthProvider';
 
 export default function Index() {
   const {authState, isLoading} = useAuthProvider()
-
   const backgroundImageLogo = require('../assets/img/logo.png'); 
-  
 
   useEffect(() => {
     const loading = async () => {
@@ -31,40 +29,36 @@ export default function Index() {
     // return () => clearTimeout(timeout);
   }, [isLoading])
 
-
-
-
-
   return (
-    
-      <SafeAreaView className="h-full bg-primary_green_milico">
-        <ScrollView contentContainerStyle={{ height: '100%' }}>
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-[32px] text-white font-robotobold mb-[54px]"> BICITY </Text>
-            <Image 
-              source={backgroundImageLogo} 
-              resizeMode="contain" 
-              className='h-[172px] w-[135px]'
-               
-            ></Image>
+      <SafeAreaView className="h-full bg-primary_green">
+           <View style={{flex: 1, justifyContent: 'flex-end',backgroundColor: 'rgba(0,0,0,0.2)'}}>
+            <ScrollView contentContainerStyle={{ height: '100%' }}>
+              <View className="flex-1 items-center justify-center">
+                <Text className="text-[32px] text-white font-robotobold mb-[54px]"> BICITY </Text>
+                <Image 
+                  source={backgroundImageLogo} 
+                  resizeMode="contain" 
+                  className='h-[172px] w-[135px]'
+                  
+                ></Image>
 
-              {isLoading && (
-                <View>
-                  <Text>
-                    <ActivityIndicator
-                      size='large'
-                      color='#fff'
-                    />
-                  </Text>
-                </View>
-              )}
-              
-             
+                  {isLoading && (
+                    <View>
+                      <Text>
+                        <ActivityIndicator
+                          size='large'
+                          color='#fff'
+                        />
+                      </Text>
+                    </View>
+                  )}
+                  
+                
 
+              </View>
+            </ScrollView>
           </View>
-        </ScrollView>
         <StatusBar backgroundColor='#161622' style='light' />
       </SafeAreaView>
-
   );
 }

@@ -456,7 +456,7 @@ export default function SignUp() {
 
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
         {step === 1 && (
-          <View className="flex-1 justify-center">
+          <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}} className="flex-1">
             <FormField
               title="Primeiro Nome"
               value={firstName}
@@ -497,13 +497,13 @@ export default function SignUp() {
             <CustomButton
               title="Próximo"
               handlePress={nextStep}
+             
             />
           </View>
         )}
 
         {step === 2 && (
-          <View className="flex-1 justify-center">
-        
+          <View style={{position: 'absolute', width: '100%', bottom: 0, top: 70}}>
             <FormField
               title='CEP'
               value={masks.CEP(cep)}
@@ -568,7 +568,7 @@ export default function SignUp() {
         )}
 
         {step === 3 && (
-          <View className="flex-1 justify-center">
+          <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}}>
             {cpfCnpj.length <= 14 ? (
               <FormField
                 title="CPF ou CNPJ"
@@ -629,7 +629,7 @@ export default function SignUp() {
         )}
 
         {step === 4 && (
-          <View className="flex-1 justify-center">
+          <View style={{position: 'absolute', width: '100%', bottom: 0, top: 250}}>
              <FormField
               title="Email"
               value={masks.EMAIL(email)}
@@ -653,7 +653,7 @@ export default function SignUp() {
         )}
 
         {step === 5 && (
-          <View className="flex-1 justify-center">
+          <View style={{position: 'absolute', width: '100%', bottom: 0, top: 260}}>
             <FormField
               title="Código de confirmação"
               value={masks.CODIGO(codigo)}
