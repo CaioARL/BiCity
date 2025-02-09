@@ -1,42 +1,62 @@
-import { View, Text, TextInput } from 'react-native'
+import { View, Text, TextInput, ActivityIndicator } from 'react-native'
+import { Ionicons } from '@expo/vector-icons';
 import React, {useState} from 'react'
 
 interface FormFieldProps {
     title: string
     value: string
+    msg?: string
+    isValid?: boolean
     placeholder?: string
     handleChangeText: (e : string) => void
+    validantionCheck?: () => void
     otherStyles?: string
-    keyboardType?: 'email-address' | 'default'
-}
+    keyboardType?: 'email-address' | 'default' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad' 
+    secureTextEntry?: boolean
+    disableEdit?: boolean
+    isLoading?: boolean
+    maxLength?: number
+  }
 
 
 
-export default function FormField({ title, value, placeholder, handleChangeText, otherStyles, keyboardType } : FormFieldProps) {
+export default function FormField({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength} : FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
 
 
   return (
     <View className={`space-y-2 ${otherStyles}`}>
-      <Text className='text-base'>{title}</Text>
-      <View className='border-4 border-black w-full h-16 px-4 rounded-2xl bg-orange-5001e focus:border-blue-300 items-center flex-row'>
+      <Text className='text-base color-secondary_black'>{title}</Text>
+      <View className={`border-2 ${disableEdit==true &&  'bg-color_lightGray'} ${msg? 'border-color_red_error': isValid? 'border-color_green_success': 'border-color__lightGray' }  w-full h-16 px-4 rounded-[2px] bg-orange-5001e focus:border-blue-300 items-center flex-row`}>
         <TextInput
           className='flex-1 text-base w-full'
           value={value}
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
-          secureTextEntry={title === 'Password' && !showPassword}
+          secureTextEntry={secureTextEntry && !showPassword}
+          editable={!disableEdit}
+          onEndEditing={validantionCheck}
+          maxLength={maxLength}
         />
-        {title === 'Password' && (
+        {secureTextEntry && (
           <Text
             onPress={() => setShowPassword(!showPassword)}
             className='text-base'
           >
-            {showPassword ? 'Hide' : 'Show'}
+            <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="#D9D9D9" />
           </Text>
         )}
+        {isLoading && (
+          <ActivityIndicator
+            size='small'
+            color='#0000ff'
+          />    
+        )}
+
         </View>
+        {msg && (<Text className='text-sm text-color_red_error'>{msg}</Text>)}
+        
     </View>
   )
 }

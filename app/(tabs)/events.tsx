@@ -1,26 +1,386 @@
-import { View, Text, ScrollView, FlatList } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import MapView, { Marker } from 'react-native-maps';
+import { Ionicons, Feather } from "@expo/vector-icons";
+import CustomEvents from '../../css/CustomEvents';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import FilterModal from '../../components/FilterModal';
+import EventModal from '../../components//EventModal';
+import { useAuthProvider } from '../context/AuthProvider';
+import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
+import { getEvento } from '../../api/evento';
+import EventView from '../view/EventView';
+
+
+
+// interface EventItem {
+//   id: string;
+//   nameUser: string;
+//   userImage: string;
+//   eventName: string;
+//   description: string;
+//   date: string;
+//   image: string;
+//   location: string;
+//   status: string;
+//   isPast?: boolean;
+// }
+// Versão original
+//type FilterType = "Todos" | "Ativos" | "Realizados" | "Pendentes";
+
+type FilterType = "Ativos" | "Realizados" ;
+
 
 export default function Events() {
-  return (
-    <SafeAreaView className='h-full'>
-      <FlatList 
-        data={[{id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5},]}
-        keyExtractor={item => item.id.toString()} 
-        renderItem={({item}) => (
-          <View className='items-center justify-center'>
-            <Text className='text-xl color-rose-600'>{item.id}</Text>
-            </View>
-            )}
+  const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' } });
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  
+  
+  //requests - api
+  const [eventos, setEventos] = useState<Evento[] | null>(null)
+  const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
+  const totalPagesRef = useRef<number>(2)
+  const totalRegistrosRef = useRef<number>()
+  const currentPageRef = useRef<number>(0)
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  const abortControllerRef = useRef<AbortController>()
 
-        ListHeaderComponent={() => (
-          <View className='items-center justify-center'>
-            <Text className='text-xl color-rose-600'>Events</Text>
+
+  //modals - filtro e criar evento
+  const [modalVisible, setModalVisible] = useState(false)
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
+  
+
+
+  const [filter, setFilter] = useState<FilterType>("Ativos");
+  
+
+
+
+  const [showEventTypeOptions, setShowEventTypeOptions] = useState(false);
+
+  // Filtro - Data Calendario
+  {{/* Aquiiiii */}} 
+
+
+  
+  const  { authState }  = useAuthProvider()
+  
+  useEffect(() => {
+    if(authState?.user){
+      if(authState.user){
+        setUsuario(authState.user)
+      }
+    }
+    console.log('detalhes de usuario carregados no evento')
+  },[])
+  
+
+  useEffect(() => {
+      if(requestPageEvento.page === currentPageRef.current ) return 
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      console.log('requestPageEvento', requestPageEvento)
+      getEvento(requestPageEvento, abortControllerRef.current)
+      .then((response) =>{
+        totalPagesRef.current = response.totalPaginas
+        totalRegistrosRef.current = response.totalRegistros
+        currentPageRef.current = requestPageEvento.page
+        eventos ? setEventos([...eventos,...response.eventos]) :
+        setEventos(response.eventos)
+      })
+      .catch((response)=>{  
+        alert("Error ao carregar eventos: "+ response.message)
+      })
+      .finally(()=>{
+        setIsContentLoading(false)
+      })
+  }, [requestPageEvento])
+  
+  
+  
+  const loadMorePage =() =>{
+    if(requestPageEvento.page >= totalPagesRef.current) return //alert removed
+    setRequestPageEvento({...requestPageEvento, page: requestPageEvento.page + 1})
+  }
+  
+  
+
+  const refreshContent = () => {
+        setEventos(null)
+        setSearchText('')
+        currentPageRef.current = 0
+        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  }
+  
+
+  const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
+    setEventos(null)
+    currentPageRef.current = 0
+    console.log('tipoEvento', tipoEvento)
+    console.log('faixaKm', faixaKm)
+    console.log('data', data)
+    setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
+  }
+ 
+  const searchName = () => {
+    setEventos(null)
+    currentPageRef.current = 0
+    setRequestPageEvento({...requestPageEvento, nome: searchText, page: 1})
+  }
+
+
+  {{/*----------------------------------------------------------------- */}}
+
+
+  
+
+  
+
+  const toggleSelection = (id: string) => {
+    setSelectedItems(prev =>
+      prev.includes(id)
+        ? prev.filter(itemId => itemId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleSave = (item: Evento) => {
+    console.log('Evento salvo:', item.nome);
+  };
+
+  // const handleShare = (item: EventItem) => {
+  //   console.log('Evento compartilhado:', item.eventName);
+  // };
+
+  // const handleFavorite = (item: EventItem) => {
+  //   console.log('Evento favoritado:', item.eventName);
+  // };
+
+  const handleAddEvent = () => {
+    setModalVisible(true);
+  };
+
+
+
+  
+  
+
+  return (
+    <SafeAreaView>
+      <View className='container' style={{ backgroundColor: 'white' }}>
+
+        {/* Perfil, busca e filtro */}
+        <View style={CustomEvents.evento}>
+          <View style={CustomEvents.location}>
+            {
+            //   <Image
+            //   source={{ uri: 'https://img.freepik.com/fotos-gratis/mulher-vai-trabalhar-de-bicicleta_23-2149443039.jpg' }}
+            //   style={CustomEvents.userImage}
+            // />
+            //width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10
+
+            }
+            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+
             </View>
-            )}
-      >
-      </FlatList>
+
+
+            <View style={{ flexDirection: 'column' }}>
+              <Text style={CustomEvents.locationText}>{usuario?.nomeUsuario}</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
+                <Text style={CustomEvents.locationText}>{usuario?.endereco.cidade}</Text>
+                {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
+                <Text style={CustomEvents.nivelText}>{usuario?.nivelHabilidade.nome}</Text>   
+              </View>
+            </View>
+          </View>
+
+          <View style={CustomEvents.searchBox}>
+            <Ionicons name="search-outline" size={20} color="#555"/>
+            <TextInput
+              placeholder="Digite o nome do evento"
+              style={CustomEvents.input}
+              value={searchText}
+              onChangeText={setSearchText}
+              onEndEditing={() => searchName()}
+            />
+            <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
+                <Ionicons name="options-outline" size={20} color="#555" />
+              </TouchableOpacity>
+          </View>
+
+          <View style={CustomEvents.filterContainer}>
+            {["Ativos",  "Realizados"].map((item) => (
+              <TouchableOpacity 
+                key={item} 
+                onPress={() => setFilter(item as FilterType)}
+              >
+                <Text
+                  style={[
+                    CustomEvents.filterText,
+                    filter === item && {
+                      fontWeight: "bold",
+                      color: "#555",
+                      backgroundColor: "#C3FF00",
+                      borderColor: "white",
+                    }
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Box - Eventos */}
+        <View>
+          <Text style={CustomEvents.placesContainer}>Eventos</Text>
+
+
+          
+           {eventos && (
+            <FlatList
+              style={{ minHeight: "100%" }}
+              contentContainerStyle={{ paddingBottom: "300%" }}
+              onEndReached={loadMorePage}
+              onEndReachedThreshold={0.1}
+              refreshing={isContentLoading}
+              onRefresh={refreshContent}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false} 
+              data={eventos}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => {
+                const isSelected = selectedItems.includes(item.id.toString());
+                return (
+                  <TouchableOpacity
+                    style={[
+                      CustomEvents.card,
+                      isSelected && { backgroundColor: "#d3e5ff" }
+                    ]}
+                    onPress={() => setModalViewEvento(item)}
+                  >
+                    <ImageBackground  
+                      // source={{ uri: item.image }} 
+                      style={CustomEvents.cardImage} 
+                      imageStyle={{ borderRadius: 10 }}
+                    >
+                      <View style={CustomEvents.overlay}>
+                        {/* <View>
+                          <TouchableOpacity 
+                            style={CustomEvents.customButtonSave} 
+                            onPress={() => handleSave(item)}
+                          >
+                            <Ionicons name="bookmarks-outline" size={20} color="white" />
+                          </TouchableOpacity>
+                        </View> */}
+                        <View style={CustomEvents.cardInfo}>
+                          <View style={{ 
+                            flexDirection: 'row', 
+                            alignItems: 'center', 
+                            zIndex: 3, 
+                            position: 'relative', 
+                            top: 10 
+                          }}>
+                            {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
+                            {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
+                          </View>
+
+                          <View style={CustomEvents.cardLine}/>
+
+                          <View style={CustomEvents.cardInfoBox}>
+                            <Text style={CustomEvents.cardTitle}>{item.nome}</Text>
+                            <Text style={CustomEvents.cardLocation}>{item.endereco.bairro}</Text>
+                            <Text 
+                              style={CustomEvents.cardDescription} 
+                              numberOfLines={2} 
+                              ellipsizeMode="tail"
+                            >
+                              {item.descricao}
+                            </Text>
+                            <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                          </View>
+                        </View>
+                      </View>
+                      
+
+                      {/* <View>
+                        <TouchableOpacity 
+                          style={CustomEvents.customButtonToShare} 
+                          onPress={() => handleShare(item)}
+                        >
+                        <Ionicons name="return-up-forward" size={20} color="#555" />
+                        </TouchableOpacity>
+                        </View> */}
+
+                      <View style={CustomEvents.containerButton}>
+                        <TouchableOpacity 
+                          style={CustomEvents.customButton} 
+                          onPress={() => handleSave(item)}
+                          >
+                          <Ionicons name="location-outline" size={20} color="white" />
+                          <Text style={CustomEvents.customButtonText}>Localizada</Text>
+                        </TouchableOpacity>
+                        {/* <TouchableOpacity 
+                          style={CustomEvents.customButton} 
+                          onPress={() => handleFavorite(item)}
+                          >
+                          <Ionicons name="star-outline" size={20} color="white" />
+                          <Text style={CustomEvents.customButtonText}>DAR O LIKE TIU</Text>
+                          </TouchableOpacity> */}
+                      </View>
+                    </ImageBackground>
+                  </TouchableOpacity>
+              );
+              }}
+            />
+          )}
+          
+
+        </View>
+
+        {/* Add - Eventos */}
+        <TouchableOpacity style={CustomEvents.addButton} onPress={handleAddEvent}>
+         <Ionicons name="add-circle-outline" size={24} color="#333" />
+        </TouchableOpacity>
+
+        {/* Modal Criar - Eventos */}
+        {modalVisible && 
+          <EventModal
+            visible={modalVisible}
+            closeModal={ () => {setModalVisible(!modalVisible) ; refreshContent()}}
+          />
+        }
+        {/* Modal Filtro - Eventos */}  
+        <FilterModal
+          visible={filterModalVisible}
+          onClose={() => setFilterModalVisible(false)}
+          setFilterEntity={setFilteredEvents}
+        />
+
+        {/* Modal Visualizar - Eventos */}  
+        {modalViewEvento && 
+          <EventView
+            closeModal={ () => setModalViewEvento(null) }
+            onUpdate={refreshContent}
+            evento={modalViewEvento}
+          />
+        }
+
+
+      
+      </View>
+
     </SafeAreaView>
-  )
+  );
 }
