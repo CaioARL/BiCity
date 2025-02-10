@@ -173,69 +173,64 @@ export default function Home() {
 
               eventos.map((evento) => {
                 return (
-                    /* <Circle
+                  <View>
+                    <Circle
                       key={evento.id+10}
-                      fillColor={evento.gratuito? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)'}
-                      strokeColor={evento.gratuito? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)'}
+                      fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
+                      strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.8)' : 'rgba(192, 170, 129, 0.6)'}
                       center={evento.endereco}
                       radius={evento.faixaKm*100}
-                      />  */
-                
-                  // <Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>
-                  //   <Image
-                  //     source={evento.gratuito
-                  //       ? require('../../assets/pins/pin_free_evento.png')
-                  //       : require('../../assets/pins/pin_paid_evento.png')}
-                  //       style={{width: 30, height: 35}} 
-                  //       resizeMode="contain"
-                  //       />
-                  // </Marker>
+                      strokeWidth={2}
+                    />  
+        
+                   <Marker 
+                      key={evento.id} 
+                      coordinate={evento.endereco} 
+                      title={evento.nome}
+                      image={evento.gratuito
+                        ? require('../../assets/pins/pin_free_evento.png')
+                        : require('../../assets/pins/pin_paid_evento.png')
+                      }
 
-                  <Marker 
-                    key={evento.id} 
-                    coordinate={evento.endereco} 
-                    title={evento.nome}
-                    image={evento.gratuito
-                      ? require('../../assets/pins/pin_free_evento.png')
-                      : require('../../assets/pins/pin_paid_evento.png')
-                    }
-                  />
-
-                  
-                
+                    />
+                  </View>
                 )
               }
-
-
             )
-
-
-
           )}
   
            </MapView>
+           {/**<Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>
+            //   <Image
+            //     source={evento.gratuito
+            //       ? require('../../assets/pins/pin_free_evento.png')
+            //       : require('../../assets/pins/pin_paid_evento.png')}
+            //       style={{width: 30, height: 35}} 
+            //       resizeMode="contain"
+            //       />
+            // </Marker>*/} 
 
-            {currentLocationError &&
-              (<View className='items-center justify-center h-fit w-[100%] bg-primary_green_dark absolute top-[50%] rounded-[100px]' >
-              <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
-                {currentLocationError.key === 'SERVICE' &&
-                <ButtonModal
-                  title='Tentar Novamente'
-                  handlePress={getCurrentLocation}
-                  customColor='bg-primary_green_light'
-                />}
-              </View>)}
-               {isMoved && 
-                  (<View className='items-center justify-center h-fit w-[100%]  absolute top-[2%]' >
-                    <ButtonModal
-                      title='Achar Eventos Próximos'
-                      handlePress={getEventsOnViewLocation}
-                      textStyles='text-[#000]'
-                    />
-                  </View>)}
-
-           
-            </SafeAreaView>
+          {currentLocationError &&
+            (<View className='items-center justify-center h-[50%] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
+            <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
+              {currentLocationError.key === 'SERVICE' &&
+              <ButtonModal
+                title='Tentar Novamente'
+                handlePress={getCurrentLocation}
+                customColor=''
+                customStyles='min-w-[200px] min-h-[50px] px-4 py-2 bg-primary_green_light'
+              />}
+            </View>)}
+              {isMoved && 
+            (<View className='items-center justify-center h-[50%] w-[100%] absolute top-[-20%]'>
+              <ButtonModal
+                title='Achar Eventos Próximos'
+                handlePress={getEventsOnViewLocation}
+                textStyles='text-[#000] text-center'
+                customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
+              />
+            </View>)}
+      </SafeAreaView>
     )
   }
 }
