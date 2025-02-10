@@ -87,7 +87,7 @@ Thanks goes to these wonderful people:
     <img align="center" alt="Jira" height="80" width="150" src="https://github.com/user-attachments/assets/4122a8e7-2ddc-492f-883c-7a10d3f25d90">
     <img align="center" alt="mysql" height="45" width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original-wordmark.svg">
     <img align="center" alt="Figma" height="45" width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg">
-    <img align="center" alt="Jira" height="45" width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original-wordmark.svg">
+    <img align="center" alt="Jira" height="45" width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/trello/trello-original-wordmark.svg">
 </div>
 
 ## Descrição do Projeto
