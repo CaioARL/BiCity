@@ -84,9 +84,9 @@ export const upateEventSchema = z.object(
         endereco: z.object({
             cep: z.string().min(8, {message: 'Cep: deve digitar um cep com 8 digitos '}).max(8, {message: 'Cep: deve digitar um cep com 8 digitos '}),
             estado: z.string({message: 'Estado: deve conter estado'}).min(2, {message: 'Estado: deve conter no mínimo 2 digitos'}),
-            cidade: z.string({message: 'Cidade: deve conter cidade'}).min(4 , {message: 'Cidade: deve conter no mínimo 4 digitos'}),
-            bairro: z.string({message: 'Bairro: deve conter bairro'}).min(4, {message: 'Bairro: deve conter no mínimo 4 digitos'}),
-            rua: z.string({message: 'Rua: deve conter rua'}).min(4, {message: 'Rua: deve conter no mínimo 4 digitos'}),
+            cidade: z.string({message: 'Cidade: deve conter cidade'}).min(2 , {message: 'Cidade: deve conter no mínimo 2 digitos'}),
+            bairro: z.string({message: 'Bairro: deve conter bairro'}).min(2, {message: 'Bairro: deve conter no mínimo 2 digitos'}),
+            rua: z.string({message: 'Rua: deve conter rua'}).min(2, {message: 'Rua: deve conter no mínimo 2 digitos'}),
             numero: z.number(  { message: 'Numero: deve conter numero de endereço' } ).min(1),
         }),
         faixaKm: z.number().max(200, {message: 'faixa em KM de no máximo até 200km'}).min(1, {message: 'faixa em KM de no mínimo 1km'}),

@@ -473,19 +473,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 value={novoEvento.data}
                 handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
                 
-              />
-
-              
-              <View className='mb-[20px]'>
-                <Text className='mt-[10px] text-[14px] text-[#666]' >Localização Selecionada:</Text>
-                <Text>
-                  {selectedLocation
-                    ? `Latitude: ${selectedLocation.latitude}, Longitude: ${selectedLocation.longitude}`
-                    : 'Nenhuma localização selecionada'}
-                </Text>
-              </View>
-
-                  
+              />               
               
               {saveError && (
                 <Text className='text-color_red_error  my-2'>{'*'+saveError}</Text>

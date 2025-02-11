@@ -165,6 +165,7 @@ export default function Home() {
 
         <MapView style={{width: '100%', height:'100%'}} 
             onRegionChange={setcurrentViewLocation}
+            mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
             initialRegion={initialLocation}
             showsUserLocation={true} 
             onRegionChangeComplete={ (e, {isGesture}  ) => {setIsMoved(isGesture)}}
@@ -173,11 +174,10 @@ export default function Home() {
 
               eventos.map((evento) => {
                 return (
-                  <View>
+                  <View key={evento.id}>
                     <Circle
-                      key={evento.id+10}
                       fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
-                      strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.8)' : 'rgba(192, 170, 129, 0.6)'}
+                      strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
                       center={evento.endereco}
                       radius={evento.faixaKm*100}
                       strokeWidth={2}

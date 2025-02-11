@@ -45,7 +45,7 @@ export default function MapModalView({prop, raio}: MapModalViewProps) {
     >
         <Marker
             coordinate={prop}
-                image={require('../assets/pins/flag_pink.png')}
+                image={require('../assets/pins/flag_location.png')}
             />
     </MapView>
   )
