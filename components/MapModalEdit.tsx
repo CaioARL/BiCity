@@ -60,14 +60,14 @@ export default function MapModalEdit({getRegion, initalRegion}: MapModalEditProp
         
         <Marker
             coordinate={region}
-            image={isSelected ? require('../assets/pins/flag_pink.png') : require('../assets/pins/flag_blue.png')}
+            image={isSelected ? require('../assets/pins/flag_location.png') : require('../assets/pins/flag_selection.png')}
             />
 
     </MapView>
     <ButtonModal 
         title='Selecionar localização'
         customStyles='w-full'
-        customColor='bg-[#000]'
+        customColor='bg-[#000] mt-[5px] mb-[15px]'
         handlePress={() => {
             getRegion(region)
             setIsSelected(true)
