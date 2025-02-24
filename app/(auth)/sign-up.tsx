@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet, BackHandler } from 'react-native';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
+import TokenInput from '../../components/CustomTokenInput';
 import { masks } from '../../util/masks';
 import { valid } from '../../util/validationSchemas';
 import { getViaCep } from '../../api/endereco';
@@ -28,47 +29,63 @@ export default function SignUp() {
   const [userName, setUserName] = useState('');
   const [userNameError, setUserNameError] = useState('');
   const [isValidUserName, setIsValidUserName] = useState<boolean | undefined>(undefined);
+
   const [firstName, setFirstName] = useState('');
   const [firstNameError, setFirstNameError] = useState('');
   const [isValidFirstName, setIsValidFirstName] = useState<boolean | undefined>(undefined);
+
   const [lastName, setLastName] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const [isValidLastName, setIsValidLastName] = useState<boolean | undefined>(undefined);
+
   const [cep, setCep] = useState('');
   const [cepError, setCepError] = useState('');
   const [isCepLoading, setIsCepLoading] = useState(false);
   const [isValidCep, setIsValidCep] = useState<boolean | undefined>(undefined);
+  
   const [estado, setEstado] = useState('');
   const [cidade, setCidade] = useState('');
   const [bairro, setBairro] = useState('');
   const [rua, setRua] = useState('');
+
   const [numero, setNumero] = useState('');
   const [numberError, setNumberError] = useState('');
   const [isValidNumber, setIsValidNumber] = useState<boolean | undefined>(undefined);
+
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined);
+
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
+
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined);
+
   const [cpfCnpj, setCpfCnpj] = useState('');
   const [cpfCnpjError, setCpfCnpjError] = useState('');
   const [isCpfLoading, setIsCpfLoading] = useState(false);
   const [isValidCpfCnpj, setIsValidCpfCnpj] = useState<boolean | undefined>(undefined);
+  //const [cnpjError, setCnpjError] = useState('')
+  //const [isValidCnpj, setIsValidCnpj] = useState(false)
+
+
   const [codigo, setCodigo] = useState('');
   const [codigoError, setCodigoError] = useState('');
   const [isValidCodigo, setIsValidCodigo] = useState<boolean | undefined>(undefined);
   const [isEmailCodeLoading, setIsEmailCodeLoading] = useState(false);
   const [isCodigoLoading, setIsCodigoLoading] = useState(false);
+  
   const [habilidade, setHabilidade] = useState<NivelHabilidade>({ id: 0, nome: '', descricao: '' });
   const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([]);
   const [nivelHabilidadeError, setNivelHabilidadeError] = useState('');
   const [isValidHabilidade, setIsValidHabilidade] = useState<boolean | undefined>(undefined);
+
   const [step, setStep] = useState(1);
   const abortControllerRef = useRef<AbortController | null>(null);
+  
   const { onRegister } = useAuthProvider();
   const navigation = useNavigation();
   const backgroundImage = require('../../assets/img/background-fundo-figura.png');
@@ -227,12 +244,10 @@ export default function SignUp() {
   };
 
   const prevStep = () => {
-    if (step > 1 && step < 5) {
+    if (step === 1 || step === 5) {
+      router.replace('/sign-in'); // Ajustado para corresponder ao caminho padrão
+    } else if (step > 1 && step < 5) {
       setStep(step - 1);
-    } else if (step === 5) {
-      router.replace('sign'); // Na última etapa, volta para "Sign"
-    } else {
-      router.replace('sign'); // Na primeira etapa, volta para "Sign"
     }
   };
 
@@ -271,23 +286,36 @@ export default function SignUp() {
       abortControllerRef.current = new AbortController();
       getViaCep(cepText, abortControllerRef.current as AbortController)
         .then((response) => {
-          setRua(response.logradouro);
-          setBairro(response.bairro);
-          setCidade(response.localidade);
-          setEstado(response.estado);
-          setCepError('');
-          setIsValidCep(true);
+          // Verifica se os campos obrigatórios estão vazios
+          if (!response.localidade || !response.estado || !response.logradouro || !response.bairro) {
+            setCepError('CEP inválido: informações incompletas');
+            setIsValidCep(false);
+            setRua('');
+            setBairro('');
+            setCidade('');
+            setEstado('');
+          } else {
+            setRua(response.logradouro);
+            setBairro(response.bairro);
+            setCidade(response.localidade);
+            setEstado(response.estado);
+            setCepError('');
+            setIsValidCep(true);
+          }
         })
         .catch((response) => {
-          setCepError('CEP não encontrado: ' + response.message);
+          setCepError('CEP inválido ou não encontrado');
           setIsValidCep(false);
+          setRua('');
+          setBairro('');
+          setCidade('');
+          setEstado('');
         })
         .finally(() => setIsCepLoading(false));
     } else {
       setCepError('');
     }
   };
-
   const checkNumber = (text: string) => {
     setNumero(text);
     const result = valid.houseNumberSchema.safeParse(text);
@@ -533,17 +561,33 @@ export default function SignUp() {
             {step === 3 && (
               <>
                <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}}>
-                <FormField
-                  title="CPF ou CNPJ"
-                  value={cpfCnpj.length <= 14 ? masks.CPF(cpfCnpj) : masks.CNPJ(cpfCnpj)}
-                  placeholder={cpfCnpj.length <= 14 ? "Digite seu CPF" : "Digite seu CNPJ"}
-                  handleChangeText={checkCpfCnpj}
-                  msg={cpfCnpjError}
-                  isValid={isValidCpfCnpj}
-                  isLoading={isCpfLoading}
-                  keyboardType="numeric"
-                  maxLength={18}
-                />
+               {cpfCnpj.length <= 14 ? (
+                    <FormField
+                      title="CPF ou CNPJ"
+                      value={masks.CPF(cpfCnpj)}
+                      placeholder="Digite seu CPF"
+                      handleChangeText={checkCpfCnpj}
+                      msg={cpfCnpjError}
+                      isValid={isValidCpfCnpj}
+                      isLoading={isCpfLoading}
+                      keyboardType="numeric"
+                      maxLength={18}
+                    />
+                  ) : ( 
+                    <FormField
+                    title="CNPJ"
+                    value={masks.CNPJ(cpfCnpj)}
+                    placeholder="Digite seu CNPJ"
+                    handleChangeText={checkCpfCnpj}
+                    msg={cpfCnpjError}
+                    isValid={isValidCpfCnpj}
+                    isLoading={isCpfLoading}
+                    keyboardType="numeric"
+                    maxLength={18}
+                  />
+                  )  
+                }
+                
                 <FormField
                   title="Senha"
                   value={password}
@@ -587,10 +631,9 @@ export default function SignUp() {
             {step === 5 && (
               <>
               <View style={{position: 'absolute', width: '100%', bottom: 0, top: 260}}>
-                <FormField
+                <TokenInput
                   title="Código de confirmação"
-                  value={masks.CODIGO(codigo)}
-                  placeholder="Digite o código de confirmação"
+                  value={codigo}
                   handleChangeText={checkCodigo}
                   msg={codigoError}
                   isValid={isValidCodigo}
