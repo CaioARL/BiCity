@@ -26,6 +26,10 @@ const ENDPOINTS = {
     ENDERECO_LAT_LONG_GET: '/endereco/get/LatAndLon/by/cepAndNumber',
     ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/get/by/LatAndLon',
 
+
+    INFRAESTRUTURA_GET: '/infraestrutura/list/as/geoJson',
+
+
 } as const;
 
 export default ENDPOINTS;

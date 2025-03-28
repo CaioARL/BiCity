@@ -2,11 +2,12 @@ import { View, Text, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-n
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Marker, Overlay } from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, RequestEventoByRadius, RequestPageEvento } from '../../types'
+import { Evento, InfraestruturaGeoJson, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento } from '../../types'
 import { getEvento, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import { string } from 'zod'
 import ButtonModal from '../../components/ButtonModal'
+import { getInfraestrutura } from '../../api/infraestrutura'
 
 interface Region {
   latitude: number
@@ -34,6 +35,9 @@ export default function Home() {
   const [currentViewLocation, setcurrentViewLocation] = useState<Region | null>(null)
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
+
+  const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
+  const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
 
   const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
   const abortControllerRef = useRef<AbortController>()
@@ -78,6 +82,12 @@ export default function Home() {
     
     let location = await Location.getCurrentPositionAsync({})
 
+    setRequestInfraestrutura({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      raio: 750
+    })
+
 
     setCurrentLocation(location)  
     setRequestEventos({
@@ -114,6 +124,20 @@ export default function Home() {
     abortControllerRef.current = new AbortController
     setIsContentLoading(true)
     console.log(new Date().toLocaleTimeString()+' veio do mapa: requestEventos', requestEventos)
+
+
+    if(requestInfraestrutura){
+      getInfraestrutura(requestInfraestrutura, abortControllerRef.current)
+      .then((response) => {
+        setInfraestrutura(response)
+
+      })
+      .catch((response)=>{
+        alert("Error ao carregar infraestrutura: " + response.message)
+      })
+    }
+
+
       getEventoByRadius(requestEventos, abortControllerRef.current)
     .then((response) =>{
       setEventos(response)
