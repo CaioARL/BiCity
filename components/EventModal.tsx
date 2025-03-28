@@ -17,6 +17,7 @@ import ButtonModal from './ButtonModal';
 import MapModalEdit from './MapModalEdit';
 import { map, set } from 'zod';
 import MapModalView from './MapModalView';
+import { useAuthProvider } from '../app/context/AuthProvider';
 
 
 
@@ -31,6 +32,9 @@ const EventModal: React.FC<EventModalProps> = ({
   visible,
   closeModal,
 }) => {
+
+  const { authState } = useAuthProvider()
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const abortControllerRef = useRef(new AbortController())
@@ -61,7 +65,8 @@ const EventModal: React.FC<EventModalProps> = ({
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
 
-  const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false, tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: ''}}})
+  const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false , tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }} })
+
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
 
 
@@ -201,18 +206,20 @@ const EventModal: React.FC<EventModalProps> = ({
     setIsSavingLoading(true)
     abortControllerRef.current?.abort
     abortControllerRef.current = new AbortController
-    createEvento(novoEvento, abortControllerRef.current)
-    .then((response)=>{
-      alert('Evento: ' + response.nome + ' criado com sucesso')
-      closeModal()
-    })
-    .catch((response)=>{
-      alert('falha na criação do Evento. \n Code error: ' + response.message)
-      setSaveError(response.message)
-    })
-    .finally(()=>{
-      setIsSavingLoading(false)
-    })
+    if (authState?.id){
+      createEvento(novoEvento, authState.id, abortControllerRef.current)
+      .then((response)=>{
+        alert('Evento: ' + response.nome + ' criado com sucesso')
+        closeModal()
+      })
+      .catch((response)=>{
+        alert('falha na criação do Evento. \n Code error: ' + response.message)
+        setSaveError(response.message)
+      })
+      .finally(()=>{
+        setIsSavingLoading(false)
+      })
+    }
 
   }
 

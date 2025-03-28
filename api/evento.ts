@@ -3,7 +3,7 @@ import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEvent
 import ENDPOINTS from "./endpoints"
 
 
-export const createEvento = async (evento: RequestCreateEvento, abortSignal: AbortController) : Promise<Evento> => {
+export const createEvento = async (evento: RequestCreateEvento,idUsuario: number, abortSignal: AbortController) : Promise<Evento> => {
     const response = await api.post<Evento>(ENDPOINTS.EVENTO_POST, 
         {
             nome: evento.nome,
@@ -20,6 +20,7 @@ export const createEvento = async (evento: RequestCreateEvento, abortSignal: Abo
             faixaKm: evento.faixaKm,
             gratuito: evento.gratuito,
             idTipoEvento: evento.tipoEvento.id,
+            idUsuario: idUsuario,
         }
         , {signal: abortSignal.signal })
     return response.data

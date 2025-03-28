@@ -1,6 +1,7 @@
 import { EventoEndereco } from "./endereco";
 import { NivelHabilidade } from "./nivel-habilidade";
 import { TipoEvento } from "./tipo-evento";
+import { Usuario } from "./usuario";
 
 export interface Evento {
     id: number
@@ -12,12 +13,12 @@ export interface Evento {
     faixaKm: number
     gratuito: boolean
     tipoEvento: TipoEvento
+    usuario: Usuario
 }
 
 
 
 export interface RequestCreateEvento {
-    
     nome: string
     descricao: string
     data: string

@@ -47,12 +47,12 @@ export default function AuthProvider({children}: any) {
 
         try{
           const token = await SecureStore.getItemAsync('hash')
-          
-          if (token) {
-            // axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-            await getUserById(parseInt(token))
+          const id = await SecureStore.getItemAsync('id')
+          if (token && id) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            await getUserById(parseInt(id))
             .then((response) => {
-              setAuthState({id: parseInt(token), authenticated: true, user: response})
+              setAuthState({id: parseInt(id), authenticated: true, user: response})
             })
             .catch((error) => {
               setErrorLoading("Erro ao carregar dados de usuário, verifique sua conexão : "+ error.message)
@@ -63,8 +63,8 @@ export default function AuthProvider({children}: any) {
             
           } else {
             setAuthState({id: null, authenticated: false, user: authState.user})
+            axios.defaults.headers.common['Authorization'] = ''
             setIsLoading(false)
-            // axios.defaults.headers.common['Authorization'] = ''
           }
         }catch(error){
           console.log("Main Loading Error: "+ error)
@@ -82,8 +82,9 @@ export default function AuthProvider({children}: any) {
       return new Promise ((resolve, reject) => {
         try {
           setAuthState({id: usuario.id, authenticated: true, user: usuario})
-          // axios.defaults.headers.common['Authorization'] = `Bearer ${response.hash}`
-          SecureStore.setItemAsync('hash', usuario.id.toString())
+          axios.defaults.headers.common['Authorization'] = `Bearer ${usuario.sessao.token}`
+          SecureStore.setItemAsync('hash', usuario.sessao.token)
+          SecureStore.setItemAsync('id', usuario.id.toString())
           resolve('Login success')
         } catch (error) {
           reject('Error on login, ' + error)
@@ -97,6 +98,7 @@ export default function AuthProvider({children}: any) {
         try {
           setAuthState({id: null, authenticated: false, user: null})
           SecureStore.deleteItemAsync('hash')
+          SecureStore.deleteItemAsync('id')
           delete axios.defaults.headers.common['Authorization']
           resolve('Logout success')
         } catch (error) {
@@ -112,8 +114,9 @@ export default function AuthProvider({children}: any) {
       return new Promise((resolve, reject) => {
         try {
           setAuthState({id: usuarioCadastro.id, authenticated: true, user: usuarioCadastro})
-        // axios.defaults.headers.common['Authorization'] = `Bearer ${response.hash}`
-          SecureStore.setItemAsync('hash', usuarioCadastro.id.toString())
+        axios.defaults.headers.common['Authorization'] = `Bearer ${usuarioCadastro.sessao.token}`
+          SecureStore.setItemAsync('hash', usuarioCadastro.sessao.token)
+          SecureStore.setItemAsync('id', usuarioCadastro.id.toString())
           resolve('Register success')
         } catch (error) {
           reject('Error on Register' + error)

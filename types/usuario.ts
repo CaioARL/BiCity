@@ -42,6 +42,11 @@ export interface Usuario {
         nome: string
         descricao: string
     }
+    sessao: {
+        id: number
+        token: string
+    }
+    foto: string
 }
 
 
@@ -69,6 +74,11 @@ export interface CriarUsuarioResponse {
         nome: string
         descricao: string
     }
+    sessao: {
+        id: number
+        token: string
+    }
+    foto: string
 }
 
 

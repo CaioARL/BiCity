@@ -218,7 +218,7 @@ export default function Home() {
                 title='Tentar Novamente'
                 handlePress={getCurrentLocation}
                 customColor=''
-                customStyles='min-w-[200px] min-h-[50px] px-4 py-2 bg-primary_green_light'
+                customStyles='w-[200px] h-[50px] px-4 py-2 bg-primary_green_light'
               />}
             </View>)}
               {isMoved && 

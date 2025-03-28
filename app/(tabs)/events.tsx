@@ -32,7 +32,7 @@ type FilterType = "Ativos" | "Realizados" ;
 
 
 export default function Events() {
-  const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' } });
+  const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' }, sessao: {id:0, token:''}, foto:'' });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   
@@ -61,8 +61,7 @@ export default function Events() {
 
   const [showEventTypeOptions, setShowEventTypeOptions] = useState(false);
 
-  // Filtro - Data Calendario
-  {{/* Aquiiiii */}} 
+
 
 
   
@@ -116,6 +115,9 @@ export default function Events() {
         setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   }
   
+
+    // Filtro - Data Calendario
+    {{/* Aquiiiii */}} 
 
   const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
     setEventos(null)
