@@ -42,7 +42,7 @@ export default function FormField({
         className={`border-2 ${disableEdit ? 'bg-color_lightGray' : ''} ${getBorderColor()} w-full h-16 px-4 rounded-[2px] bg-orange-5001e items-center flex-row`}
       >
         <TextInput
-          className="flex-1 text-base w-full"
+          className={`flex-1 text-base w-full ${theme === 'dark' ? 'text-white' : 'text-black'}`}
           value={value}
           placeholder={placeholder}
           onChangeText={handleChangeText}

@@ -45,14 +45,14 @@ export default function Terms({ visible, onClose }: TermsProps) {
       <View className="flex-[1] justify-end bg-[rgba(0,0,0,0.5)]">
         <View className={theme === 'dark' ? 'bg-secondary_black rounded-t-3xl h-[300] p-[20px]' : 'bg-white rounded-t-3xl h-[300] p-[20px]'}>
           <View className="flex-row justify-between mb-[20px]">
-            <Text className="text-[18px] font-bold">Política de Privacidade</Text>
+            <Text className={theme === 'dark' ? 'text-white text-[18px] font-bold' : 'text-[18px] font-bold'}>Política de Privacidade</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#555" />
             </TouchableOpacity>
           </View>
 
           <ScrollView>
-            <Text className="mb-[20px]">
+            <Text className={theme === 'dark' ? 'text-white mb-[20px]' : ''}>
               Prezado Usuário,{"\n\n"}
               Antes de prosseguir com o uso do aplicativo BiCity:{"\n"}
               Ao clicar em "Aceitar", você concorda com o armazenamento de cookies do seu dispositivo para melhorar a navegação no aplicativo e experiência.{"\n\n"}
