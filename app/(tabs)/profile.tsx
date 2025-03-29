@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, TextInput, } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, TextInput, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthProvider } from '../context/AuthProvider';
-import { replace } from 'expo-router/build/global-state/routing';
 import { router } from 'expo-router';
 import { Usuario } from '../../types';
-import { set } from 'zod';
 import { useTheme } from '../context/ThemeProvider';
 import tailwindConfig from '../../tailwind.config';
+import { useTabBar } from '../context/TabBarContext'; 
+import { withSpring } from 'react-native-reanimated';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface DadosdoUsuário {
   id: string;
@@ -39,11 +41,11 @@ const nearbyPlaces: DadosdoUsuário[] = [
 ];
 
 const Profile = () => {
+  const { theme } = useTheme();
+  const { onLogout, authState } = useAuthProvider();
+  const { tabBarOffset } = useTabBar();
 
-  const {onLogout, authState} = useAuthProvider()
-
-  const [usuario, setUsuario] = useState<Usuario | null>(null); //not used but impl for test
-    
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const user = nearbyPlaces[0];
   const [image, setImage] = useState(require('../../assets/img/logo-perfil.png'));
   const [isEditing, setIsEditing] = useState(false);
@@ -54,12 +56,12 @@ const Profile = () => {
   const [email, setEmail] = useState(user.email);
   const [cpf, setCpf] = useState(user.cpf);
   const [cnpj, setCnpj] = useState(user.cnpj);
-  const [passwordVisible, setPasswordVisible] = useState(false); // Estado para controle da visibilidade da senha
-
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     if (authState?.user) {
-      if(authState.user){
+      if (authState.user) {
         setUsuario(authState.user);
         setNome(authState.user.nome);
         setNomeUsuario(authState.user.nomeUsuario);
@@ -69,27 +71,21 @@ const Profile = () => {
         setCnpj(authState.user.cnpj);
       }
     }
-  } 
-  , [authState]);
-
-
+  }, [authState]);
 
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
       if (status !== 'granted') {
         alert('Sorry, we need camera roll permissions to make this work!');
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
       });
-
       if (!result.canceled && result.assets[0].uri) {
         setImage(result.assets[0].uri);
       }
@@ -111,91 +107,152 @@ const Profile = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const formattedDate = formatDate(user.dt_criacao); // Formatar a data para o formato desejado
+  const formatCPF = (cpf: string) => {
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    if (cleaned.length !== 11) return cleaned;
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  };
 
+  const formatCNPJ = (cnpj: string) => {
+    if (!cnpj) return '';
+    const cleaned = cnpj.replace(/\D/g, '');
+    if (cleaned.length !== 14) return cleaned;
+    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  };
+
+  const formattedDate = formatDate(user.dt_criacao);
 
   const handleLogout = () => {
-   if(onLogout){
+    if (onLogout) {
       onLogout()
-      .then((respose)=>{
-        alert(respose)
-      })
-      .catch((error)=>{
-        alert(error)
-      })
-      router.replace('sign-in')
-   }
-  }
+        .then((response) => {
+          alert(response);
+        })
+        .catch((error) => {
+          alert(error);
+        });
+      router.replace('sign-in');
+    }
+  };
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    if (currentScrollY > lastScrollY && currentScrollY > 0) {
+      tabBarOffset.value = withSpring(30, { damping: 20, stiffness: 100 });
+    } else if (currentScrollY < lastScrollY) {
+      tabBarOffset.value = withSpring(0, { damping: 20, stiffness: 100 });
+    }
+    setLastScrollY(currentScrollY);
+  };
 
   return (
-    <SafeAreaView style={{ backgroundColor: 'white', flex: 1 }}>
-      <ScrollView >
-        <View style={CustomProfile.profileCard}>
-          <View style={CustomProfile.topSection}>
+    <SafeAreaView
+      style={{
+        backgroundColor: theme === 'dark' ? colors.secondary_black || '#1f2937' : colors.white || '#FFF',
+        flex: 1,
+      }}
+    >
+      <ScrollView onScroll={handleScroll} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 107 }}>
+        <View
+          style={{
+            ...CustomProfile.profileCard,
+            backgroundColor: theme === 'dark' ? colors.secondary_black || '#1f2937' : colors.white || '#FFF',
+            shadowColor: theme === 'dark' ? '#FFF' : '#000',
+          }}
+        >
+          <View
+            style={{
+              ...CustomProfile.topSection,
+              backgroundColor: theme === 'dark' ? colors.primary_green || '#C3FF00' : colors.primary_green || '#C3FF00',
+            }}
+          >
             <View style={CustomProfile.imageContainer}>
-              {/* <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
-              <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
-                <Ionicons name="pencil" size={16} color="#1f2937" />
-              </TouchableOpacity>
-              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
-              <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
-                  <Text className='text-[245px]'>{usuario && usuario.nome[0]}</Text>
+              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
+              <View
+                className={`w-[350px] h-[350px] rounded-[350px] border-[3px] border-white mr-[10px] items-center shadow-md ${
+                  theme === 'dark' ? 'bg-[#1f2937]' : 'bg-white'
+                }`}
+              >
+                <Text
+                  className="text-[250px]"
+                  style={{
+                    position: 'absolute',
+                    top: -50,
+                    color: theme === 'dark' ? colors.white || '#FFF' : colors.secondary_black || '#1f2937',
+                  }}
+                >
+                  {usuario && usuario.nome[0]}
+                </Text>
               </View>
-              
             </View>
           </View>
-          
 
-          {/*  Editar as informações */}
           <View style={CustomProfile.bottomSection}>
             {isEditing ? (
               <>
                 <TextInput
-                  style={CustomProfile.input}
+                  style={{
+                    ...CustomProfile.input,
+                    color: theme === 'dark' ? '#FFF' : '#1f2937',
+                  }}
                   value={nome}
                   onChangeText={setNome}
                   placeholder="Nome"
                 />
                 <TextInput
-                  style={CustomProfile.input}
+                  style={{
+                    ...CustomProfile.input,
+                    color: theme === 'dark' ? '#FFF' : '#1f2937',
+                  }}
                   value={nomeUsuario}
                   onChangeText={setNomeUsuario}
                   placeholder="Nome de Usuário"
                 />
                 <TextInput
-                  style={CustomProfile.input}
+                  style={{
+                    ...CustomProfile.input,
+                    color: theme === 'dark' ? '#FFF' : '#1f2937',
+                  }}
                   value={endereco}
                   onChangeText={setEndereco}
                   placeholder="Endereço"
                 />
                 <TextInput
-                  style={CustomProfile.input}
+                  style={{
+                    ...CustomProfile.input,
+                    opacity: 2,
+                    backgroundColor: theme === 'dark' ? '#444' : '#f0f0f0',
+                    color: theme === 'dark' ? '#FFF' : '#1f2937',
+                    borderColor: theme === 'dark' ? '#666' : '#ccc',
+                  }}
                   value={email}
                   onChangeText={setEmail}
                   placeholder="E-mail"
                   editable={false}
                 />
                 <TextInput
-                  style={[CustomProfile.input, { opacity: 2, backgroundColor: '#f0f0f0' }]}
-                  value={`${cpf || ''} ${cnpj || ''}`}
+                  style={{
+                    ...CustomProfile.input,
+                    opacity: 2,
+                    backgroundColor: theme === 'dark' ? '#444' : '#f0f0f0',
+                    color: theme === 'dark' ? '#FFF' : '#1f2937',
+                    borderColor: theme === 'dark' ? '#666' : '#ccc',
+                  }}
+                  value={`${formatCPF(cpf)} ${formatCNPJ(cnpj)}`}
                   onChangeText={setCpf}
-                  placeholder="CPF/CNPJ"
+                  placeholder="CPF / CNPJ"
                   editable={false}
+                  placeholderTextColor={theme === 'dark' ? '#999' : '#6b7280'}
                 />
-
-                
-
-                {/* Data de Criação */}
                 <Text style={CustomProfile.title}>Data de Criação: {formattedDate}</Text>
               </>
             ) : (
               <>
-                <Text style={CustomProfile.name}>{nome}</Text>
+                <Text style={{...CustomProfile.name, color: theme === 'dark' ? colors.white : '' }}>{nome}</Text>
                 <Text style={CustomProfile.title}>@{nomeUsuario}</Text>
               </>
             )}
-
 
             <View style={CustomProfile.nivelHabilidadeContainer}>
               <Text style={CustomProfile.nivelHabilidade}>Nível</Text>
@@ -204,29 +261,37 @@ const Profile = () => {
 
             {showMoreInfo && (
               <View style={CustomProfile.informaçõesContainer}>
-                <Text>Endereço: {endereco}</Text>
-                <Text>E-mail: {email}</Text>
-                <Text>CPF: {cpf}</Text>
-                <Text>CNPJ: {cnpj}</Text>
-                <Text>Data de Criação: {formattedDate}</Text>
+                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>Endereço: {endereco}</Text>
+                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>E-mail: {email}</Text>
+                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>CPF: {formatCPF(cpf)}</Text>
+                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>CNPJ: {formatCNPJ(cnpj)}</Text>
+                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>Data de Criação: {formattedDate}</Text>
               </View>
             )}
           </View>
 
           <View style={CustomProfile.iconSection}>
-            <TouchableOpacity style={CustomProfile.iconButton} onPress={toggleEdit}>
+            <TouchableOpacity
+              style={{
+                ...CustomProfile.iconButton,
+                backgroundColor: theme === 'dark' ? colors.primary_green : '#f3f4f6',
+              }}
+              onPress={toggleEdit}
+            >
               <Ionicons name="chevron-down" size={24} color="white" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={CustomProfile.button}
-            onPress={handleLogout}
-          >
-            <Text style={{ fontWeight: 'bold' }}>Logout</Text>
+
+          <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
+            <Text style={{ fontWeight: 'bold' }}>Sair</Text>
           </TouchableOpacity>
+
+          {isEditing && (
+            <TouchableOpacity style={CustomProfile.buttonSalve}>
+              <Text style={{ fontWeight: 'bold' }}>Salvar</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        {/* Espaço vazio ao final */}
-        <Text style={{ height: 200 }}>{' '}</Text>
       </ScrollView>
     </SafeAreaView>
   );

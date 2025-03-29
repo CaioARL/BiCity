@@ -460,10 +460,10 @@ export default function SignUp() {
     <TouchableOpacity
       style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
         paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-        className='bg-primary_green'
+        className={theme === 'dark' ? 'bg-secondary_black' : 'bg-primary_green'}
         onPress={prevStep}
       >
-      <ArrowLeft size={24} color="white" />
+      <ArrowLeft size={24} color={theme === 'dark' ? colors.primary_green  : colors.white} />
     </TouchableOpacity>
       
    

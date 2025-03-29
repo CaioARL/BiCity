@@ -3,9 +3,7 @@ import { StyleSheet } from 'react-native';
 
 const CustomProfile = StyleSheet.create({
   profileCard: {
-    backgroundColor: 'white',
     borderRadius: 10,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -16,7 +14,6 @@ const CustomProfile = StyleSheet.create({
   },
   topSection: {
     height: 400,
-    backgroundColor: '#C3FF00',
     // borderTopLeftRadius: 50,
     // borderTopRightRadius: 20,
     // borderBottomLeftRadius: 20,
@@ -26,6 +23,7 @@ const CustomProfile = StyleSheet.create({
   imageContainer: {
     position: 'absolute',
     top: 30,
+    left: 3.5,
     alignSelf: 'center',
   },
   profileImage: {
@@ -43,6 +41,7 @@ const CustomProfile = StyleSheet.create({
     height: 150,
     bottom: -20, 
     zIndex: 1,
+    borderTopRightRadius: 50,
   },
   editButton: {
     position: 'absolute',
@@ -88,16 +87,20 @@ const CustomProfile = StyleSheet.create({
     marginVertical: 4,
   },
   iconSection: {
-    backgroundColor: '#f3f4f6',
-    padding: 16,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    padding: 16,  
+    width: 50,
+    height: 60,
+    justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   iconButton: {
-    backgroundColor: '#C3FF00',
-    width: 400,
-    height: 40,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius:10,
+    width: 360,
+    height: 58,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -130,9 +133,21 @@ const CustomProfile = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#C3FF00',
     padding: 15,
+    paddingHorizontal: 30,
     borderRadius: 8,
     alignItems: 'center',
-    bottom: 110,
+    bottom: 95,
+    right: '5%',
+    alignSelf: 'center',
+  },
+  buttonSalve: {
+    position: 'absolute',
+    backgroundColor: '#C3FF00',
+    padding: 15,
+    paddingHorizontal: 35,
+    borderRadius: 8,
+    alignItems: 'center',
+    bottom: 150,
     right: '5%',
     alignSelf: 'center',
   }
