@@ -1,6 +1,9 @@
 import { View, Text, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import tailwindConfig from '../tailwind.config';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface FormFieldProps {
   title: string;
@@ -15,11 +18,12 @@ interface FormFieldProps {
   disableEdit?: boolean;
   isLoading?: boolean;
   maxLength?: number;
+  theme?: 'light' | 'dark';
 }
 
 export default function FormField({
   title, value, placeholder, handleChangeText, otherStyles,
-  keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength
+  keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength, theme = 'light'
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,7 +37,7 @@ export default function FormField({
 
   return (
     <View className={`space-y-2 ${otherStyles}`}>
-      <Text className="text-base color-secondary_black">{title}</Text>
+      <Text className={`text-base ${theme === 'dark' ? 'text-white' : 'color-secondary_black'}`}>{title}</Text>
       <View
         className={`border-2 ${disableEdit ? 'bg-color_lightGray' : ''} ${getBorderColor()} w-full h-16 px-4 rounded-[2px] bg-orange-5001e items-center flex-row`}
       >
@@ -43,6 +47,7 @@ export default function FormField({
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
+          placeholderTextColor={theme === 'dark' ? colors.white : colors.color__lightGray}
           secureTextEntry={secureTextEntry && !showPassword}
           editable={!disableEdit}
           maxLength={maxLength}
