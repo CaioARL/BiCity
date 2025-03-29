@@ -466,7 +466,6 @@ export default function SignUp() {
       <ArrowLeft size={24} color={theme === 'dark' ? colors.primary_green  : colors.white} />
     </TouchableOpacity>
       
-   
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
      
         {step === 1 && (
