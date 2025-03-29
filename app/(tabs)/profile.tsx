@@ -9,6 +9,8 @@ import { replace } from 'expo-router/build/global-state/routing';
 import { router } from 'expo-router';
 import { Usuario } from '../../types';
 import { set } from 'zod';
+import { useTheme } from '../context/ThemeProvider';
+import tailwindConfig from '../../tailwind.config';
 
 interface DadosdoUsuário {
   id: string;
