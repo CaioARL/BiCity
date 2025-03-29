@@ -9,11 +9,10 @@ import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
-import DarkMode from '../../components/DarkMode';
+import { useTheme } from '../context/ThemeProvider';
 import tailwindConfig from '../../tailwind.config';
 
 type AlertType = 'success' | 'error' | 'loading';
-type ThemeType = 'light' | 'dark';
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
@@ -29,7 +28,7 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = useState('');
   const [isValidUsername, setIsValidUsername] = useState<boolean | undefined>(undefined);
   const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
-  const [theme, setTheme] = useState<ThemeType>('light');
+  const { theme } = useTheme();
   
   // Alert state and animation
   const [alertConfig, setAlertConfig] = useState({
@@ -183,8 +182,6 @@ export default function SignIn() {
               style={{ width: 100, height: 100 }}
             />
           </View>
-
-          <DarkMode theme={theme} setTheme={setTheme}/>
           
           <Text className={`text-2xl font-bold text-center mb-4 ${theme === 'dark' ? 'color-primary_green' : 'text-secondary_black'}`}>
             BICITY
