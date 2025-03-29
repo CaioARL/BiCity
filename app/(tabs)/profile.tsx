@@ -274,7 +274,7 @@ const Profile = () => {
             <TouchableOpacity
               style={{
                 ...CustomProfile.iconButton,
-                backgroundColor: theme === 'dark' ? colors.primary_green : '#f3f4f6',
+                backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green,
               }}
               onPress={toggleEdit}
             >
