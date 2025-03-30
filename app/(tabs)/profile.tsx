@@ -164,26 +164,29 @@ const Profile = () => {
           <View
             style={{
               ...CustomProfile.topSection,
-              backgroundColor: theme === 'dark' ? colors.primary_green || '#C3FF00' : colors.primary_green || '#C3FF00',
+              backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green
             }}
           >
             <View style={CustomProfile.imageContainer}>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
+
+               {/* <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
+              <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
+                <Ionicons name="pencil" size={16} color="#1f2937" />
+              </TouchableOpacity>
+              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
               <View
                 className={`w-[350px] h-[350px] rounded-[350px] border-[3px] border-white mr-[10px] items-center shadow-md ${
                   theme === 'dark' ? 'bg-[#1f2937]' : 'bg-white'
                 }`}
               >
-                <Text
-                  className="text-[250px]"
-                  style={{
-                    position: 'absolute',
-                    top: -50,
-                    color: theme === 'dark' ? colors.white || '#FFF' : colors.secondary_black || '#1f2937',
-                  }}
-                >
-                  {usuario && usuario.nome[0]}
+                <Text className={`text-[250px] ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>
+                  {usuario && usuario.nome[0].toUpperCase()}
                 </Text>
+
+                <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor: theme === 'dark' ?  colors.secondary_black : colors.primary_green }} onPress={pickImage} >
+                 <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: theme === 'dark' ? 'white' : 'secondary_black' }}/>
+                </TouchableOpacity>
               </View>
             </View>
           </View>

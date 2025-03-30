@@ -47,7 +47,6 @@ const CustomProfile = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 40,
-    backgroundColor: '#C3FF00',
     borderRadius: 50,
     padding: 8,
     borderWidth: 2,
