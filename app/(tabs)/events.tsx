@@ -167,14 +167,9 @@ export default function Events() {
   const handleAddEvent = () => {
     setModalVisible(true);
   };
-
-
-
   
-  
-
   return (
-    <SafeAreaView>
+  <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? colors.matte_gray : 'transparent' }}>
       <View className={`container ${theme === 'dark' ? 'bg-secondary_black' : 'bg-white'}`}>
 
         {/* Perfil, busca e filtro */}
@@ -247,10 +242,9 @@ export default function Events() {
 
         {/* Box - Eventos */}
         <View>
-          <Text style={CustomEvents.placesContainer}>Eventos</Text>
+      
+          <Text style={{ ...CustomEvents.placesContainer, color: theme === 'dark' ? 'white': '' }}>Eventos</Text>
 
-
-          
            {eventos && (
             <FlatList
               style={{ minHeight: "100%" }}
