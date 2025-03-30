@@ -1,6 +1,9 @@
 import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
-import React, {useState} from 'react'
+import React, {useState} from 'react';
+import tailwindConfig from '../tailwind.config';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface FormFieldProps <T>{
     title?: string
@@ -17,17 +20,18 @@ interface FormFieldProps <T>{
     isLoading?: boolean;
     maxLength?: number;
     multiline?: boolean;
+    theme?: 'light' | 'dark';
   }
 
 
 
-export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
+export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline, theme = 'light'} : FormFieldProps<any>) {
   const [showPassword, setShowPassword] = useState(false)
 
 
   return (
     <View className={`mb-[10px] ${otherStyles}`}>
-      {title && <Text className='text-[16px] text-[#555] mb-[1px]'>{title}</Text>}
+      {title && <Text className={`text-[16px] mb-[1px] ${theme === 'dark' ? 'color-white' : 'color-matte_gray'}`}>{title}</Text>}
       <View className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8px] p-[1px] ${disableEdit==true &&  'bg-color_lightGray' } ${msg? 'border-color_red_error': isValid && 'border-color_green_success'} `}>
         <TextInput
           className={`flex-1 w-full  }  ${multiline && 'h-[120px] align-top'}`}

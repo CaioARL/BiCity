@@ -18,10 +18,10 @@ import MapModalEdit from './MapModalEdit';
 import { map, set } from 'zod';
 import MapModalView from './MapModalView';
 import { useAuthProvider } from '../app/context/AuthProvider';
+import { useTheme } from '../app/context/ThemeProvider';
+import tailwindConfig from '../tailwind.config';
 
-
-
-
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface EventModalProps {
   visible: boolean
@@ -32,6 +32,8 @@ const EventModal: React.FC<EventModalProps> = ({
   visible,
   closeModal,
 }) => {
+
+  const { theme } = useTheme();
 
   const { authState } = useAuthProvider()
 
@@ -313,12 +315,9 @@ const EventModal: React.FC<EventModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={closeModal}>
       <View className='flex-row bg-[rgba(0,0,0,0.5)] justify-center'>
         <ScrollView>
-          <View className='bg-white flex-[1] rounded-[10px] p-[20px] m-[20px]'>
+          <View
+          className={`rounded-[10px] p-[20px] m-[20px] ${theme === 'dark' ? 'bg-secondary_black' : 'bg-white'}`}>
             <Animated.View style={{ opacity: fadeAnim }}>
-
-
-               
-
 
                <View  className='mb-[2px]'>
                   
@@ -349,9 +348,9 @@ const EventModal: React.FC<EventModalProps> = ({
                     <Text className='text-color_red_error  my-2'>{'*'+mapPlotError}</Text>
                   )}
                     
-                  <Text>Selecione o local do evento:</Text>
-                  <Text>1. Clique no mapa para selecionar o local, ou</Text>
-                  <Text>2. Digite o CEP abaixo:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>Selecione o local do evento:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>1. Clique no mapa para selecionar o local, ou</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>2. Digite o CEP abaixo:</Text>
                 </View>
                
               <FormFieldModal

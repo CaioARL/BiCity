@@ -18,11 +18,10 @@ import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelec
 import FormFieldViewModal from '../../components/FormFieldViewModal';
 import MapModalView from '../../components/MapModalView';
 import MapModalEdit from '../../components/MapModalEdit';
+import { useTheme } from '../context/ThemeProvider';
+import tailwindConfig from '../../tailwind.config';
 
-
-
-
-
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface EventModalProps {
   closeModal: () => void
@@ -31,6 +30,7 @@ interface EventModalProps {
 }
 
 const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) => {
+  const { theme } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const abortControllerRef = useRef(new AbortController())
 

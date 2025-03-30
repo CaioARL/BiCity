@@ -15,15 +15,13 @@ const CustomEvents = StyleSheet.create({
     borderRadius: 100,
     paddingHorizontal: 10,
     height: 50,
-    borderColor: "#555", 
-    shadowColor: "#555", 
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 3,
   },
   input: {
     flex: 1, 

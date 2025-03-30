@@ -202,7 +202,7 @@ export default function Events() {
             </View>
           </View>
 
-          <View style={CustomEvents.searchBox}>
+          <View style={{ ...CustomEvents.searchBox, shadowColor: theme === 'dark' ? colors.white : colors.matte_gray, borderColor: theme === 'dark' ? colors.primary_green : colors.matte_gray, }}>
             <Ionicons name="search-outline" size={20} color="#555"/>
             <TextInput
               placeholder="Digite o nome do evento"
@@ -226,10 +226,10 @@ export default function Events() {
                   style={[
                     CustomEvents.filterText,
                     filter === item && {
-                      fontWeight: "bold",
+                      ...CustomEvents.filterText,fontWeight: "bold",
                       color: "#555",
-                      backgroundColor: "#C3FF00",
-                      borderColor: "white",
+                      backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green,
+                      shadowColor: theme === 'dark' ? colors.white : colors.matte_gray, borderColor: theme === 'dark' ? colors.primary_green : colors.white, 
                     }
                   ]}
                 >
