@@ -23,16 +23,16 @@ const CustomProfile = StyleSheet.create({
   imageContainer: {
     position: 'absolute',
     top: 30,
-    left: 3.5,
+    // left: 3.5,
     alignSelf: 'center',
   },
-  profileImage: {
-    width: 350,
-    height: 350,
+  profileImage: { width: '100%',
+    height: '100%',
     borderRadius: 350,
-    borderWidth: 3,
+    borderWidth: 0,
     borderColor: 'white', 
     backgroundColor: 'white',   
+   
 
   },
   gradientOverlay: {
@@ -87,7 +87,7 @@ const CustomProfile = StyleSheet.create({
   },
   iconSection: {
     padding: 16,  
-    width: 50,
+    width: '100%',
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
@@ -98,7 +98,7 @@ const CustomProfile = StyleSheet.create({
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius:10,
-    width: 360,
+    width: '108%',
     height: 58,
     borderRadius: 20,
     justifyContent: 'center',

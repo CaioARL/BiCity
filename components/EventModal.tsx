@@ -20,6 +20,7 @@ import MapModalView from './MapModalView';
 import { useAuthProvider } from '../app/context/AuthProvider';
 import { useTheme } from '../app/context/ThemeProvider';
 import tailwindConfig from '../tailwind.config';
+import FormFieldTime from './FormFieldTime';
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
@@ -472,14 +473,28 @@ const EventModal: React.FC<EventModalProps> = ({
                 option_2='Pago'
               />
 
+
+
+                <FormFieldTime                
+                    value={novoEvento.data}
+                    handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
+                />
+
+                
         
 
 
               <FormFieldCalendarSelectModal
                 value={novoEvento.data}
-                handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
+                handleChangeValue={(e) => updateCampoNovoEvento('data', e + novoEvento.data)}
                 
-              />               
+              />
+
+
+
+
+
+
               
               {saveError && (
                 <Text className='text-color_red_error  my-2'>{'*'+saveError}</Text>

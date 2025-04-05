@@ -12,12 +12,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        console.log("Request sent: ", config.baseURL);
+        console.log("Request sent: ", config.baseURL)
+        console.log("Request endpoint: ", config.url)
+        console.log("Request headers: ", config.headers)
         return config;
     }, 
     (error) => {
-        console.error("Request error: ", error);
-        console.error("Request error: ", error.response);
+        console.error("Request error: ", error)
+        console.error("Request error: ", error.response)
     
         return Promise.reject(error);
     }

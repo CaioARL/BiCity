@@ -6,7 +6,7 @@ import TokenInput from '../../components/CustomTokenInput';
 import { masks } from '../../util/masks';
 import { valid } from '../../util/validationSchemas';
 import { getViaCep } from '../../api/endereco';
-import { NivelHabilidade } from '../../types/nivel-habilidade';
+import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilidade';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,11 +19,7 @@ import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-nativ
 import { useTheme } from '../context/ThemeProvider';
 import tailwindConfig from '../../tailwind.config';
 
-interface ListNivelHabilidade {
-  nome: string;
-  id: number;
-  value: NivelHabilidade;
-}
+
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 

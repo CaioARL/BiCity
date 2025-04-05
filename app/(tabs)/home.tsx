@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Marker, Overlay } from 'react-native-maps'
+import MapView, { Circle, Geojson, Marker, Overlay } from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento } from '../../types'
 import { getEvento, getEventoByRadius } from '../../api/evento'
@@ -163,7 +163,9 @@ export default function Home() {
     }
 
 
-
+    const presisonado = () => {
+      console.log('pressionado')
+    }
 
 
 
@@ -173,12 +175,12 @@ export default function Home() {
       )
 
     }else {
-      let initialLocation :Region = {latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.1000, longitudeDelta:0.1000}
+      let initialLocation :Region = {latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034}
       if (currentViewLocation && isMoved){
         initialLocation = currentViewLocation
       }
       else if(currentLocation){
-        initialLocation  = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude, latitudeDelta:0.1000, longitudeDelta:0.1000}
+        initialLocation  = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0040}
       }
       return (   
         <SafeAreaView >
@@ -222,6 +224,15 @@ export default function Home() {
               }
             )
           )}
+
+          {infraestrutura && <Geojson
+            geojson={infraestrutura}
+            onPress={presisonado}
+            strokeColor='rgba(255, 0, 0, 0.5)'
+            strokeWidth={15}
+          />}
+            
+
   
            </MapView>
            {/**<Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>

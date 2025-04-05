@@ -1,10 +1,8 @@
-import { View, Text, requireNativeComponent } from 'react-native'
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { CriarUsuarioRequest, CriarUsuarioResponse, Usuario, UsuarioLoginRequest } from '../../types'
-import { createUser, getUserById, loginUser } from '../../api/usuario'
+import {  CriarUsuarioResponse, Usuario  } from '../../types'
+import { getUserById } from '../../api/usuario'
 import * as SecureStore from 'expo-secure-store'
-import axios from 'axios'
-import { set } from 'zod'
+import api from '../../api/index'
 
 
     interface AuthProps {
@@ -32,6 +30,7 @@ export default function AuthProvider({children}: any) {
     id: number | null
     authenticated: boolean | null
     user : Usuario | null
+    
   }>({id: null, authenticated: null, user: null})
   const [errorLoading, setErrorLoading] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -49,7 +48,7 @@ export default function AuthProvider({children}: any) {
           const token = await SecureStore.getItemAsync('hash')
           const id = await SecureStore.getItemAsync('id')
           if (token && id) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
             await getUserById(parseInt(id))
             .then((response) => {
               setAuthState({id: parseInt(id), authenticated: true, user: response})
@@ -63,7 +62,7 @@ export default function AuthProvider({children}: any) {
             
           } else {
             setAuthState({id: null, authenticated: false, user: authState.user})
-            axios.defaults.headers.common['Authorization'] = ''
+            api.defaults.headers.common['Authorization'] = ''
             setIsLoading(false)
           }
         }catch(error){
@@ -82,7 +81,7 @@ export default function AuthProvider({children}: any) {
       return new Promise ((resolve, reject) => {
         try {
           setAuthState({id: usuario.id, authenticated: true, user: usuario})
-          axios.defaults.headers.common['Authorization'] = `Bearer ${usuario.sessao.token}`
+          api.defaults.headers.common['Authorization'] = `Bearer ${usuario.sessao.token}`
           SecureStore.setItemAsync('hash', usuario.sessao.token)
           SecureStore.setItemAsync('id', usuario.id.toString())
           resolve('Login success')
@@ -99,7 +98,7 @@ export default function AuthProvider({children}: any) {
           setAuthState({id: null, authenticated: false, user: null})
           SecureStore.deleteItemAsync('hash')
           SecureStore.deleteItemAsync('id')
-          delete axios.defaults.headers.common['Authorization']
+          delete api.defaults.headers.common['Authorization']
           resolve('Logout success')
         } catch (error) {
           reject('Error on logout' + error)
@@ -114,7 +113,7 @@ export default function AuthProvider({children}: any) {
       return new Promise((resolve, reject) => {
         try {
           setAuthState({id: usuarioCadastro.id, authenticated: true, user: usuarioCadastro})
-        axios.defaults.headers.common['Authorization'] = `Bearer ${usuarioCadastro.sessao.token}`
+          api.defaults.headers.common['Authorization'] = `Bearer ${usuarioCadastro.sessao.token}`
           SecureStore.setItemAsync('hash', usuarioCadastro.sessao.token)
           SecureStore.setItemAsync('id', usuarioCadastro.id.toString())
           resolve('Register success')
@@ -127,13 +126,27 @@ export default function AuthProvider({children}: any) {
     }
 
 
-
-
-
+    const fetchUser = async () => {
+      return new Promise((resolve, reject) => {
+       if (authState.id === null) return reject('User ID is null') 
+        try {
+          getUserById(authState.id)
+            .then((response) => {
+              setAuthState({ ...authState, user: response });
+              resolve(response);
+            })
+            .catch((error) => {
+              reject('Error on fetching user data: ' + error);
+            });
+        } catch (error) {
+          reject('Error on fetching user data: ' + error);
+        }
+      });
+    }
 
 
     return (
-        <AuthContext.Provider value={{onLogin, onLogout, onRegister, authState, isLoading, errorLoading}}>
+        <AuthContext.Provider value={{onLogin, onLogout, onRegister, fetchUser, authState, isLoading, errorLoading}}>
             {children}
         </AuthContext.Provider>
   )

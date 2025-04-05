@@ -53,6 +53,7 @@ export default function MapModalEdit({getRegion, initalRegion}: MapModalEditProp
         style={{ height: 200, width: '100%', marginBottom: 20 }}
         className='h-[200px] w-full mb-[20px]'
         onRegionChange={setRegion}
+        showsUserLocation={true}
         initialRegion={initalRegion ? {...initalRegion, latitudeDelta: 0.0922 , longitudeDelta:0.0421 } : {latitude: -23.55052, longitude: -46.633308, latitudeDelta: 0.05, longitudeDelta: 0.05,}}
         onTouchEnd={() => isSelected && setIsSelected(false)}
         >

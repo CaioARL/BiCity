@@ -3,3 +3,8 @@ export interface NivelHabilidade {
     nome: string
     descricao: string
 }
+export interface ListNivelHabilidade {
+  nome: string;
+  id: number;
+  value: NivelHabilidade;
+}

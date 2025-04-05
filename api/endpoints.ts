@@ -1,33 +1,36 @@
 const ENDPOINTS = {
-    USUARIO_LOGIN: '/login/do',
+    USUARIO_LOGIN: '/login/',
     USUARIO_RECUPERAR_SENHA: '/login/recover',
-    USUARIO_CADASTRO: '/usuario/create',
-    USUARIO_GET: '/usuario/get',
-    USUARIO_VALIDAR_CPF: '/usuario/validate/cpf',
+    USUARIO_CADASTRO: '/usuario',
+    USUARIO_PUT: '/usuario/',
+    USUARIO_GET: '/usuario/',
+    USUARIO: '/usuario',
+    USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
+    USUARIO_GET_IMAGE: '/usuario/foto/file',
 
-    TOKEN_VALIDAR: '/token/send',
-    TOKEN_CHECK: '/token/is/valid',
+    TOKEN_VALIDAR: '/token/',
+    TOKEN_CHECK: '/token/validate',
 
-    NIVEL_GET: '/nivel/habilidade/list',
+    NIVEL_GET: '/nivel/habilidade/',
     NIVEL_POST: '/nivel/habilidade/create',
 
-    TIPO_EVENTO_GET: '/tipo-evento/list',
-    TIPO_EVENTO_POST: '/tipo-evento/create',
+    TIPO_EVENTO_GET: '/tipo/evento/',
+    TIPO_EVENTO_POST: '/tipo/evento/',
 
 
-    EVENTO_GET: '/evento/list',
-    EVENTO_GET_BY_RADIUS: '/evento/list/by/radius',
-    EVENTO_GET_BY_ID: '/evento/get',
-    EVENTO_POST: '/evento/create',
-    EVENTO_PUT: '/evento/update',
+    EVENTO_GET: '/evento/',
+    EVENTO_GET_BY_RADIUS: '/evento/radius',
+    EVENTO_GET_BY_ID: '/evento/',
+    EVENTO_POST: '/evento/',
+    EVENTO_PUT: '/evento/',
 
     ENDERECO_CEP_GET: '/endereco/get/by/cep',
     ENDERECO_VIACEP_GET: 'https://viacep.com.br/ws/',
     ENDERECO_LAT_LONG_GET: '/endereco/get/LatAndLon/by/cepAndNumber',
-    ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/get/by/LatAndLon',
+    ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/get/cep/by/LatAndLon',
 
 
-    INFRAESTRUTURA_GET: '/infraestrutura/list/as/geoJson',
+    INFRAESTRUTURA_GET: '/infraestrutura/geojson',
 
 
 } as const;

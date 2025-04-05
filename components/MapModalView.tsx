@@ -41,6 +41,7 @@ export default function MapModalView({prop, raio}: MapModalViewProps) {
     <MapView
         style={{ height: 200, width: '100%', marginBottom: 20 }}
         className='h-[200px] w-full mb-[20px]'
+        showsUserLocation={true}
         initialRegion={{...prop, latitudeDelta: 0.0922, longitudeDelta:0.0421} }
     >
         <Marker
