@@ -4,14 +4,14 @@ import ENDPOINTS from "./endpoints";
 
 
 
-export const getInfraestrutura = async (request: RequestInfraestruturaByRadius, abortSignal: AbortController) => {
+export const getInfraestrutura = async (request: RequestInfraestruturaByRadius, abortSignal: AbortController | null) => {
     const response = await api.get<InfraestruturaGeoJson>(ENDPOINTS.INFRAESTRUTURA_GET, {
         params: {
             latitude: request.latitude,
             longitude: request.longitude,
             raio: request.raio
         },
-        signal: abortSignal.signal
+        signal: abortSignal?.signal
     })
     return response.data
 }

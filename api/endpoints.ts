@@ -8,6 +8,12 @@ const ENDPOINTS = {
     USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
     USUARIO_GET_IMAGE: '/usuario/foto/file',
 
+
+    PROBLEMA_GET_BY_RADIUS: '/problema/radius',
+    PROBLEMA_GET_BY_ID: '/problema/',
+    PROBLEMA_POST: '/problema/',    
+
+
     TOKEN_VALIDAR: '/token/',
     TOKEN_CHECK: '/token/validate',
 

@@ -2,12 +2,14 @@ import { View, Text, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-n
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker, Overlay } from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento } from '../../types'
+import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
 import { getEvento, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
-import { string } from 'zod'
+import { set, string } from 'zod'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
+import { createProblema, getProblemaByRadius } from '../../api/problema'
+import ShowAlert from '../../components/ShowAlert'
 
 interface Region {
   latitude: number
@@ -39,14 +41,22 @@ export default function Home() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
 
-  const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
+
+  const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema>()
+  const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
+  const [problemas, setProblemas] = useState<Problema[]>([])
+
+
   const abortControllerRef = useRef<AbortController>()
-  const [isRequestInProgress, setIsRequestInProgress] = useState(false)
-
+  // const [isRequestInProgress, setIsRequestInProgress] = useState(false)
+  
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
+  
+  const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
+  const [eventos, setEventos] = useState<Evento[]>([])
 
-  const [eventos, setEventos] = useState<Evento[]>()
-
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const locationErrors = {
     PERMISSION : {key: 'PERMISSION', message: 'Permissão de localização negada, cheque as permissões do aplicativo'},
@@ -54,12 +64,11 @@ export default function Home() {
     ERROR : {key: 'ERROR', message: 'Erro ao obter localização'}
   }
 
-
-    
+  const emptyGeoJson: InfraestruturaGeoJson = {
+    type: "FeatureCollection",
+    features: [],
+  };
   
- 
-
-
 
    const getCurrentLocation = async (): Promise<void>  => {
      let {status} = await Location.requestForegroundPermissionsAsync()
@@ -77,7 +86,7 @@ export default function Home() {
       }
     })
     .catch((error)=> {
-      alert("Error ao checar service de localização: "+ error)
+      setErrorMessage("Error ao checar serviço de localização: "+ error)
     })
     
     let location = await Location.getCurrentPositionAsync({})
@@ -86,6 +95,12 @@ export default function Home() {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       raio: 750
+    })
+
+    setRequestProblemas({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      raio: 7000
     })
 
 
@@ -115,66 +130,109 @@ export default function Home() {
   }, [])
 
 
-  useEffect(()=>{
+  useEffect( () => {
     if (!requestEventos) {return}
-    if(isRequestInProgress){return}
-    setIsRequestInProgress(true)
 
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = new AbortController
-    setIsContentLoading(true)
-    console.log(new Date().toLocaleTimeString()+' veio do mapa: requestEventos', requestEventos)
-
-
-    if(requestInfraestrutura){
-      getInfraestrutura(requestInfraestrutura, abortControllerRef.current)
-      .then((response) => {
-        setInfraestrutura(response)
-
-      })
-      .catch((response)=>{
-        alert("Error ao carregar infraestrutura: " + response.message)
-      })
-    }
-
-
-      getEventoByRadius(requestEventos, abortControllerRef.current)
+      getEventoByRadius(requestEventos, null)
     .then((response) =>{
       setEventos(response)
     })
     .catch((response)=>{  
-      alert("Error ao carregar eventos: "+ response.message)
+      setErrorMessage("Error ao carregar eventos: "+ response.message)
     })
     .finally(()=>{
-      setIsRequestInProgress(false)
-      setIsContentLoading(false)
+      console.log("Teriminou a requisição de eventos")
     })
 
     },[requestEventos])
 
 
+    useEffect(() => {
+      if (!requestProblemas) {return}
+      getProblemaByRadius(requestProblemas, null)
+      .then((response) => {
+        setProblemas(response)
+      })
+      .catch((response)=>{
+        setErrorMessage("Error ao carregar problemas: " + response.message)
+      })
+      .finally(()=>{
+        console.log("Teriminou a requisição de problemas")
+      })
+    }
+    , [requestProblemas])
+
+    useEffect(() => {
+      if (!requestInfraestrutura) {return}
+      getInfraestrutura(requestInfraestrutura, null)
+      .then((response) => {
+        setInfraestrutura(response)
+      })
+      .catch((response)=>{
+        setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+      })
+      .finally(()=>{
+        console.log("Teriminou a requisição de infraestrutura")
+      })
+    }, [requestInfraestrutura])
+
+
     const getEventsOnViewLocation = () => {
+      abortControllerRef.current?.abort()
       if(!currentViewLocation){return}
-      setRequestEventos({
-        latitude: currentViewLocation.latitude,
-        longitude: currentViewLocation.longitude,
-        raio: 7000
+      setRequestInfraestrutura({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 750
+        })
+        setRequestProblemas({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 7000
+        })
+        setRequestEventos({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 7000
+        })
+    }
+
+
+
+    
+
+    useEffect(()=>{
+      if(!requestCreateProblema){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createProblema(requestCreateProblema, abortControllerRef.current)
+      .then((response) => {
+        setSuccessMessage("Problema criado com sucesso")
+      })
+      .catch((response) => {
+        setErrorMessage("Error ao criar problema: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+      })
+    
+    },[requestCreateProblema])
+
+
+
+
+    const pressionado = (latitude: number, longitude: number) => {
+      setRequestCreateProblema({
+        descricao: 'Teste de problema',
+        ativo: true,
+        latitude: latitude || 0,
+        longitude: longitude || 0,
+        idTipoProblema: 1
       })
     }
 
 
-    const presisonado = () => {
-      console.log('pressionado')
-    }
 
-
-
-    if (isContentLoading){
-      return (
-        <LoadingActivity/>
-      )
-
-    }else {
       let initialLocation :Region = {latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034}
       if (currentViewLocation && isMoved){
         initialLocation = currentViewLocation
@@ -182,6 +240,7 @@ export default function Home() {
       else if(currentLocation){
         initialLocation  = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0040}
       }
+
       return (   
         <SafeAreaView >
         {/* <View className='h-[10%]'>
@@ -194,12 +253,16 @@ export default function Home() {
             mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
             initialRegion={initialLocation}
             showsUserLocation={true} 
+            onLongPress={e=> {
+              console.log('Long Press', e.nativeEvent.coordinate)
+              pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
+            }}
             onRegionChangeComplete={ (e, {isGesture}  ) => {setIsMoved(isGesture)}}
           >
-            {eventos &&(
+            
 
-              eventos.map((evento) => {
-                return (
+              {eventos.map((evento) => (
+
                   <View key={evento.id}>
                     <Circle
                       fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
@@ -220,17 +283,26 @@ export default function Home() {
 
                     />
                   </View>
-                )
-              }
-            )
-          )}
+                ))}
 
-          {infraestrutura && <Geojson
-            geojson={infraestrutura}
-            onPress={presisonado}
-            strokeColor='rgba(255, 0, 0, 0.5)'
-            strokeWidth={15}
-          />}
+                {problemas.map((problema) => (        
+                   <Marker 
+                      key={problema.id} 
+                      coordinate={problema} 
+                      title={problema.descricao}
+                      image={require('../../assets/pins/flag_pink.png')}
+                    />
+                ))}
+
+          
+            
+        
+
+          <Geojson
+            geojson={infraestrutura || emptyGeoJson}
+            strokeColor='rgba(255, 0, 0, 0.35)'
+            strokeWidth={10}
+          />
             
 
   
@@ -246,7 +318,7 @@ export default function Home() {
             // </Marker>*/} 
 
           {currentLocationError &&
-            (<View className='items-center justify-center h-[50%] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
+            (<View className='items-center justify-center h-[20%] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
             <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
               {currentLocationError.key === 'SERVICE' &&
               <ButtonModal
@@ -265,7 +337,20 @@ export default function Home() {
                 customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
               />
             </View>)}
+            {isContentLoading && <LoadingActivity/>}
+            {successMessage && 
+            <ShowAlert
+              message={successMessage}
+              type='success'
+              onClose={()=>setSuccessMessage(null)}
+            />}
+            {errorMessage && 
+            <ShowAlert
+              message={errorMessage}
+              type='error'
+              onClose={()=>setErrorMessage(null)}
+            />}
+
       </SafeAreaView>
     )
   }
-}

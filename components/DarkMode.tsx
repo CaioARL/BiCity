@@ -36,10 +36,7 @@ const DarkMode: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    loadTheme();
-  }, []);
-
+  
   // Detecta mudanças no tema do sistema e atualiza apenas se não houver preferência salva
   // Se não houver tema salvo, segue o tema do App
   useEffect(() => {
@@ -52,13 +49,17 @@ const DarkMode: React.FC = () => {
     });
     return () => subscription.remove(); 
   }, [setTheme]);
-
+  
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     saveThemeToStorage(newTheme); 
   };
-
+  
+  useEffect(() => {
+    loadTheme();
+  }, []);
+  
   return (
     <View
     style={{ position: 'absolute', zIndex: 8888, top: 50, left: 5 }}

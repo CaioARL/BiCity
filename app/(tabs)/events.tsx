@@ -1,5 +1,6 @@
-import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
+import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Modal, Button } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
+import { Image } from 'expo-image'
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
@@ -182,9 +183,9 @@ export default function Events() {
             { authState?.user?.s3Url ? 
             
             <Image
-              source={{ uri: process.env.EXPO_PUBLIC_S3_URL + authState.user.s3Url }}
-              className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
-              // style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
+              source={authState.user.s3Url}
+              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
             />
             :
             <View className={`w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center   ${theme === 'dark' ? 'bg-secondary_black uppercase border-white' : 'border-[#EAEAEC]'}`}>

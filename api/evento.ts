@@ -48,14 +48,14 @@ export const getEvento = async (requestPageEvento: RequestPageEvento, abortSigna
 
 
 
-export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByRadius, abortSignal: AbortController) : Promise<Evento[]> => {
+export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByRadius, abortSignal: AbortController | null) : Promise<Evento[]> => {
     const response = await api.get<Evento[]>(ENDPOINTS.EVENTO_GET_BY_RADIUS, {
         params: {
             latitude: requestEventoByRadius.latitude,
             longitude: requestEventoByRadius.longitude,
             raio: requestEventoByRadius.raio,
         }, 
-        signal: abortSignal.signal
+        signal: abortSignal?.signal
     })
     return response.data
 }

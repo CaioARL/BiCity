@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, TextInput, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Image, useImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,15 @@ const Profile = () => {
   const { tabBarOffset } = useTabBar()
 
   const [image, setImage] = useState<string | null>()
+  // const profileImg = useImage(  authState?.user?.s3Url , {
+  //     maxWidth: 800,
+  //     onError(error, retry) {
+  //       console.log(authState?.user?.s3Url)
+  //       console.error('Loading failed:', error.message);
+  //     }}
+  // )
+
+
   const [isEditing, setIsEditing] = useState(false)
   const [showMoreInfo, setShowMoreInfo] = useState(false)
   
@@ -66,6 +76,9 @@ const Profile = () => {
     if (authState?.user) {
       if (authState.user) {
           setUserToUpdate(authState.user)
+          if (authState.user.s3Url) {
+            setImage(authState.user.s3Url)
+          }
       }
     }  
   }, [authState])
@@ -268,15 +281,11 @@ const Profile = () => {
                 }`}
               >
             {image? 
-              (<Image style={CustomProfile.profileImage} source={{ uri: image }} />)
+              (<Image style={CustomProfile.profileImage} source={image} />)
               :
-              (authState?.user?.s3Url ? 
-              // <Image style={CustomProfile.profileImage} source={{ uri: process.env.EXPO_PUBLIC_AWS_S3_URL + authState.user.s3Key }} /> 
-              <Image style={CustomProfile.profileImage} source={{ uri: authState.user.s3Url }} /> 
-                : 
               <Text className={`text-[250px] ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>
                 {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
-              </Text>)
+              </Text>
             }
 
                 <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor: theme === 'dark' ?  colors.secondary_black : colors.primary_green }} onPress={pickImage} >
