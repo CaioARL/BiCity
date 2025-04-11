@@ -1,27 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Modal, Animated, ScrollView} from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../../types/tipo-evento';
 import { getTipoEvento } from '../../api/tipo-evento';
 
-import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError, RequestUpdateEventoError, RequestUpdateEvento, Region } from '../../types';
+import { Evento, NivelHabilidade, RequestUpdateEventoError, RequestUpdateEvento, Region } from '../../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep, getCepByLatAndLong, getViaCep } from '../../api/endereco';
+import { getCep, getCepByLatAndLong } from '../../api/endereco';
 import { upateEventSchema } from '../../util/validationSchemas';
-import { createEvento, updateEvento } from '../../api/evento';
+import {  updateEvento } from '../../api/evento';
 import FormFieldModal from '../../components/FormFieldModal';
 import FormSelectFieldModal from '../../components/FormSelectFieldModal';
 import FormFieldCalendarSelectModal from '../../components/FormFieldCalendarSelectModal';
 import ButtonModal from '../../components/ButtonModal';
 import LoadingActivity from '../../components/LoadingActivity';
 import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList';
-import FormFieldViewModal from '../../components/FormFieldViewModal';
 import MapModalView from '../../components/MapModalView';
 import MapModalEdit from '../../components/MapModalEdit';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
 
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface EventModalProps {
   closeModal: () => void
@@ -30,7 +25,6 @@ interface EventModalProps {
 }
 
 const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) => {
-  const { theme } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const abortControllerRef = useRef(new AbortController())
 

@@ -11,10 +11,7 @@ import { useAuthProvider } from '../context/AuthProvider';
 import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { getEvento } from '../../api/evento';
 import EventView from '../view/EventView';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
 
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 // interface EventItem {
 //   id: string;
@@ -38,7 +35,6 @@ export default function Events() {
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', role: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' }, sessao: {id:0, token:''}, s3Url:'' });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  const { theme } = useTheme();
   
   //requests - api
   const [eventos, setEventos] = useState<Evento[] | null>(null)
@@ -170,8 +166,8 @@ export default function Events() {
   };
   
   return (
-  <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? colors.matte_gray : 'transparent' }}>
-      <View className={`container ${theme === 'dark' ? 'bg-secondary_black' : 'bg-white'}`}>
+  <SafeAreaView>
+      <View className='container' style={{ backgroundColor: 'white' }}>
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
@@ -188,32 +184,32 @@ export default function Events() {
               style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
             />
             :
-            <View className={`w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center   ${theme === 'dark' ? 'bg-secondary_black uppercase border-white' : 'border-[#EAEAEC]'}`}>
-              <Text className={`text-[45px] uppercase ${theme === 'dark' ? 'color-white' : ''}`}>{usuario && usuario.nome[0]}</Text>
+            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
             </View>
             
             }
 
 
             <View style={{ flexDirection: 'column' }}>
-              <Text style={{ ...CustomEvents.locationText, color: theme === 'dark' ? 'white': 'matte_gray' }}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+              <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
               <View style={{ flexDirection: 'row' }}>
-                <Feather name="map-pin" size={18} style={{marginLeft: 2, color: theme === 'dark' ? colors.primary_green : 'matte_gray' }}/>
-                {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText, color: theme === 'dark' ? 'white': 'matte_gray' }}>{authState.user.endereco.cidade}</Text> }
+                <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
+                {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
                 {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
               </View>
               <View style={{ flexDirection: 'row' }}>
                 <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
                 
                 {authState?.user?.nivelHabilidade && (
-                  <Text style={{ ...CustomEvents.nivelText, color: theme === 'dark' ? 'white': 'matte_gray' }}>{authState.user.nivelHabilidade.nome}</Text>)  
+                  <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
                 }
 
               </View>
             </View>
           </View>
 
-          <View style={{ ...CustomEvents.searchBox, shadowColor: theme === 'dark' ? colors.white : colors.matte_gray, borderColor: theme === 'dark' ? colors.primary_green : colors.matte_gray, }}>
+          <View style={{ ...CustomEvents.searchBox, }}>
             <Ionicons name="search-outline" size={20} color="#555"/>
             <TextInput
               placeholder="Digite o nome do evento"
@@ -239,8 +235,8 @@ export default function Events() {
                     filter === item && {
                       ...CustomEvents.filterText,fontWeight: "bold",
                       color: "#555",
-                      backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green,
-                      shadowColor: theme === 'dark' ? colors.white : colors.matte_gray, borderColor: theme === 'dark' ? colors.primary_green : colors.white, 
+                      backgroundColor: "#C3FF00",
+                      borderColor: "white" 
                     }
                   ]}
                 >
@@ -254,7 +250,7 @@ export default function Events() {
         {/* Box - Eventos */}
         <View>
       
-          <Text style={{ ...CustomEvents.placesContainer, color: theme === 'dark' ? 'white': '' }}>Eventos</Text>
+        <Text style={CustomEvents.placesContainer}>Eventos</Text>
 
            {eventos && (
             <FlatList

@@ -9,12 +9,9 @@ import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
 
 type AlertType = 'success' | 'error' | 'loading';
 
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 export default function SignIn() {
   const backgroundImageLogo = require('../../assets/img/logo.png');
@@ -28,7 +25,6 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = useState('');
   const [isValidUsername, setIsValidUsername] = useState<boolean | undefined>(undefined);
   const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
-  const { theme } = useTheme();
   
   // Alert state and animation
   const [alertConfig, setAlertConfig] = useState({
@@ -167,7 +163,7 @@ export default function SignIn() {
   };
 
   return (
-    <SafeAreaView style={ { backgroundColor: theme === 'dark' ? colors.secondary_black : colors.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ImageBackground
         source={backgroundImage}
         style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -183,7 +179,7 @@ export default function SignIn() {
             />
           </View>
           
-          <Text className={`text-2xl font-bold text-center mb-4 ${theme === 'dark' ? 'color-primary_green' : 'text-secondary_black'}`}>
+          <Text className="text-2xl font-bold text-center text-secondary_black mb-4">
             BICITY
           </Text>
 
@@ -196,7 +192,6 @@ export default function SignIn() {
             placeholder="Insira seu nome de usuário"
             msg={usernameError}
             isValid={isValidUsername}
-            theme={theme}
           />
 
           <FormField
@@ -208,7 +203,6 @@ export default function SignIn() {
             secureTextEntry={true}
             msg={passwordError}
             isValid={isValidPassword}
-            theme={theme}
           />
 
           <CustomButton
@@ -224,7 +218,7 @@ export default function SignIn() {
             </Text>
             <Text
               onPress={() => setFilterModalVisible(true)}
-              className={theme === 'dark' ? 'text-white text-blue-500 font-bold' : 'text-secondary_black_sub_title text-blue-500 font-bold'}
+               className="text-blue-500 font-bold"
             >
               Inscrever-se
             </Text>
@@ -236,7 +230,7 @@ export default function SignIn() {
             </Text>
             <Text
               onPress={() => router.push('/forgot-password')}
-              className={theme === 'dark' ? 'text-white text-blue-500 font-bold' : 'text-secondary_black_sub_title text-blue-500 font-bold'}
+              className={'text-secondary_black_sub_title text-blue-500 font-bold'}
             >
               Redefina
             </Text>

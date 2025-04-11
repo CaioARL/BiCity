@@ -1,16 +1,16 @@
 import { View, Text, SafeAreaView} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
-import { set, string } from 'zod'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
 import { createProblema, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
+import PinProblemaView from '../view/PinProblemaView'
 
 interface Region {
   latitude: number
@@ -49,6 +49,8 @@ export default function Home() {
   const [problemas, setProblemas] = useState<Problema[]>([])
   const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number}>({latitude: 0, longitude: 0})
   const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false)
+
+  const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
 
 
 
@@ -327,7 +329,9 @@ export default function Home() {
                           require('../../assets/pins/pin_problema_tipo_1.png')
                           
                       }
+                      onPress={()=>setPinProblemaSelector(problema)}
                     >
+                    
                     </Marker>
                 ))}
 
@@ -365,6 +369,13 @@ export default function Home() {
                 customStyles='w-[200px] h-[50px] px-4 py-2 bg-primary_green_light'
               />}
             </View>)}
+
+          {pinProblemaSelector &&
+            <PinProblemaView
+              problema={pinProblemaSelector}
+              onClose={() => setPinProblemaSelector(null)}
+            />}
+                
               {isMoved && 
             (<View className='items-center justify-center h-[50%] w-[100%] absolute top-[-20%]'>
               <ButtonModal
