@@ -16,6 +16,8 @@ import { updateImageUser, updateUser } from '../../api/usuario';
 import LoadingActivity from '../../components/LoadingActivity';
 import FormFieldSelectList from '../../components/FormFieldSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
+import CustomButton from '../../components/CustomButton';
+import ShowAlert from '../../components/ShowAlert';
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
@@ -34,6 +36,9 @@ const Profile = () => {
   //     }}
   // )
 
+
+  const [errorMessage, setErrorMessage] = useState<string|null>(null)
+  const [successMessage, setSuccessMessage] = useState<string|null>(null)
 
   const [isEditing, setIsEditing] = useState(false)
   const [showMoreInfo, setShowMoreInfo] = useState(false)
@@ -101,10 +106,10 @@ const Profile = () => {
     updateUser(authState.id, userToUpdate, abortControllerRef.current)
       .then((response) => {
         fetchUser()
-        alert('Usuário atualizado com sucesso!')
+        setSuccessMessage('Usuário atualizado com sucesso!')
       })
       .catch((error) => {
-        alert('Erro ao atualizar usuário: ' + error.message)
+        setErrorMessage('Erro ao atualizar usuário: ' + error.message)
       })
       .finally(() => {
         setIsLoading(false)
@@ -118,17 +123,15 @@ const Profile = () => {
           name: authState.id+'profile.jpg',
           type: 'image/jpeg',
         } as any)
-        abortControllerRef?.current.abort()
-        abortControllerRef.current = new AbortController()
         setIsLoading(true)
 
-        updateImageUser(authState.id, formData, abortControllerRef.current)
+        updateImageUser(authState.id, formData, null)
           .then((response) => {
             setImage(null)
-            alert('Imagem atualizada com sucesso!')
+            setSuccessMessage('Imagem atualizada com sucesso!')
           })
           .catch((error) => {
-            alert('Erro ao atualizar imagem: ' + error.message)
+            setErrorMessage('Erro ao atualizar imagem: ' + error.message)
           })
           .finally(() => {
             setIsLoading(false)
@@ -188,10 +191,10 @@ const Profile = () => {
     if (onLogout) {
       onLogout()
         .then((response) => {
-          alert(response);
+          setSuccessMessage(response);
         })
         .catch((error) => {
-          alert(error);
+          setErrorMessage(error);
         });
       router.replace('sign-in');
     }
@@ -288,9 +291,9 @@ const Profile = () => {
               </Text>
             }
 
-                <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor: theme === 'dark' ?  colors.secondary_black : colors.primary_green }} onPress={pickImage} >
+                {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor: theme === 'dark' ?  colors.secondary_black : colors.primary_green }} onPress={pickImage} >
                  <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: theme === 'dark' ? 'white' : 'secondary_black' }}/>
-                </TouchableOpacity>
+                </TouchableOpacity>}
               </View>
             </View>
           </View>
@@ -420,6 +423,14 @@ const Profile = () => {
             )} */}
           </View>
 
+            {isEditing && (
+              <CustomButton
+                title="Salvar Alterações"
+                handlePress={update}
+                containerStyles='mb-[20px]'
+              />
+            )}
+
           <View style={CustomProfile.iconSection}>
             <TouchableOpacity
               style={{
@@ -428,19 +439,27 @@ const Profile = () => {
               }}
               onPress={toggleEdit}
             >
-              <Ionicons name="chevron-down" size={24} color="white" />
+              {isEditing ? <Text className='text-lg font-robotobold text-secondary_black'>Cancelar</Text> : <Ionicons name="chevron-down" size={24} color="white" />}
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
+          {!isEditing && <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
             <Text style={{ fontWeight: 'bold' }}>Sair</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>}
 
-          {isEditing && (
-            <TouchableOpacity style={CustomProfile.buttonSalve} onPress={update}>
-              <Text style={{ fontWeight: 'bold' }}>Salvar</Text>
-            </TouchableOpacity>
-          )}
+          {errorMessage && (
+          <ShowAlert
+            type='error'
+            message={errorMessage}
+            onClose={() => setErrorMessage(null)}
+          />)}
+        {successMessage && (
+          <ShowAlert
+            type='success'
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />)}
+
         </View>
       </ScrollView>
     </SafeAreaView>

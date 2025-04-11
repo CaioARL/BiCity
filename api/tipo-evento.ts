@@ -4,6 +4,6 @@ import ENDPOINTS from "./endpoints";
 
 
 export const getTipoEvento = async (): Promise<TipoEvento[]> => {
-    const response = await api.get<TipoEvento[]>(ENDPOINTS.TIPO_EVENTO_GET)
+    const response = await api.get(ENDPOINTS.TIPO_EVENTO_GET)
     return response.data
 }

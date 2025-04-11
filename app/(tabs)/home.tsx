@@ -1,15 +1,16 @@
-import { View, Text, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-native'
+import { View, Text, SafeAreaView} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, Marker, Overlay } from 'react-native-maps'
+import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
-import { getEvento, getEventoByRadius } from '../../api/evento'
+import { getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import { set, string } from 'zod'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
 import { createProblema, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
+import ProblemaModal from '../../components/ProblemaModal'
 
 interface Region {
   latitude: number
@@ -34,7 +35,8 @@ export default function Home() {
 
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
 
-  const [currentViewLocation, setcurrentViewLocation] = useState<Region | null>(null)
+  const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
+  const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
 
@@ -42,12 +44,17 @@ export default function Home() {
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
 
 
-  const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema>()
+  const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>()
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
   const [problemas, setProblemas] = useState<Problema[]>([])
+  const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number}>({latitude: 0, longitude: 0})
+  const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false)
+
 
 
   const abortControllerRef = useRef<AbortController>()
+  const [initalLoading, setInitalLoading] = useState<boolean>(true)
+  
   // const [isRequestInProgress, setIsRequestInProgress] = useState(false)
   
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
@@ -89,27 +96,34 @@ export default function Home() {
       setErrorMessage("Error ao checar serviço de localização: "+ error)
     })
     
-    let location = await Location.getCurrentPositionAsync({})
-
-    setRequestInfraestrutura({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      raio: 750
+    await Location.getCurrentPositionAsync({})
+    .then((response) => {
+      setCurrentLocation(response)
+      setRequestInfraestrutura({
+        latitude: response.coords.latitude,
+        longitude: response.coords.longitude,
+        raio: 750
+      })
+      setRequestProblemas({
+        latitude: response.coords.latitude,
+        longitude: response.coords.longitude,
+        raio: 7000
+      })   
+      setRequestEventos({
+        latitude: response.coords.latitude,
+        longitude: response.coords.longitude,
+        raio: 7000
+      })
+      setInitialRegion({latitude: response.coords.latitude, longitude: response.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
+      initalLoading && setInitalLoading(false)
+    })
+    .catch((error) => {
+      setCurrentLocationError(locationErrors.ERROR)
+      setErrorMessage("Error ao obter localização: "+ error)
+    }).finally(() => {
     })
 
-    setRequestProblemas({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      raio: 7000
-    })
 
-
-    setCurrentLocation(location)  
-    setRequestEventos({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      raio: 7000
-    })
 
   }
 
@@ -126,7 +140,6 @@ export default function Home() {
     getCurrentLocation
   , 120000)
 
-
   }, [])
 
 
@@ -142,6 +155,7 @@ export default function Home() {
     })
     .finally(()=>{
       console.log("Teriminou a requisição de eventos")
+      isContentLoading && setIsContentLoading(false)
     })
 
     },[requestEventos])
@@ -158,6 +172,7 @@ export default function Home() {
       })
       .finally(()=>{
         console.log("Teriminou a requisição de problemas")
+        isContentLoading && setIsContentLoading(false)
       })
     }
     , [requestProblemas])
@@ -173,6 +188,7 @@ export default function Home() {
       })
       .finally(()=>{
         console.log("Teriminou a requisição de infraestrutura")
+        isContentLoading && setIsContentLoading(false)
       })
     }, [requestInfraestrutura])
 
@@ -180,6 +196,7 @@ export default function Home() {
     const getEventsOnViewLocation = () => {
       abortControllerRef.current?.abort()
       if(!currentViewLocation){return}
+      setIsContentLoading(true)
       setRequestInfraestrutura({
           latitude: currentViewLocation.latitude,
           longitude: currentViewLocation.longitude,
@@ -214,33 +231,30 @@ export default function Home() {
         setErrorMessage("Error ao criar problema: " + response.message)
       }).finally(() => {
         setIsContentLoading(false)
-      })
+        setRequestCreateProblema(null)
+      }) 
     
     },[requestCreateProblema])
 
 
-
+    const detalheDaVia = () => {
+      
+    }
 
     const pressionado = (latitude: number, longitude: number) => {
-      setRequestCreateProblema({
-        descricao: 'Teste de problema',
-        ativo: true,
-        latitude: latitude || 0,
-        longitude: longitude || 0,
-        idTipoProblema: 1
-      })
+      setProblemaCoords({latitude, longitude})
+      setShowProblemaModal(true)
     }
 
 
+    
+    if(initalLoading)
+      return (
+        <LoadingActivity/>
+      )
 
-      let initialLocation :Region = {latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034}
-      if (currentViewLocation && isMoved){
-        initialLocation = currentViewLocation
-      }
-      else if(currentLocation){
-        initialLocation  = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0040}
-      }
 
+    else
       return (   
         <SafeAreaView >
         {/* <View className='h-[10%]'>
@@ -249,10 +263,13 @@ export default function Home() {
         
 
         <MapView style={{width: '100%', height:'100%'}} 
-            onRegionChange={setcurrentViewLocation}
+            onRegionChange={setCurrentViewLocation}
             mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
-            initialRegion={initialLocation}
+            initialRegion={initialRegion}
             showsUserLocation={true} 
+            onPress={e=> {
+              console.log("Press ", e.nativeEvent.coordinate)
+            }}
             onLongPress={e=> {
               console.log('Long Press', e.nativeEvent.coordinate)
               pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
@@ -290,8 +307,28 @@ export default function Home() {
                       key={problema.id} 
                       coordinate={problema} 
                       title={problema.descricao}
-                      image={require('../../assets/pins/flag_pink.png')}
-                    />
+                      image={
+                        problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1.png')) 
+                        :
+                        problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2.png') )
+                        : 
+                        problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3.png') )
+                        :
+                        problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4.png') ) 
+                        :
+                        problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5.png') )   
+                        :
+                        problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6.png') )   
+                        :
+                        problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7.png') )   
+                        :  
+                        problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8.png') )   
+                        :  
+                          require('../../assets/pins/pin_problema_tipo_1.png')
+                          
+                      }
+                    >
+                    </Marker>
                 ))}
 
           
@@ -318,7 +355,7 @@ export default function Home() {
             // </Marker>*/} 
 
           {currentLocationError &&
-            (<View className='items-center justify-center h-[20%] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
+            (<View className='items-center justify-center h-[200px] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
             <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
               {currentLocationError.key === 'SERVICE' &&
               <ButtonModal
@@ -350,6 +387,16 @@ export default function Home() {
               type='error'
               onClose={()=>setErrorMessage(null)}
             />}
+            {showProblemaModal &&
+            <ProblemaModal
+              coords={problemaCoords}
+              visible={showProblemaModal}
+              closeModal={e => {
+                setRequestCreateProblema(e)
+                setShowProblemaModal(false)
+              }}
+              />
+            }
 
       </SafeAreaView>
     )

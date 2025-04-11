@@ -38,7 +38,7 @@ export const getUserById = async (id: number ) => {
 }
 
 
-export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSignal: AbortController ) => {
+export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSignal: AbortController | null ) => {
     const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT+ id , {
         
                 nome: user.nome, 
@@ -55,7 +55,7 @@ export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSi
                 nivelHabilidade: user.nivelHabilidade.id   
     },
     {
-        signal: abortSignal.signal
+        signal: abortSignal?.signal
     }
     
 )
@@ -63,9 +63,9 @@ export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSi
 }
 
 
-export const updateImageUser = async (id: number, image: FormData, abortSignal: AbortController ) => {
+export const updateImageUser = async (id: number, image: FormData, abortSignal: AbortController | null ) => {
     const response = await api.put<Usuario>(ENDPOINTS.USUARIO_PUT + id + '/foto', image, {
-        signal: abortSignal.signal,
+        signal: abortSignal?.signal,
         headers: {
             'Content-Type': 'multipart/form-data'
         }
