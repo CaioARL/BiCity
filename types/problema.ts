@@ -31,6 +31,9 @@ export interface RequestProblemaByRadius {
 
 
 
-
+export interface RequestCreateProblemaImage {
+    id: number
+    image: FormData
+}
 
 

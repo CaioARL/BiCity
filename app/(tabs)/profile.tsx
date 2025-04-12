@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Image, useImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -239,12 +238,15 @@ const Profile = () => {
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
               <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
 
-            {image? 
-              (<Image style={CustomProfile.profileImage} source={image} />)
-              :
-              <Text className='text-[245px]'>
-                {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
-              </Text>
+            {image ? 
+                (<Image style={CustomProfile.profileImage} src={image} />)
+            :
+            authState?.user?.s3Url ? 
+                (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
+                :
+                (<Text className='text-[245px]'>
+                  {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
+                </Text>)
             }
 
                 {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor : '#C3FF00'}} onPress={pickImage} >

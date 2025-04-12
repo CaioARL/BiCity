@@ -2,12 +2,12 @@ import { View, Text, SafeAreaView} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
+import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
-import { createProblema, getProblemaByRadius } from '../../api/problema'
+import { createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import PinProblemaView from '../view/PinProblemaView'
@@ -49,6 +49,8 @@ export default function Home() {
   const [problemas, setProblemas] = useState<Problema[]>([])
   const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number}>({latitude: 0, longitude: 0})
   const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false)
+  const [problemaImage ,setProblemaImage] = useState<string | null>(null)
+  const [requestProblemaImage, setRequestProblemaImage] = useState<RequestCreateProblemaImage | null>(null)
 
   const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
 
@@ -228,6 +230,18 @@ export default function Home() {
       createProblema(requestCreateProblema, abortControllerRef.current)
       .then((response) => {
         setSuccessMessage("Problema criado com sucesso")
+        if(problemaImage){
+          const formData = new FormData()
+          formData.append('file', {
+            uri: problemaImage,
+            name: 'problema.jpg',
+            type: 'image/jpeg',
+          } as any)
+          setRequestProblemaImage({
+            id: response.id,
+            image: formData
+          })
+        }
       })
       .catch((response) => {
         setErrorMessage("Error ao criar problema: " + response.message)
@@ -237,6 +251,26 @@ export default function Home() {
       }) 
     
     },[requestCreateProblema])
+
+
+    useEffect(()=>{
+      if(!requestProblemaImage){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createProblemaImage(requestProblemaImage, abortControllerRef.current)
+      .then((response) => {
+        setSuccessMessage("Imagem enviada com sucesso" + response)
+      })
+      .catch((response) => {
+        setErrorMessage("Error ao enviar imagem: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+        setRequestProblemaImage(null)
+      })
+    }, [requestProblemaImage])
+
+
 
 
     const detalheDaVia = () => {
@@ -359,7 +393,7 @@ export default function Home() {
             // </Marker>*/} 
 
           {currentLocationError &&
-            (<View className='items-center justify-center h-[200px] w-[100%] bg-primary_green absolute top-[50%] rounded-[100px]' >
+            (<View className='items-center justify-center h-fit w-[90%] left-[5%] bg-primary_green absolute top-[50%] rounded-[10px]' >
             <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
               {currentLocationError.key === 'SERVICE' &&
               <ButtonModal
@@ -377,7 +411,7 @@ export default function Home() {
             />}
                 
               {isMoved && 
-            (<View className='items-center justify-center h-[50%] w-[100%] absolute top-[-20%]'>
+            (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
               <ButtonModal
                 title='Achar Eventos Próximos'
                 handlePress={getEventsOnViewLocation}
@@ -402,8 +436,9 @@ export default function Home() {
             <ProblemaModal
               coords={problemaCoords}
               visible={showProblemaModal}
-              closeModal={e => {
-                setRequestCreateProblema(e)
+              closeModal={(createProblema, image) => {
+                setRequestCreateProblema(createProblema)
+                setProblemaImage(image)
                 setShowProblemaModal(false)
               }}
               />

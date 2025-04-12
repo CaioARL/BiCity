@@ -1,7 +1,8 @@
-import { View, Text, Animated, Modal, ScrollView } from 'react-native'
+import { View, Text, Animated, Modal, ScrollView , Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
+import * as ImagePicker from 'expo-image-picker'
 import { ListTipoProblema, RequestCreateProblema, TipoProblema } from '../types'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
 import { getTipoProblema } from '../api/tipo-problema'
@@ -9,9 +10,10 @@ import { set } from 'zod'
 import CustomButton from './CustomButton'
 
 
+
 interface ModalProps {
     visible: boolean
-    closeModal: (problema: RequestCreateProblema|null) => void
+    closeModal: (problema: RequestCreateProblema|null, image : string | null) => void
     coords: {latitude: number, longitude: number}
 }
 
@@ -23,6 +25,8 @@ export default function ProblemaModal( {visible, closeModal, coords}: ModalProps
     const [listTipoProblema, setListTipoProblema] = useState<ListTipoProblema[]>([])
 
     const [descricao, setDecricao] = useState<string>('')	
+
+    const [image, setImage] = useState<string | null>(null)
 
     const fadeAnim = useRef(new Animated.Value(0)).current
     const [problema, setProblema] = useState<RequestCreateProblema>({
@@ -53,6 +57,28 @@ export default function ProblemaModal( {visible, closeModal, coords}: ModalProps
         }).start()
         }
     }, [visible, fadeAnim])
+
+
+      const pickImage = async () => {
+        try {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+          if (status !== 'granted') {
+            alert('Desculpe, precisamos de permissão para acessar!')
+            return;
+          }
+          let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+          })
+      
+          if (!result.canceled && result.assets[0].uri) {
+            setImage(result.assets[0].uri)
+            
+          }
+        } catch (error) {
+          console.error("Error picking image:", error)
+        }
+      };
 
 
     useEffect(()=>{
@@ -121,11 +147,29 @@ export default function ProblemaModal( {visible, closeModal, coords}: ModalProps
                             dropDownSize={'100%'}            
 
                             />
+                        {image ?
+                            (<View>
+                                <Image className='h-[120px] w-[100%] rounded-[10px] mb-1 border-[1px] border-color__lightGray' src={image}></Image>
+                            </View>)
+                            :
+                            (<View className='h-[120px] w-[100%] mb-1 bg-[#f0f0f0] rounded-[10px] items-center justify-center'>
+                                <Text>Nenhuma Imagem selecionada</Text>
+                            </View>)
+                        }
+                        <View className='mb-16 mt-[-40px]'>
+                            <CustomButton
+                                title='Selecionar Imagem'
+                                handlePress={pickImage}
+                                containerStyles='w-[100%] h-fit rounded-[10px]'
+                                textStyles='text-black'
+                            />
+                        </View>
+
                         <View className='flex-row justify-between'>
                             {problema &&
                                 <ButtonModal
                                 title='Cancelar'
-                                handlePress={() => closeModal(null)}
+                                handlePress={() => closeModal(null, null)}
                                 customStyles=''
                                 textStyles='text-black'
                                 />
@@ -133,7 +177,7 @@ export default function ProblemaModal( {visible, closeModal, coords}: ModalProps
 
                             <ButtonModal
                                 title='Reportar !'
-                                handlePress={() => closeModal(problema)}
+                                handlePress={() => closeModal(problema, image)}
                                 customStyles='bg-[#ffcc00]'
                                 textStyles='text-black'
                             />

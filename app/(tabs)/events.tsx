@@ -1,6 +1,5 @@
-import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Modal, Button } from 'react-native';
+import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image } from 'expo-image'
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
@@ -179,7 +178,7 @@ export default function Events() {
             { authState?.user?.s3Url ? 
             
             <Image
-              source={authState.user.s3Url}
+              src={authState.user.s3Url}
               // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
               style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
             />

@@ -15,6 +15,7 @@ api.interceptors.request.use(
         console.log("Request sent: ", config.baseURL)
         console.log("Request endpoint: ", config.url)
         console.log("Request headers: ", config.headers)
+        console.log("Request params: ", config.data)
         return config;
     }, 
     (error) => {
