@@ -6,6 +6,7 @@ interface ThemeContextType {
   setTheme: (theme: ThemeType) => void;
 }
 
+// Initialize with undefined and add proper type
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
@@ -25,3 +26,6 @@ export const useTheme = () => {
   }
   return context;
 };
+
+// Add default export to fix the missing default export error
+export default ThemeProvider;

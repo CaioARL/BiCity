@@ -3,8 +3,8 @@ import React, { useEffect } from 'react';
 import { router, SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import AuthProvider from "./context/AuthProvider";
-import { ThemeProvider } from './context/ThemeProvider';
-import { TabBarProvider } from '../app/context/TabBarContext';
+import ThemeProvider from './context/ThemeProvider';
+import TabBarProvider from './context/TabBarContext';
 import DarkMode from '../components/DarkMode';
 
 SplashScreen.preventAutoHideAsync();
@@ -29,14 +29,14 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-      <TabBarProvider> 
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        </Stack>
-        {/* DarkMode Global*/}
-        <DarkMode /> 
+        <TabBarProvider> 
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          </Stack>
+          {/* DarkMode Global*/}
+          <DarkMode /> 
         </TabBarProvider>
       </AuthProvider> 
     </ThemeProvider>
