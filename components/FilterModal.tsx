@@ -192,8 +192,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </View>
         </View>
         </Animated.View>
-     
-
     </Modal>
   );
 };

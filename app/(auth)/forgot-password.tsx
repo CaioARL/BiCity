@@ -8,6 +8,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { sendToken, checkToken, resetPassword } from '../../api/token';
 import { router, useNavigation } from 'expo-router';
 import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-native';
+import { useTheme } from '../context/ThemeProvider';
+import tailwindConfig from '../../tailwind.config';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 type AlertType = 'success' | 'error' | 'loading';
 
@@ -24,6 +28,8 @@ export default function ResetPassword() {
   const [emailError, setEmailError] = useState('');
   const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
+
+  const { theme } = useTheme();
 
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
@@ -234,7 +240,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? colors.secondary_black : colors.white, justifyContent: 'center', alignItems: 'center' }}>
       <ImageBackground
         source={backgroundImage}
         style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -242,14 +248,10 @@ export default function ResetPassword() {
       />
 
       <TouchableOpacity
-        style={{
-          position: 'absolute', top: 45, right: 20, borderRadius: 50, paddingHorizontal: 15,
-          paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5,
-          shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25,
-          shadowRadius: 3.84, zIndex: 10,
-        }}
-        className='bg-primary_green'
-        onPress={prevStep}
+        style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
+          paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
+          className={theme === 'dark' ? 'bg-secondary_black' : 'bg-primary_green'}
+          onPress={prevStep}
       >
         <ArrowLeft size={24} color="white" />
       </TouchableOpacity>
@@ -266,6 +268,7 @@ export default function ResetPassword() {
               isValid={isValidEmail}
               isLoading={isEmailLoading}
               keyboardType="email-address"
+              theme={theme}
             />
             <CustomButton title="Próximo" handlePress={nextStep} isLoading={isEmailLoading} />
           </View>
@@ -273,14 +276,14 @@ export default function ResetPassword() {
         {step === 2 && (
           <View style={{ position: 'absolute', width: '100%', bottom: 0, top: 250 }}>
             <TokenInput
-              title="Código de verificação"
-              value={token}
-              handleChangeText={checkToken}
-              msg={tokenError}
-              isValid={isValidToken}
-              maxLength={4}
+             title="Código de verificação"
+             value={token}
+             handleChangeText={checkToken}
+             msg={tokenError}
+             isValid={isValidToken}
+             maxLength={4}
             />
-            <Text className="text-center text-gray-600 mt-2">Tempo restante: {formatTime(timer)}</Text>
+            <Text className={`text-center text-gray-600 mt-2 ${theme === 'dark' ? 'color-white' : ''}`}>Tempo restante: {formatTime(timer)}</Text>
             <CustomButton title="Verificar" handlePress={nextStep} isLoading={isTokenLoading} />
           </View>
         )}
@@ -294,6 +297,7 @@ export default function ResetPassword() {
               msg={newPasswordError}
               isValid={isValidNewPassword}
               secureTextEntry={true}
+              theme={theme}
             />
             <FormField
               title="Confirmar Nova Senha"
@@ -304,6 +308,7 @@ export default function ResetPassword() {
               isValid={isValidConfirmPassword}
               secureTextEntry={true}
               maxLength={20}
+              theme={theme}
             />
             <CustomButton title="Redefinir Senha" handlePress={nextStep} />
           </View>
