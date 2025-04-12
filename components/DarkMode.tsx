@@ -1,14 +1,78 @@
-import React, { useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Appearance } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Appearance, Animated, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState } from 'react-native';
 import { Sun, Moon } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa o AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import tailwindConfig from '../tailwind.config';
 import { useTheme } from '../app/context/ThemeProvider';
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
+const { width, height } = Dimensions.get('window');
 
 const DarkMode: React.FC = () => {
   const { theme, setTheme } = useTheme();
+  const [position, setPosition] = useState({ x: 20, y: 50 });
+  
+  const pan = useRef(new Animated.ValueXY({ x: position.x, y: position.y })).current;
+
+  const savePosition = async (x: number, y: number) => {
+    try {
+      await AsyncStorage.setItem('buttonPosition', JSON.stringify({ x, y }));
+    } catch (error) {
+      console.error('Error saving button position:', error);
+    }
+  };
+
+  const loadPosition = async () => {
+    try {
+      const savedPosition = await AsyncStorage.getItem('buttonPosition');
+      if (savedPosition) {
+        const { x, y } = JSON.parse(savedPosition);
+        setPosition({ x, y });
+        pan.setValue({ x, y });
+      }
+    } catch (error) {
+      console.error('Error loading button position:', error);
+    }
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        const { x, y } = pan.getLayout();
+        
+        const currentX = (pan.x as any)._value || 0;
+        const currentY = (pan.y as any)._value || 0;
+        
+        pan.setOffset({
+          x: currentX,
+          y: currentY
+        });
+        pan.setValue({ x: 0, y: 0 });
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: (_, gestureState: PanResponderGestureState) => {
+        // When releasing the drag, save the current position
+        pan.flattenOffset();
+        
+        // Get current position values in TypeScript-safe way
+        const currentX = (pan.x as any)._value || 0;
+        const currentY = (pan.y as any)._value || 0;
+        
+        // Constrain to screen boundaries
+        const newX = Math.max(0, Math.min(currentX, width - 60));
+        const newY = Math.max(0, Math.min(currentY, height - 60));
+        
+        pan.setValue({ x: newX, y: newY });
+        setPosition({ x: newX, y: newY });
+        savePosition(newX, newY);
+      },
+    })
+  ).current;
 
   // Função para salvar o tema no AsyncStorage "Cache"
   const saveThemeToStorage = async (newTheme: 'light' | 'dark') => {
@@ -36,9 +100,7 @@ const DarkMode: React.FC = () => {
     }
   };
 
-  
   // Detecta mudanças no tema do sistema e atualiza apenas se não houver preferência salva
-  // Se não houver tema salvo, segue o tema do App
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       AsyncStorage.getItem('userTheme').then((savedTheme) => {
@@ -47,40 +109,57 @@ const DarkMode: React.FC = () => {
         }
       });
     });
-    return () => subscription.remove(); 
+    return () => subscription.remove();
   }, [setTheme]);
-  
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    saveThemeToStorage(newTheme); 
+    saveThemeToStorage(newTheme);
   };
-  
+
   useEffect(() => {
     loadTheme();
+    loadPosition();
   }, []);
-  
+
+  const handleTouchablePress = (e: GestureResponderEvent) => {
+    e.stopPropagation();
+    toggleTheme();
+  };
+
   return (
-    <View
-    style={{ position: 'absolute', zIndex: 8888, top: 50, left: 5 }}
-    className="flex-row items-center justify-center"
-  >
-    <TouchableOpacity
-      onPress={toggleTheme}
-      className={`p-2 rounded-full ${theme === 'light' ? 'bg-primary_green' : 'bg-secondary_black'}`}
-      style={styles.toggleButton}
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          transform: [{ translateX: pan.x }, { translateY: pan.y }]
+        }
+      ]}
+      {...panResponder.panHandlers}
     >
-      {theme === 'light' ? (
-        <Sun size={24} color={colors.black || '#000'} />
-      ) : (
-        <Moon size={24} color={colors.white || '#FFF'} />
-      )}
-    </TouchableOpacity>
-  </View>
+      <TouchableOpacity
+        onPress={handleTouchablePress}
+        className={`p-2 rounded-full ${theme === 'light' ? 'bg-primary_green' : 'bg-secondary_black'}`}
+        style={styles.toggleButton}
+      >
+        {theme === 'light' ? (
+          <Sun size={24} color={colors.black || '#000'} />
+        ) : (
+          <Moon size={24} color={colors.white || '#FFF'} />
+        )}
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    zIndex: 8888,
+    left: 20,
+    top: 50,
+  },
   toggleButton: {
     shadowColor: colors.black || '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -1,12 +1,10 @@
 import React, { createContext, useContext } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-// Define the context type properly
 type TabBarContextType = {
-  tabBarOffset: any; // Using any for simplicity, but you might want to use the appropriate type
+  tabBarOffset: any; 
 };
 
-// Create context with a safer default value
 const TabBarContext = createContext<TabBarContextType | undefined>(undefined);
 
 export const TabBarProvider = ({ children }: { children: React.ReactNode }) => {
@@ -28,5 +26,4 @@ export const useTabBar = () => {
   return context;
 };
 
-// Add default export to fix the missing default export error
 export default TabBarProvider;
