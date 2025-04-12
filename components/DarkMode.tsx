@@ -11,6 +11,7 @@ const { width, height } = Dimensions.get('window');
 const DarkMode: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const [position, setPosition] = useState({ x: 20, y: 50 });
+  const [isDragging, setIsDragging] = useState(false);
   
   const pan = useRef(new Animated.ValueXY({ x: position.x, y: position.y })).current;
 
@@ -38,10 +39,13 @@ const DarkMode: React.FC = () => {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+    
+        const { dx, dy } = gestureState;
+        return Math.abs(dx) > 2 || Math.abs(dy) > 2;
+      },
       onPanResponderGrant: () => {
-        const { x, y } = pan.getLayout();
-        
+        setIsDragging(true);
         const currentX = (pan.x as any)._value || 0;
         const currentY = (pan.y as any)._value || 0;
         
@@ -56,20 +60,19 @@ const DarkMode: React.FC = () => {
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (_, gestureState: PanResponderGestureState) => {
-        // When releasing the drag, save the current position
         pan.flattenOffset();
         
-        // Get current position values in TypeScript-safe way
         const currentX = (pan.x as any)._value || 0;
         const currentY = (pan.y as any)._value || 0;
         
-        // Constrain to screen boundaries
         const newX = Math.max(0, Math.min(currentX, width - 60));
         const newY = Math.max(0, Math.min(currentY, height - 60));
         
         pan.setValue({ x: newX, y: newY });
         setPosition({ x: newX, y: newY });
         savePosition(newX, newY);
+        
+        setTimeout(() => setIsDragging(false), 100);
       },
     })
   ).current;
@@ -78,6 +81,7 @@ const DarkMode: React.FC = () => {
   const saveThemeToStorage = async (newTheme: 'light' | 'dark') => {
     try {
       await AsyncStorage.setItem('userTheme', newTheme);
+      console.log('Tema salvo:', newTheme); // Debug
     } catch (error) {
       console.error('Erro ao salvar o tema:', error);
     }
@@ -88,9 +92,11 @@ const DarkMode: React.FC = () => {
     try {
       const savedTheme = await AsyncStorage.getItem('userTheme');
       if (savedTheme) {
+        console.log('Tema carregado do storage:', savedTheme); 
         setTheme(savedTheme as 'light' | 'dark');
       } else {
         const systemTheme = Appearance.getColorScheme();
+        console.log('Usando tema do sistema:', systemTheme); 
         setTheme(systemTheme === 'dark' ? 'dark' : 'light');
       }
     } catch (error) {
@@ -105,6 +111,7 @@ const DarkMode: React.FC = () => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       AsyncStorage.getItem('userTheme').then((savedTheme) => {
         if (!savedTheme) {
+          console.log('Alterando para tema do sistema:', colorScheme); // Debug
           setTheme(colorScheme === 'dark' ? 'dark' : 'light');
         }
       });
@@ -113,7 +120,10 @@ const DarkMode: React.FC = () => {
   }, [setTheme]);
 
   const toggleTheme = () => {
+    if (isDragging) return; // Não alternar o tema se estiver arrastando
+    
     const newTheme = theme === 'light' ? 'dark' : 'light';
+    console.log('Alternando tema para:', newTheme); // Debug
     setTheme(newTheme);
     saveThemeToStorage(newTheme);
   };
@@ -122,11 +132,6 @@ const DarkMode: React.FC = () => {
     loadTheme();
     loadPosition();
   }, []);
-
-  const handleTouchablePress = (e: GestureResponderEvent) => {
-    e.stopPropagation();
-    toggleTheme();
-  };
 
   return (
     <Animated.View
@@ -139,9 +144,10 @@ const DarkMode: React.FC = () => {
       {...panResponder.panHandlers}
     >
       <TouchableOpacity
-        onPress={handleTouchablePress}
+        onPress={toggleTheme}
         className={`p-2 rounded-full ${theme === 'light' ? 'bg-primary_green' : 'bg-secondary_black'}`}
         style={styles.toggleButton}
+        activeOpacity={0.7}
       >
         {theme === 'light' ? (
           <Sun size={24} color={colors.black || '#000'} />
