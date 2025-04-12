@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Callout, Circle, Geojson, Marker, PROVIDER_GOOGLE} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
@@ -11,6 +11,11 @@ import { getInfraestrutura } from '../../api/infraestrutura'
 import { createProblema, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
+import { useTheme } from '../context/ThemeProvider'
+import tailwindConfig from '../../tailwind.config'
+import { mapStylesLight, mapStylesDark } from '../../components/mapStyles';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>
 
 interface Region {
   latitude: number
@@ -27,14 +32,11 @@ interface LocationError {
 }
 
 
-
-
-
-
 export default function Home() {
+  const { theme } = useTheme()
+  const isDarkMode = theme === 'dark'
 
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
-
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
@@ -256,7 +258,7 @@ export default function Home() {
 
     else
       return (   
-        <SafeAreaView >
+        <SafeAreaView style={{ backgroundColor: isDarkMode ? '#121212' : '#FFFFFF' }}>
         {/* <View className='h-[10%]'>
           <Text > {JSON.stringify(currentLocation)} </Text>
         </View> */}
@@ -267,6 +269,8 @@ export default function Home() {
             mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
             initialRegion={initialRegion}
             showsUserLocation={true} 
+            provider={PROVIDER_GOOGLE}
+            customMapStyle={isDarkMode ? mapStylesDark : mapStylesLight}
             onPress={e=> {
               console.log("Press ", e.nativeEvent.coordinate)
             }}
