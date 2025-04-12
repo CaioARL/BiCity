@@ -2,8 +2,10 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { Calendar } from 'react-native-calendars'
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../app/context/ThemeProvider';
+import tailwindConfig from '../tailwind.config';
 
-
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface FormFieldCalendarSelectModalProps {
     value: string
@@ -16,7 +18,7 @@ interface FormFieldCalendarSelectModalProps {
 export default function FormFieldCalendarSelectModal({ value, handleChangeValue, disabled}: FormFieldCalendarSelectModalProps) {
 
     const [showCalendar, setShowCalendar] = useState(false)
-
+    const { theme } = useTheme();
 
   return (
     <View className='mb-[20px]'>
@@ -25,10 +27,10 @@ export default function FormFieldCalendarSelectModal({ value, handleChangeValue,
             disabled={disabled}
             onPress={() => setShowCalendar(!showCalendar )}
         >
-            <Text className='text-[#555] ml-[10px]'>
+            <Text className={` ml-[10px] ${theme === 'dark' ? 'color-white' : 'color-matte_gray'}`}>
             {value || 'Selecione a data do evento'}
             </Text>
-            <Ionicons name="calendar-outline" size={20} color="#555" />
+            <Ionicons name="calendar-outline" size={20} color={theme === 'dark' ? colors.white  : colors.matte_gray}  />
         </TouchableOpacity>
 
         {showCalendar && (
@@ -52,9 +54,16 @@ export default function FormFieldCalendarSelectModal({ value, handleChangeValue,
                     }
                 }
                 theme={{
-                    selectedDayBackgroundColor: '#C3FF00',
-                    todayTextColor: '#C3FF00',
-                    arrowColor: '#C3FF00',
+                    backgroundColor: theme === 'dark' ? '#555' : '#FFF',
+                    calendarBackground: theme === 'dark' ? '#555' : '#FFF',
+                    textSectionTitleColor: theme === 'dark' ? '#FFF' : '#000',
+                    dayTextColor: theme === 'dark' ? '#FFF' : '#000',
+                    todayTextColor: theme === 'dark' ? '#C3FF00' : '#C3FF00',
+                    selectedDayBackgroundColor: theme === 'dark' ? '#C3FF00' : '#C3FF00',
+                    selectedDayTextColor: theme === 'dark' ? '#FFF' : '#000',
+                    monthTextColor: theme === 'dark' ? '#FFF' : '#000',
+                    arrowColor: theme === 'dark' ? '#C3FF00' : '#C3FF00',
+                    textDisabledColor: theme === 'dark' ? '#D1D5DB' : '#D1D5DB',
                 }}
             />
             </View>

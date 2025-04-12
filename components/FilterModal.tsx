@@ -7,8 +7,10 @@ import { ListTipoEvento, RequestPageEvento, TipoEvento } from '../types';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
 import ButtonModal from './ButtonModal';
+import { useTheme } from '../app/context/ThemeProvider';
+import tailwindConfig from '../tailwind.config';
 
-
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface FilterModalProps {
   visible: boolean;
@@ -25,7 +27,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current; // Valor inicial da animação
   const [filterDistance, setFilterDistance] = useState(0)
-
+  const { theme } = useTheme();
   
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]>([])
@@ -126,11 +128,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
       <Animated.View style={{ height: '100%', opacity: fadeAnim, }}>
 
         <View className='flex-[1] justify-end bg-[rgba(0,0,0,0.5)] '>
-            <View className='bg-white rounded-t-3xl min-h-[50%] p-[20px] '>
+            <View className={`rounded-t-3xl min-h-[50%] p-[20px] ${theme === 'dark' ? 'bg-secondary_black' : 'bg-white'}`}>
               <View className='flex-row justify-between mb-[20px]'>
-                <Text className='text-[18px] font-bold' >Filtros</Text>
+                <Text className={`text-[18px] font-bold ${theme === 'dark' ? 'color-white' : ''}` }>Filtros</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <Ionicons name="close" size={24} color="#555" />
+                  <Ionicons name="close" size={24} color={theme === 'dark' ? colors.white : colors.matte_gray} />
                 </TouchableOpacity>
               </View>
 
@@ -148,7 +150,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
               {/* Distance Slider */}
               <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                <Text className={`text-[16px] mb-[10px] ${theme === 'dark' ? 'color-white' : ''}`}>
                   Distância: {filterDistance}km
                 </Text>
                 <Slider
@@ -181,12 +183,12 @@ const FilterModal: React.FC<FilterModalProps> = ({
               <ButtonModal
                 handlePress={cleanFilters}
                 title='Limpar Filtros'
-                textStyles='font-bold text-center'
-                customStyles='w-full mt-[20px]'
-                customColor='#fff'
+                textStyles={`font-bold text-center ${
+                  theme === 'dark' ? 'text-color_red_error' : 'text-color_red_error'
+                }`}
+                customStyles={`w-full mt-[20px] py-[10px] px-[16px]`}
+                customColor="transparent"
               />
-
-              
           </View>
         </View>
         </Animated.View>
