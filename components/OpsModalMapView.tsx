@@ -1,5 +1,10 @@
 import { View, Text, Animated, Modal, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useRef } from 'react'
+import { useTheme } from '../app/context/ThemeProvider';
+import tailwindConfig from '../tailwind.config';
+
+const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
+
 
 interface SelectionModalProps {
   visible: boolean
@@ -34,6 +39,8 @@ export default function SelectionModal({
     }
   }, [visible, fadeAnim])
 
+  const { theme } = useTheme();
+
   return (
     <Modal visible={visible} transparent={true} animationType="none">
       <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
@@ -43,37 +50,40 @@ export default function SelectionModal({
           className="flex-1 bg-[rgba(0,0,0,0.5)] justify-center items-center"
         >
           <View 
-            className="bg-white rounded-xl p-5 w-[80%]"
+            className={`rounded-xl p-5  w-[80%] ${theme === 'dark' ? 'bg-secondary_black' : 'bg-white'}`}
             onStartShouldSetResponder={() => true}
             onTouchEnd={(e) => e.stopPropagation()}
           >
-            <Text className="text-center text-lg font-bold mb-4">O que deseja fazer?</Text>
+            <Text className={`text-center text-lg ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>O que deseja fazer?</Text>
             
             <TouchableOpacity 
               onPress={onSelectCycleway}
-              className="bg-[#4CAF50] py-3 px-4 rounded-lg mb-3 flex-row items-center justify-center"
+              className="pt-[30px] px-4 rounded-lg mb-3 flex-row items-center justify-center"
             >
-              <Text className="text-black text-center font-medium">Avaliar Ciclovia</Text>
+              <Text className={`text-center font-medium ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>Avaliar Ciclovia</Text>
               <Image
                 source={require('../assets/img/check.png')}
                 resizeMode="cover"
                 className={`w-6 h-6 ml-5`}
               />
             </TouchableOpacity>
+
+            <View className={`h-px w-full my-2 `} style={{ borderStyle: 'dashed', borderWidth: 1, borderColor: '#ccc' }} />
             
             <TouchableOpacity 
               onPress={onSelectProblem}
-              className="bg-[#ffcc00]  py-3 px-4 rounded-lg flex-row items-center justify-center"
+              className="py-3 px-4 rounded-lg flex-row items-center justify-center"
             >
-              <Text className="text-white text-center font-medium">Reportar Problema</Text>
+              <Text className={`text-center font-medium ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>Reportar Problema</Text>
               <Image
                 source={require('../assets/img/reportar.png')}
                 resizeMode="cover"
-                className={`w-6 h-6 ml-4`}
+                className="w-6 h-6 ml-4"
+                style={{ tintColor: theme === 'dark' ? 'white' : undefined }}
               />
             </TouchableOpacity>
             
-            <Text className="text-xs text-gray-500 mt-3 text-center">
+            <Text className={`text-xs text-gray-500 mt-3 text-center ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>
               Coordenadas: {coords.latitude.toFixed(6)}, {coords.longitude.toFixed(6)}
             </Text>
           </View>
