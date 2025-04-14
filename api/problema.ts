@@ -26,3 +26,8 @@ export const createProblemaImage = async (problemaImage: RequestCreateProblemaIm
     })
     return response
 }
+
+export const checkCreateViabilityProblema = async (latitude: number, longitude: number, abortSignal: AbortController | null)  => {
+    const response = await api.get<boolean>(ENDPOINTS.PROBLEMA_CHECK, { params: { latitude, longitude }, signal: abortSignal?.signal })
+    return response.data
+}

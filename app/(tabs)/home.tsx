@@ -7,7 +7,7 @@ import { getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
-import { createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
+import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import PinProblemaView from '../view/PinProblemaView'
@@ -278,8 +278,26 @@ export default function Home() {
     }
 
     const pressionado = (latitude: number, longitude: number) => {
-      setProblemaCoords({latitude, longitude})
-      setShowProblemaModal(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      checkCreateViabilityProblema(latitude, longitude, abortControllerRef.current)
+      .then((reponse) => {
+        if(!reponse){
+          setErrorMessage("Não é possível criar um problema nesse local")
+          return
+        }
+        setProblemaCoords({latitude, longitude})
+        setShowProblemaModal(true)
+      })
+      .catch(()=>{
+        setErrorMessage("Não é possível criar um problema nesse local")
+      })
+      .finally(()=>{
+        setIsContentLoading(false)
+      })
+
+
     }
 
 

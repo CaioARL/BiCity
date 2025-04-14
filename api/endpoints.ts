@@ -11,8 +11,9 @@ const ENDPOINTS = {
 
     PROBLEMA_GET_BY_RADIUS: '/problema/radius',
     PROBLEMA_GET_BY_ID: '/problema/',
-    PROBLEMA_POST: '/problema/',  
-    PROBLEMA_PUT: '/problema/',
+    PROBLEMA_POST: '/problema/',    
+    PROBLEMA_GET: '/problema/',
+    PROBLEMA_CHECK: '/problema/check',    
     
     TIPO_PROBLEMA_GET: '/tipo/problema/',
 
