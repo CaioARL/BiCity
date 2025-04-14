@@ -17,6 +17,10 @@ const ENDPOINTS = {
     
     TIPO_PROBLEMA_GET: '/tipo/problema/',
 
+    AVALIACAO_INFRAESTRUTURA: '/avaliacao/infraestrutura/',
+    AVALIACAO_GET: '/avaliacoes',
+    AVALIACAO_POST: '/avaliacao/avaliar',
+
 
     TOKEN_VALIDAR: '/token/',
     TOKEN_CHECK: '/token/validate',

@@ -1,8 +1,8 @@
-import { View, Text, SafeAreaView} from 'react-native'
+import { View, Text, SafeAreaView, Modal} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageEvento, RequestProblemaByRadius } from '../../types'
+import { Evento, InfraestruturaGeoJson, PageAvaliacao, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestPageEvento, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
@@ -11,6 +11,12 @@ import { checkCreateViabilityProblema, createProblema, createProblemaImage, getP
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import PinProblemaView from '../view/PinProblemaView'
+import AvaliacaoModal from '../../components/AvaliacaoModal'
+import { isPointNearLine } from '../../util/map-util'
+import OpsModal from '../../components/OpsModalMap'
+import { set } from 'zod'
+import { createAvaliacao, getAvaliacoesByInfraestrutura } from '../../api/avaliacao'
+import AvaliacaoView from '../view/AvaliacaoView'
 
 interface Region {
   latitude: number
@@ -47,13 +53,21 @@ export default function Home() {
   const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>()
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
   const [problemas, setProblemas] = useState<Problema[]>([])
-  const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number}>({latitude: 0, longitude: 0})
+  const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number} | null>(null)
   const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false)
   const [problemaImage ,setProblemaImage] = useState<string | null>(null)
   const [requestProblemaImage, setRequestProblemaImage] = useState<RequestCreateProblemaImage | null>(null)
 
   const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
 
+
+  const [requestCreateAvaliacao, setRequestCreateAvaliacao] = useState<RequestCreateAvaliacao | null>(null)
+  const [showAvaliacaoModal, setShowAvaliacaoModal] = useState<boolean>(false)
+  const [idInfraAvaliacao, setIdInfraAvaliacao] = useState<number | null>(null)
+  const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(null)
+  const [pageAvaliacoes, setPageAvaliacoes] = useState<PageAvaliacao | null>(null)
+
+  const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
 
 
   const abortControllerRef = useRef<AbortController>()
@@ -220,6 +234,29 @@ export default function Home() {
 
 
 
+
+
+    useEffect(()=>{
+      if(!requestCreateAvaliacao){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
+      .then((response) => {
+        setSuccessMessage("Avaliação criada com sucesso")
+      })
+      .catch((response) => {
+        setErrorMessage("Error ao criar avaliação: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+        setRequestCreateAvaliacao(null)
+        setIdInfraAvaliacao(null)
+      })
+
+    },[requestCreateAvaliacao])
+
+
+
     
 
     useEffect(()=>{
@@ -248,6 +285,7 @@ export default function Home() {
       }).finally(() => {
         setIsContentLoading(false)
         setRequestCreateProblema(null)
+        setProblemaCoords(null)
       }) 
     
     },[requestCreateProblema])
@@ -271,34 +309,84 @@ export default function Home() {
     }, [requestProblemaImage])
 
 
+    useEffect(()=>{
+      if(!requestPageAvaliacao) return
+      getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
+      .then((response)=>{
+        setPageAvaliacoes(response)
+      })
+      .catch((reponse)=>{
+        setErrorMessage("Erro buscando avaliações: " + reponse.message)
+      })
+      .finally(()=>{
+        setRequestPageAvaliacao(null)
+      })
+    },[requestPageAvaliacao])
 
 
-    const detalheDaVia = () => {
-      
+    /*
+    * Função chamada quando o usuário clicar o mapa
+    * Se o usuário clicar em cima de uma linha da infraestrutura,vai mostrar modal com avaliações da infraestrutura
+    */
+    const clicado = (latitude: number, longitude: number) => {
+      const matchedFeature = infraestrutura?.features.find((feature) => {
+        const geometry = feature.geometry
+        if (geometry.type === 'LineString') {
+          return isPointNearLine({latitude, longitude}, geometry.coordinates as [number, number][])  
+        }
+        return false
+      })
+      if (!matchedFeature) return
+
+      setRequestPageAvaliacao({idInfraestruturaCicloviaria: parseInt(matchedFeature.properties.id), nota:null, pagina:null})
+
+     
     }
 
+
+    /*
+    * Função chamada quando o usuário pressiona o mapa
+    * Se o usuário pressionar em cima de uma linha da infraestrutura,vai mostrar modal com opções de criar problema ou avaliar a infraestrutura
+    */
     const pressionado = (latitude: number, longitude: number) => {
+      console.log('Long Press', latitude, longitude)
+      setIdInfraAvaliacao(null)
+      setProblemaCoords(null)
+      const matchedFeature = infraestrutura?.features.find((feature) => {
+        const geometry = feature.geometry
+        if (geometry.type === 'LineString') {
+          return isPointNearLine({latitude, longitude}, geometry.coordinates as [number, number][])  
+        }
+        return false
+      })
+      if (!matchedFeature) return
+      
+      setIdInfraAvaliacao(parseInt(matchedFeature.properties.id))
+      
       abortControllerRef.current?.abort()
       abortControllerRef.current = new AbortController
       setIsContentLoading(true)
       checkCreateViabilityProblema(latitude, longitude, abortControllerRef.current)
       .then((reponse) => {
         if(!reponse){
+          console.log('REPONSE DO CHECK: ', reponse) 
           setErrorMessage("Não é possível criar um problema nesse local")
+          setShowOpsModal(true)
           return
         }
         setProblemaCoords({latitude, longitude})
-        setShowProblemaModal(true)
+        setShowOpsModal(true)
       })
-      .catch(()=>{
-        setErrorMessage("Não é possível criar um problema nesse local")
+      .catch((response)=>{
+        setErrorMessage("Não é possível criar um problema nesse local: "+ response.message)
       })
       .finally(()=>{
         setIsContentLoading(false)
       })
 
-
     }
+
+
 
 
     
@@ -321,9 +409,10 @@ export default function Home() {
             mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
             initialRegion={initialRegion}
             showsUserLocation={true} 
-            onPress={e=> {
-              console.log("Press ", e.nativeEvent.coordinate)
-            }}
+            zoomEnabled={true}
+
+
+            onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
             onLongPress={e=> {
               console.log('Long Press', e.nativeEvent.coordinate)
               pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
@@ -450,11 +539,12 @@ export default function Home() {
               type='error'
               onClose={()=>setErrorMessage(null)}
             />}
-            {showProblemaModal &&
+            {showProblemaModal && problemaCoords &&
             <ProblemaModal
               coords={problemaCoords}
               visible={showProblemaModal}
               closeModal={(createProblema, image) => {
+                if(createProblema){setShowOpsModal(false)}
                 setRequestCreateProblema(createProblema)
                 setProblemaImage(image)
                 setShowProblemaModal(false)
@@ -462,6 +552,38 @@ export default function Home() {
               />
             }
 
+            {showAvaliacaoModal && idInfraAvaliacao &&
+              <AvaliacaoModal
+                idInfraestruturaCicloviaria={idInfraAvaliacao}
+                closeModal={(createAvaliacao)=>{
+                  if(createAvaliacao){setShowOpsModal(false)}
+                  setRequestCreateAvaliacao(createAvaliacao)
+                  setShowAvaliacaoModal(false)
+                }}
+                />
+            }
+
+            {showOpsModal && !showAvaliacaoModal && !showProblemaModal &&
+              <OpsModal
+                  onSelectInfraestrutura={()=>setShowAvaliacaoModal(true)}
+                  visible={showOpsModal}
+                  onSelectProblema={()=>setShowProblemaModal(true)}
+                  problemaAvailable={ problemaCoords !== null }
+                  onClose={()=>setShowOpsModal(false)}
+              />
+            }
+
+            {pageAvaliacoes && 
+              <AvaliacaoView
+                pageAvaliacao={pageAvaliacoes}
+                onClose={()=>{
+                  setPageAvaliacoes(null)
+                }}
+              />
+            }
+
       </SafeAreaView>
     )
   }
+
+  
