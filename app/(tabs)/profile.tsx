@@ -112,7 +112,7 @@ const Profile = () => {
         const formData = new FormData()
         formData.append('file', {
           uri: image,
-          name: authState.id+'profile.jpg',
+          name: authState.id+'profile.jpeg',
           type: 'image/jpeg',
         } as any)
         setIsLoading(true)

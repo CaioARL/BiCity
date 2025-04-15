@@ -7,9 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
-import { getEvento } from '../../api/evento';
+import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, TipoEvento, Usuario } from '../../types';
+import { createEvento, createEventoImage, getEvento } from '../../api/evento';
 import EventView from '../view/EventView';
+import { set } from 'zod';
+import ShowAlert from '../../components/ShowAlert';
+import LoadingActivity from '../../components/LoadingActivity';
 
 
 // interface EventItem {
@@ -48,7 +51,15 @@ export default function Events() {
   //modals - filtro e criar evento
   const [modalVisible, setModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
+
+
+
   const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [eventoImage, setEventoImage] = useState<string | null>(null)
+  const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   
 
 
@@ -57,7 +68,6 @@ export default function Events() {
 
 
 
-  const [showEventTypeOptions, setShowEventTypeOptions] = useState(false);
 
 
 
@@ -90,7 +100,7 @@ export default function Events() {
         setEventos(response.eventos)
       })
       .catch((response)=>{  
-        alert("Error ao carregar eventos: "+ response.message)
+        setErrorMessage("Error ao carregar eventos: "+ response.message)
       })
       .finally(()=>{
         setIsContentLoading(false)
@@ -114,8 +124,6 @@ export default function Events() {
   }
   
 
-    // Filtro - Data Calendario
-    {{/* Aquiiiii */}} 
 
   const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
     setEventos(null)
@@ -125,6 +133,62 @@ export default function Events() {
     console.log('data', data)
     setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
   }
+
+  useEffect( () => {
+      if(!requestCreateEvento) return 
+      setIsContentLoading(true)
+      abortControllerRef.current?.abort
+      abortControllerRef.current = new AbortController
+        createEvento(requestCreateEvento, abortControllerRef.current)
+        .then((response)=>{
+          setSuccessMessage('Evento: ' + response.nome + ' criado com sucesso')
+          if(eventoImage){
+            const formData = new FormData()
+            formData.append('file', {
+              uri: eventoImage,
+              name: 'evento.jpeg',
+              type: 'image/jpeg',
+            } as any)
+            setRequestEventoImage({
+              id: response.id,
+              image: formData
+            })
+          }else{
+            refreshContent()
+          }
+        })
+        .catch((response)=>{
+          setErrorMessage('falha na criação do Evento. \n Code error: ' + response.message)
+          
+        })
+        .finally(()=>{
+          setIsContentLoading(false)
+          setRequestCreateEvento(null)
+        })
+      }, [requestCreateEvento])
+
+
+
+  useEffect(()=>{
+    if(!requestCreateEventoImage){return}
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = new AbortController
+    setIsContentLoading(true)
+    createEventoImage(requestCreateEventoImage, abortControllerRef.current)
+    .then((response) => {
+      setSuccessMessage("Imagem enviada com sucesso" + response)
+      
+    })
+    .catch((response) => {
+      setErrorMessage("Error ao enviar imagem: " + response.message)
+    }).finally(() => {
+      setIsContentLoading(false)
+      setRequestEventoImage(null)
+      setEventoImage(null)
+      refreshContent()
+    })
+  }, [requestCreateEventoImage])
+
  
   const searchName = () => {
     setEventos(null)
@@ -151,14 +215,6 @@ export default function Events() {
   const handleSave = (item: Evento) => {
     console.log('Evento salvo:', item.nome);
   };
-
-  // const handleShare = (item: EventItem) => {
-  //   console.log('Evento compartilhado:', item.eventName);
-  // };
-
-  // const handleFavorite = (item: EventItem) => {
-  //   console.log('Evento favoritado:', item.eventName);
-  // };
 
   const handleAddEvent = () => {
     setModalVisible(true);
@@ -274,7 +330,7 @@ export default function Events() {
                     onPress={() => setModalViewEvento(item)}
                   >
                     <ImageBackground  
-                      // source={{ uri: item.image }} 
+                      source={{uri: item.s3Url}} 
                       style={CustomEvents.cardImage} 
                       imageStyle={{ borderRadius: 10 }}
                     >
@@ -358,12 +414,14 @@ export default function Events() {
         </TouchableOpacity>}
 
         {/* Modal Criar - Eventos */}
-        {modalVisible && 
-          <EventModal
-            visible={modalVisible}
-            closeModal={ () => {setModalVisible(!modalVisible) ; refreshContent()}}
-          />
-        }
+        { modalVisible && <EventModal
+          visible={modalVisible}
+          closeModal={ (requestCreateEvento, imageURI) => {
+            setRequestCreateEvento(requestCreateEvento)
+            setEventoImage(imageURI)
+            setModalVisible(false)
+          }}
+          />}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}
@@ -379,6 +437,21 @@ export default function Events() {
             evento={modalViewEvento}
           />
         }
+
+        {successMessage && 
+          <ShowAlert
+            message={successMessage}
+            type="success"
+            onClose={() => setSuccessMessage(null)}
+          />}
+
+        {errorMessage &&
+          <ShowAlert
+            message={errorMessage}
+            type="error"
+            onClose={() => setErrorMessage(null)}
+          />}
+        {isContentLoading && <LoadingActivity/>}
 
 
       

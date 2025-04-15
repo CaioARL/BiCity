@@ -1,9 +1,9 @@
 import api from "."
-import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEventoByRadius, RequestUpdateEvento } from "../types"
+import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEventoByRadius, RequestUpdateEvento, RequestCreateEventoImage } from "../types"
 import ENDPOINTS from "./endpoints"
 
 
-export const createEvento = async (evento: RequestCreateEvento,idUsuario: number, abortSignal: AbortController) : Promise<Evento> => {
+export const createEvento = async (evento: RequestCreateEvento, abortSignal: AbortController) : Promise<Evento> => {
     const response = await api.post<Evento>(ENDPOINTS.EVENTO_POST, 
         {
             nome: evento.nome,
@@ -19,8 +19,9 @@ export const createEvento = async (evento: RequestCreateEvento,idUsuario: number
             },
             faixaKm: evento.faixaKm,
             gratuito: evento.gratuito,
+            urlSite: evento.urlSite,
             idTipoEvento: evento.tipoEvento.id,
-            idUsuario: idUsuario,
+            idUsuario: evento.idUsuario,
         }
         , {signal: abortSignal.signal })
     return response.data
@@ -100,3 +101,15 @@ const getEventoById = async (id: number, abortSignal: AbortController) : Promise
 }
 
 
+
+
+export const createEventoImage = async (eventoImage: RequestCreateEventoImage, abortSignal: AbortController | null)  => {
+    const response = await api.put<FormData, string>(ENDPOINTS.EVENTO_PUT+eventoImage.id+"/foto", eventoImage.image, {
+        signal: abortSignal?.signal,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+
+    })
+    return response
+}

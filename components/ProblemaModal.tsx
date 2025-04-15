@@ -78,7 +78,7 @@ export default function ProblemaModal( {visible, closeModal, coords}: ModalProps
         } catch (error) {
           console.error("Error picking image:", error)
         }
-      };
+      }
 
 
     useEffect(()=>{
