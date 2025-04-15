@@ -4,7 +4,6 @@ import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
 import { RequestCreateAvaliacao } from '../types'
 import { useAuthProvider } from '../app/context/AuthProvider'
-import { set } from 'zod'
 
 interface AvalicaoModalProps {
     idInfraestruturaCicloviaria: number 
@@ -16,9 +15,6 @@ interface AvalicaoModalProps {
 
 export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCicloviaria}: AvalicaoModalProps) {
   const { authState } = useAuthProvider()
-  // const fadeAnim = useRef(new Animated.Value(0)).current
-  const [comentario, setComentario] = useState<string>('')
-  const [nota, setNota] = useState<number>(3)
 
   const [requestCreateAvaliacao, setRequestCreateAvaliacao] = useState({
     idUsuario: authState?.user?.id || 0,

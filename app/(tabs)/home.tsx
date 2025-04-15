@@ -66,6 +66,7 @@ export default function Home() {
   const [idInfraAvaliacao, setIdInfraAvaliacao] = useState<number | null>(null)
   const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(null)
   const [pageAvaliacoes, setPageAvaliacoes] = useState<PageAvaliacao | null>(null)
+  const [isRequestingPage, setIsRequestingPage] = useState<boolean>(false)
 
   const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
 
@@ -242,7 +243,7 @@ export default function Home() {
       abortControllerRef.current = new AbortController
       setIsContentLoading(true)
       createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
-      .then((response) => {
+      .then(() => {
         setSuccessMessage("Avaliação criada com sucesso")
       })
       .catch((response) => {
@@ -271,7 +272,7 @@ export default function Home() {
           const formData = new FormData()
           formData.append('file', {
             uri: problemaImage,
-            name: 'problema.jpg',
+            name: 'problema.jpeg',
             type: 'image/jpeg',
           } as any)
           setRequestProblemaImage({
@@ -311,15 +312,16 @@ export default function Home() {
 
     useEffect(()=>{
       if(!requestPageAvaliacao) return
+      setIsRequestingPage(true)
       getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
-      .then((response)=>{
-        setPageAvaliacoes(response)
+      .then((response)=>{        
+          setPageAvaliacoes(response)
       })
       .catch((reponse)=>{
         setErrorMessage("Erro buscando avaliações: " + reponse.message)
       })
       .finally(()=>{
-        setRequestPageAvaliacao(null)
+        setIsRequestingPage(false)
       })
     },[requestPageAvaliacao])
 
@@ -573,11 +575,15 @@ export default function Home() {
               />
             }
 
-            {pageAvaliacoes && 
+            {pageAvaliacoes && requestPageAvaliacao && 
               <AvaliacaoView
                 pageAvaliacao={pageAvaliacoes}
+                requestPage={requestPageAvaliacao}
+                setRequestPage={setRequestPageAvaliacao}
+                isContentLoading={isRequestingPage}
                 onClose={()=>{
                   setPageAvaliacoes(null)
+                  setRequestPageAvaliacao(null)
                 }}
               />
             }

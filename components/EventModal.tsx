@@ -1,29 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, Animated, ScrollView} from 'react-native';
-import MapView, { Marker, Circle, Region } from 'react-native-maps';
+import { View, Text, Modal, Animated, ScrollView, Image} from 'react-native';
+import { Region } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
 import { NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep, getCepByLatAndLong, getViaCep } from '../api/endereco';
+import { getCep, getCepByLatAndLong } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
-import { createEvento } from '../api/evento';
 import FormFieldModal from './FormFieldModal';
 import FormSelectFieldModal from './FormSelectFieldModal';
 import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
-import LoadingActivity from './LoadingActivity';
 import ButtonModal from './ButtonModal';
 import MapModalEdit from './MapModalEdit';
-import { map, set } from 'zod';
 import MapModalView from './MapModalView';
 import { useAuthProvider } from '../app/context/AuthProvider';
 import FormFieldTime from './FormFieldTime';
+import CustomButton from './CustomButton';
 
 
 interface EventModalProps {
   visible: boolean
-  closeModal: () => void
+  closeModal: ( requestCreateEvento: RequestCreateEvento | null, requestCreateEventoImage: string | null ) => void
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -34,7 +32,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const { authState } = useAuthProvider()
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const abortControllerRef = useRef(new AbortController())
 
@@ -52,42 +50,41 @@ const EventModal: React.FC<EventModalProps> = ({
   const [descricao, setDescricao] = useState('')
   const [faixaKm, setfaixaKm] = useState('')
 
+  const [site, setSite]= useState('')
+  const [image, setImage] = useState<string | null>(null)
 
-  const [isSavingLoading, setIsSavingLoading] = useState(false)
-  const [saveError, setSaveError] = useState('')
 
 
   const [mapRegion, setMapRegion] = useState<Region | null>()
   const [mapPlotError, setMapPlotError] = useState('')
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
 
-  const [novoEvento, setNovoEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false , tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }} })
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false, urlSite: '' , tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }},idUsuario: authState?.user?.id || 0  })
 
-  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
+  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
 
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
 
-  useEffect(() => {
-    if (visible) {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }).start();
+  // useEffect(() => {
+  //   if (visible) {
+  //     Animated.timing(fadeAnim, {
+  //       toValue: 1,
+  //       duration: 800,
+  //       useNativeDriver: true,
+  //     }).start();
 
     
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, fadeAnim]);
+  //   } else {
+  //     Animated.timing(fadeAnim, {
+  //       toValue: 0,
+  //       duration: 300,
+  //       useNativeDriver: true,
+  //     }).start();
+  //   }
+  // }, [visible, fadeAnim]);
 
 
   useEffect(() => {
@@ -109,19 +106,9 @@ const EventModal: React.FC<EventModalProps> = ({
     })
     .catch((response)=>{
       alert('Error ao carregar Tipos de Eventos, verifique sua conexão. \nCode error:' + response.message)
+      closeModal(null, null)
     })
   },[])
-
-
-
-  const [selectedLocation, setSelectedLocation] = useState< { latitude: number , longitude: number} | null>({ latitude: 0, longitude: 0 });
-
-
-
-  
-
-
-  
 
   const checkCep = async (cep: string) => {
     if (cep.length !== 8) return
@@ -165,12 +152,12 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
 
-  const checkEvento = () => {
-     const result = createEventSchema.safeParse(novoEvento)
-    //  console.log(result)
+  const validateEventAndClose = () => {
+    const result = createEventSchema.safeParse(requestCreateEvento)
+    console.log(result)
     if(!result.success){
       result.error.issues.map(issue => {
-        setNovoEventoError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', tipoEvento: ''})
+        setNovoEventoError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
         setNovoEventoError(prev => ({
             ...prev,
             [issue.path[0]]: issue.message
@@ -191,57 +178,39 @@ const EventModal: React.FC<EventModalProps> = ({
           }
         })
       })
-      return false
     }else{
-      setNovoEventoError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
-      return true
+      
+      closeModal(requestCreateEvento, image)
     }
-
   }
 
 
-  const handleSaveEvento = () => {
-    if(!checkEvento()) return alert('Revise os campos')
-    setIsSavingLoading(true)
-    abortControllerRef.current?.abort
-    abortControllerRef.current = new AbortController
-    if (authState?.id){
-      createEvento(novoEvento, authState.id, abortControllerRef.current)
-      .then((response)=>{
-        alert('Evento: ' + response.nome + ' criado com sucesso')
-        closeModal()
-      })
-      .catch((response)=>{
-        alert('falha na criação do Evento. \n Code error: ' + response.message)
-        setSaveError(response.message)
-      })
-      .finally(()=>{
-        setIsSavingLoading(false)
-      })
-    }
-
-  }
+  
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, //desatualizado ImagePicker.MediaTypeOptions.All (VERIFICAR NA DOCUMENTAÇÃO UM MÉTODO MAIS RECENTE)
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets[0]) {
-      setSelectedImage(result.assets[0].uri);
-      setNovoEvento(prev => ({
-        ...prev,
-        image: result.assets[0].uri
-      }));
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (status !== 'granted') {
+        alert('Desculpe, precisamos de permissão para acessar!')
+        return;
+      }
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+      })
+  
+      if (!result.canceled && result.assets[0].uri) {
+        setImage(result.assets[0].uri)
+        
+      }
+    } catch (error) {
+      console.error("Error picking image:", error)
     }
-  };
+  }
 
 
   const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
-    setNovoEvento(prev => ({
+    setRequestCreateEvento(prev => ({
       ...prev,
       [campo]: valor
     }))
@@ -249,7 +218,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
   const updateCampoNovoEventoEndereco = (campo: string, valor: number | string) => {
-    setNovoEvento(prev => ({
+    setRequestCreateEvento(prev => ({
       ...prev,
       endereco: {
         ...prev.endereco,
@@ -260,7 +229,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
   const updateCampoNovoEventoTipoEvento = (campo: string, valor: TipoEvento) => {
-    setNovoEvento(prev => ({
+    setRequestCreateEvento(prev => ({
       ...prev,
       tipoEvento: valor
     }))
@@ -309,11 +278,11 @@ const EventModal: React.FC<EventModalProps> = ({
   return (
     <>
 
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={closeModal}>
+    <Modal visible={visible} animationType="slide" transparent={true} >
       <View className='flex-row bg-[rgba(0,0,0,0.5)] justify-center'>
         <ScrollView>
         <View className='bg-white flex-[1] rounded-[10px] p-[20px] m-[20px]'>
-            <Animated.View style={{ opacity: fadeAnim }}>
+            {/* <Animated.View style={{ opacity: fadeAnim }}> */}
 
                <View  className='mb-[2px]'>
                   
@@ -424,6 +393,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 placeholder='Digite o nome do evento'
                 msg={novoEventoError.nome}
               />
+              
 
 
               
@@ -437,17 +407,25 @@ const EventModal: React.FC<EventModalProps> = ({
                 msg={novoEventoError.descricao}
               />
 
+              <FormFieldModal
+                title='Site'
+                value={site}
+                handleChangeText={setSite}
+                validantionCheck={ e=> updateCampoNovoEvento('urlSite', e.nativeEvent.text)}
+                placeholder='Digite o site do evento'
+                msg={novoEventoError.urlSite}
+              />
+            
 
               <FormFieldDropdownSelectList
                 title='Tipos de Eventos'
-                selectedValue={novoEvento.tipoEvento}
+                selectedValue={requestCreateEvento.tipoEvento}
                 options={listTipoEvento}
                 handleChange={(value) => updateCampoNovoEventoTipoEvento('tipoEvento', value)}     
               />
 
             
               
-             
               <FormFieldModal
                 title="Tamanho do Percurso"
                 placeholder="Tamanho do Percurso (km)"
@@ -462,7 +440,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
               <FormSelectFieldModal
                 handleChangeValue={(value) => updateCampoNovoEvento('gratuito', value)}
-                value={novoEvento.gratuito}
+                value={requestCreateEvento.gratuito}
                 title='O evento é gratuito ou pago?'
                 option_1='Gratuito'
                 option_2='Pago'
@@ -470,31 +448,38 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
 
-                <FormFieldTime                
-                    value={novoEvento.data}
-                    handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
-                />
+              <FormFieldTime                
+                  value={requestCreateEvento.data}
+                  handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
+              />
 
-                
-        
 
 
               <FormFieldCalendarSelectModal
-                value={novoEvento.data}
-                handleChangeValue={(e) => updateCampoNovoEvento('data', e + novoEvento.data)}
+                value={requestCreateEvento.data}
+                handleChangeValue={(e) => updateCampoNovoEvento('data', e + requestCreateEvento.data)}
                 
               />
 
 
 
-
-
-
-              
-              {saveError && (
-                <Text className='text-color_red_error  my-2'>{'*'+saveError}</Text>
-              )}
-
+              {image ?
+                (<View>
+                    <Image className='h-[120px] w-[100%] rounded-[10px] mb-1 border-[1px] border-color__lightGray' src={image}></Image>
+                </View>)
+                :
+                (<View className='h-[120px] w-[100%] mb-1 bg-[#f0f0f0] rounded-[10px] items-center justify-center'>
+                    <Text>Nenhuma Imagem selecionada</Text>
+                </View>)
+              }
+              <View className='mb-16 mt-[-40px]'>
+                  <CustomButton
+                      title='Selecionar Imagem'
+                      handlePress={pickImage}
+                      containerStyles='w-[100%] h-fit rounded-[10px]'
+                      textStyles='text-black'
+                  />
+              </View>
 
 
 
@@ -502,14 +487,14 @@ const EventModal: React.FC<EventModalProps> = ({
             
                 <ButtonModal
                   title='Cancelar'
-                  handlePress={closeModal}
+                  handlePress={() => closeModal(null, null)}
                   customStyles='bg-[#FF0000]'
                 />
 
                 <ButtonModal
                   title='Salvar Evento'
-                  handlePress={handleSaveEvento}
-                  disabled={!selectedLocation || !novoEvento.nome || !novoEvento.descricao || !novoEvento.data}
+                  handlePress={validateEventAndClose}
+                  // disabled={}
                 />
                   
               </View>
@@ -517,15 +502,12 @@ const EventModal: React.FC<EventModalProps> = ({
 
 
               
-            </Animated.View>
+            {/* </Animated.View> */}
           </View>
         </ScrollView>
       </View>
     </Modal>
 
-    {isSavingLoading && (
-      <LoadingActivity />
-    )}
     
     </>
   );
