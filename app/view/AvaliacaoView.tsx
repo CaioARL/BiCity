@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Text, View , FlatList, Image} from 'react-native'
 import { Avaliacao, PageAvaliacao, RequestPageAvaliacao } from '../../types'
 import CustomButton from '../../components/CustomButton'
-import { getAvaliacoesByInfraestrutura } from '../../api/avaliacao'
-
+import { Ionicons } from '@expo/vector-icons'
 
 /*
     VirtualizedList: You have a large list that is slow to update - make sure your renderItem function renders components that follow React performance best practices like PureComponent, shouldComponentUpdate, etc. {"contentLength": 6207.2890625, "dt": 8296, "prevDt": 3133}
 */
+
+
 
 
 interface AvaliacaoViewProps {
@@ -56,14 +57,65 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
         currentPageRef.current = currentPageRef.current+1 
     }
 
+    const ratings = [5, 5, 4, 4, 5, 3, 2, 1, 1, 5, 5, 5, 4, 2, 1];
+    const total = ratings.length;
+    const average = ratings.reduce((a, b) => a + b, 0) / total;
+    const counts = [1, 2, 3, 4, 5].map(star =>
+        ratings.filter(r => r === star).length
+    )
 
+    const maxCount = Math.max(...counts);
 
 
 
 
 
   return (
-    <View className="obsolute bg-white rounded-lg shadow-md  h-[70%] w-[94%] top-[3%] left-[3%] absolute justify-center">           
+    <View className="obsolute bg-white rounded-lg shadow-md  h-[70%] w-[94%] top-[3%] left-[3%] absolute justify-center"> 
+
+                 <View className='p-20'>
+                    <Text className='text-lg font-bold text-center mb-10'>Resumo das avaliações</Text>
+                    <View className='flex-row flex-wrap w-full'>
+                    {counts.map((count, index) => (
+                        <View className='flex-row items-center w-full mb-2' key={index}>
+                        <Text className='w-20 text-sm'>{index + 1}</Text>
+                        <View className='flex-[1] h-2 w-full bg-[#2b2b2b] rounded-[5px] ml-5'>
+                            <View
+                            className='h-2 bg-[#FFD700] rounded-[5px]'  
+                            style={[
+                                { width: `${(count / maxCount) * 100}%` },
+                            ]}
+                            />
+                        </View>
+                        </View>
+                    ))}
+                    </View>
+                    <View className='items-center'>
+                    <Text className='text-sm font-bold'>{average.toFixed(1)}</Text>
+                    <View className='flex-row my-2'>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                        <Ionicons
+                            key={i}
+                            name="star"
+                            size={20}
+                            color={i < Math.round(average) ? '#FFD700' : '#ddd'}
+                        />
+                        ))}
+                    </View>
+                    <Text className=' font-semibold text-[#555] '>{total} Avaliações</Text>
+                    </View>
+                </View>
+
+
+
+
+
+
+
+
+
+
+
             <FlatList
                 className='relative'
                 data={avaliacoes}
