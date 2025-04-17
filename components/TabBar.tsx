@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import CustomTabBar from '../css/CustomTabBar'; 
+import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number }>({ height: 20, width: 100 });
@@ -28,14 +27,19 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     };
   });
 
+
+
   const buttonWidth = dimensions.width / state.routes.length;
 
   return (
-    <View onLayout={onTabLayout} style={CustomTabBar.tabbar}>
-      <Animated.View className={`absolute bg-primary_green rounded-[30] mx-[12px]`}    style={[animatedStyle, {
-        height: dimensions.height - 15,
-        width: buttonWidth - 25,
-      }]} />
+    <Animated.View style={[CustomTabBar.tabbar]} onLayout={onTabLayout}>
+      <Animated.View
+        className={`absolute bg-primary_green rounded-[30] mx-[12px]`}
+        style={[animatedStyle, {
+          height: dimensions.height - 15,
+          width: buttonWidth - 25,
+        }]}
+      />
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
@@ -50,7 +54,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             target: route.key,
             canPreventDefault: true,
           });
-          
+
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name, route.params);
           }
@@ -64,10 +68,10 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         };
 
         return (
-          <TabBarButton 
+          <TabBarButton
             key={route.name}
             onPress={onPress}
-            onLongPress={onLongPress} 
+            onLongPress={onLongPress}
             isFocused={isFocused}
             routeName={route.name}
             color={isFocused ? '#333' : '#333'}
@@ -75,6 +79,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           />
         );
       })}
-    </View>
+    </Animated.View>
   );
 }

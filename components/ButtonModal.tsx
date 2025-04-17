@@ -26,7 +26,7 @@ export default function ButtonModal({
     <TouchableOpacity  
         onPress={handlePress}   
         className={ 
-            `p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center ${customStyles} ${isLoading ? 'opacity-50' : ''} ${disabled ? 'bg-[#CCC]' : customColor? customColor : 'bg-primary_green'}` 
+            `${customStyles} p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center ${isLoading ? 'opacity-50' : ''} ${disabled ? 'bg-[#CCC]' : customColor? customColor : 'bg-primary_green'}` 
         }  
         disabled={disabled} 
     > 

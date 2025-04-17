@@ -1,46 +1,37 @@
-import { View, Text, Image } from 'react-native'
-import React from 'react'
-import { Tabs } from 'expo-router'
-import icons from '../../constants/icons'
-import {TabBar} from '../../components/TabBar';
-
-
-
-
+import { View, Text, Image } from 'react-native';
+import React from 'react';
+import { Tabs } from 'expo-router';
+import icons from '../../constants/icons';
+import { TabBar } from '../../components/TabBar'; 
 
 export default function TabsLayout() {
   return (
     <>
-    <Tabs tabBar={props => <TabBar {...props} />}
+      <Tabs
+        tabBar={props => <TabBar {...props} />}
         screenOptions={{
-            headerShown: false,
+          headerShown: false,
         }}
-    >
+      >
         <Tabs.Screen 
-            name="events" 
-            options={
-                {
-                    title: 'Eventos',
-                }
-            }
+          name="events" 
+          options={{
+            title: 'Eventos',
+          }}
         />
         <Tabs.Screen 
-            name="home" 
-            options={
-                {
-                    title: 'Mapa',
-                }
-            }
+          name="home" 
+          options={{
+            title: 'Mapa',
+          }}
         />
         <Tabs.Screen 
-            name="profile" 
-            options={
-                {
-                    title: 'Perfil',
-                }
-            }
+          name="profile" 
+          options={{
+            title: 'Perfil',
+          }}
         />
-    </Tabs>
+      </Tabs>
     </>
-  )
+  );
 }

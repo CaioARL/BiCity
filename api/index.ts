@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
     headers: {
-        'access-token': process.env.EXPO_PUBLIC_API_KEY,
+        'X-Access-Key': process.env.EXPO_PUBLIC_API_KEY,
         "Content-Type": "application/json",
     },
     timeout: 30000,     
@@ -12,12 +12,15 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        console.log("Request sent: ", config.baseURL);
+        console.log("Request sent: ", config.baseURL)
+        console.log("Request endpoint: ", config.url)
+        console.log("Request headers: ", config.headers)
+        console.log("Request params: ", config.data)
         return config;
     }, 
     (error) => {
-        console.error("Request error: ", error);
-        console.error("Request error: ", error.response);
+        console.error("Request error: ", error)
+        console.error("Request error: ", error.response)
     
         return Promise.reject(error);
     }

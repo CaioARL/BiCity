@@ -1,6 +1,7 @@
 import { EventoEndereco } from "./endereco";
 import { NivelHabilidade } from "./nivel-habilidade";
 import { TipoEvento } from "./tipo-evento";
+import { Usuario } from "./usuario";
 
 export interface Evento {
     id: number
@@ -11,20 +12,24 @@ export interface Evento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    urlSite: string
+    s3Url: string
     tipoEvento: TipoEvento
+    usuario: Usuario
 }
 
 
 
 export interface RequestCreateEvento {
-    
     nome: string
     descricao: string
     data: string
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    urlSite: string
     tipoEvento: TipoEvento
+    idUsuario : number
 }
 
 export interface RequestUpdateEvento {   
@@ -43,7 +48,6 @@ export interface RequestUpdateEvento {
 
 
 export interface RequestCreateEventoError {
-    
     nome: string
     descricao: string
     data: string
@@ -57,12 +61,12 @@ export interface RequestCreateEventoError {
     }
     faixaKm: string
     gratuito: string
+    urlSite: string
     tipoEvento: string
 }
 
 
 export interface RequestUpdateEventoError {
-    
     nome: string
     descricao: string
     data: string
@@ -76,6 +80,7 @@ export interface RequestUpdateEventoError {
     }
     faixaKm: string
     gratuito: string
+    urlSite: string
     tipoEvento: string
 }
 
@@ -90,6 +95,7 @@ export interface ResponseCreateEvento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    urlSite: string
     tipoEvento: TipoEvento
 }
 
@@ -119,4 +125,10 @@ export interface RequestEventoByRadius {
     latitude: number
     longitude: number
     raio: number
+}
+
+
+export interface RequestCreateEventoImage {
+    id: number
+    image: FormData
 }

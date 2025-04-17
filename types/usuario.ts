@@ -1,3 +1,4 @@
+import { NivelHabilidade } from "./nivel-habilidade"
 
 
 export interface CriarUsuarioRequest {
@@ -32,6 +33,7 @@ export interface Usuario {
         numero: number
     }
     email: string
+    role: string
     senha: string
     hash: string
     cpf: string
@@ -42,6 +44,11 @@ export interface Usuario {
         nome: string
         descricao: string
     }
+    sessao: {
+        id: number
+        token: string
+    }
+    s3Url: string
 }
 
 
@@ -59,6 +66,7 @@ export interface CriarUsuarioResponse {
         numero: number
     }
     email: string
+    role: string
     senha: string
     hash: string
     cpf: string
@@ -69,6 +77,11 @@ export interface CriarUsuarioResponse {
         nome: string
         descricao: string
     }
+    sessao: {
+        id: number
+        token: string
+    }
+    s3Url: string
 }
 
 
@@ -92,4 +105,20 @@ export interface UsuarioLoginRequest {
     cpf: string
     cnpj: string
     senha: string
+}
+
+
+export interface RequestUpdateUsuario {
+    nome: string
+    nomeUsuario: string
+    endereco: {
+        cep: string
+        estado: string
+        cidade: string
+        bairro: string
+        rua: string
+        numero: number
+    }
+    email: string
+    nivelHabilidade: NivelHabilidade
 }

@@ -1,5 +1,5 @@
 import api from "."
-import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEventoByRadius, RequestUpdateEvento } from "../types"
+import {RequestPageEvento, PageEvento, RequestCreateEvento, Evento, RequestEventoByRadius, RequestUpdateEvento, RequestCreateEventoImage } from "../types"
 import ENDPOINTS from "./endpoints"
 
 
@@ -19,7 +19,9 @@ export const createEvento = async (evento: RequestCreateEvento, abortSignal: Abo
             },
             faixaKm: evento.faixaKm,
             gratuito: evento.gratuito,
+            urlSite: evento.urlSite,
             idTipoEvento: evento.tipoEvento.id,
+            idUsuario: evento.idUsuario,
         }
         , {signal: abortSignal.signal })
     return response.data
@@ -47,14 +49,14 @@ export const getEvento = async (requestPageEvento: RequestPageEvento, abortSigna
 
 
 
-export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByRadius, abortSignal: AbortController) : Promise<Evento[]> => {
+export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByRadius, abortSignal: AbortController | null) : Promise<Evento[]> => {
     const response = await api.get<Evento[]>(ENDPOINTS.EVENTO_GET_BY_RADIUS, {
         params: {
             latitude: requestEventoByRadius.latitude,
             longitude: requestEventoByRadius.longitude,
             raio: requestEventoByRadius.raio,
         }, 
-        signal: abortSignal.signal
+        signal: abortSignal?.signal
     })
     return response.data
 }
@@ -99,3 +101,15 @@ const getEventoById = async (id: number, abortSignal: AbortController) : Promise
 }
 
 
+
+
+export const createEventoImage = async (eventoImage: RequestCreateEventoImage, abortSignal: AbortController | null)  => {
+    const response = await api.put<FormData, string>(ENDPOINTS.EVENTO_PUT+eventoImage.id+"/foto", eventoImage.image, {
+        signal: abortSignal?.signal,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+
+    })
+    return response
+}

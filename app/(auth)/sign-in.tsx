@@ -1,174 +1,288 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image, ActivityIndicator  } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, Image, Modal, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FormField from '../../components/FormField';
+import FormField from '../../components/FormField'; // Usando o mesmo FormField do Arquivo 2
 import CustomButton from '../../components/CustomButton';
 import { router } from 'expo-router';
 import { useAuthProvider } from '../context/AuthProvider';
 import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
-import MapModalEdit from '../../components/MapModalEdit';
-import { Region } from 'react-native-maps';
-import { set } from 'zod';
+import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
+
+type AlertType = 'success' | 'error' | 'loading';
+
 
 export default function SignIn() {
-  const backgroundImageLogo = require('../../assets/img/logo.png')
-  const { onLogin, errorLoading} = useAuthProvider()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const abortControlRef = useRef<AbortController | null>(null)
-
-  // Modal Termos de Uso
+  const backgroundImageLogo = require('../../assets/img/logo.png');
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png');
+  const { onLogin, errorLoading } = useAuthProvider();
+  const [isLoading, setIsLoading] = useState(false);
+  const abortControlRef = useRef<AbortController | null>(null);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [usernameError, setUsernameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isValidUsername, setIsValidUsername] = useState<boolean | undefined>(undefined);
+  const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
   
-  const [form, setForm] = useState({
-    username: '',
-    password: '',
-  })
+  // Alert state and animation
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    type: 'success' as AlertType,
+    message: '',
+  });
+  const [animation] = useState(new Animated.Value(0));
 
-
-  
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png')
- 
-  
-  const submitForm = () => {
-
-    
-    
-    
-      abortControlRef.current?.abort()
-      abortControlRef.current = new AbortController
-      setIsLoading(true)
-      
-      const user: UsuarioLoginRequest = {
-        nomeUsuario: form.username,
-        email: '',
-        cpf: '',
-        cnpj: '',
-        senha: form.password
-      }
-
-
-
-
-      loginUser(user ,abortControlRef.current)
-      .then((response)=>{
-        if(onLogin) {
-          onLogin(response)
-          .then(()=> {
-            alert("Logado com sucesso"+response.nome)
-            router.replace('home');
-          })
-          .catch((error)=> {
-            alert("Login error registering in memory: "+error)
-          })
-        }
-      })
-      .catch((response)=>{
-        alert("Login response Error: "+response)
-      })
-      .finally(()=>{
-        setIsLoading(false)
-      })
-
-
-
+  const showAlert = (type: AlertType, message: string) => {
+    setAlertConfig({ visible: true, type, message });
   };
 
-
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   useEffect(() => {
-    if(errorLoading){
-      alert("Error on loading: "+errorLoading)
+    if (alertConfig.visible) {
+      Animated.sequence([
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.delay(2000),
+        Animated.timing(animation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => hideAlert());
     }
-  } ,[])
+  }, [alertConfig.visible]);
 
+  // Validação dos campos
+  const checkUsername = (text: string) => {
+    setForm({ ...form, username: text });
+    setIsValidUsername(text.trim() ? true : undefined); // Simples validação de preenchimento
+    setUsernameError(text.trim() ? '' : 'Campo obrigatório');
+  };
+
+  const checkPassword = (text: string) => {
+    setForm({ ...form, password: text });
+    setIsValidPassword(text.trim() ? true : undefined); // Simples validação de preenchimento
+    setPasswordError(text.trim() ? '' : 'Campo obrigatório');
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!form.username.trim()) {
+      setUsernameError('Campo obrigatório');
+      setIsValidUsername(false);
+      isValid = false;
+    } else {
+      setUsernameError('');
+      setIsValidUsername(true);
+    }
+
+    if (!form.password.trim()) {
+      setPasswordError('Campo obrigatório');
+      setIsValidPassword(false);
+      isValid = false;
+    } else {
+      setPasswordError('');
+      setIsValidPassword(true);
+    }
+
+    if (!isValid) {
+      showAlert('error', 'Preencha todos os campos corretamente');
+    }
+
+    return isValid;
+  };
+
+  const submitForm = () => {
+    if (!validateForm()) return;
+
+    abortControlRef.current?.abort();
+    abortControlRef.current = new AbortController();
+    setIsLoading(true);
+    showAlert('loading', 'Realizando login...');
+
+    const user: UsuarioLoginRequest = {
+      nomeUsuario: form.username,
+      email: '',
+      cpf: '',
+      cnpj: '',
+      senha: form.password,
+    };
+
+    loginUser(user, abortControlRef.current as AbortController)
+      .then((response) => {
+        if (onLogin) {
+          onLogin(response)
+            .then(() => {
+              showAlert('success', `Bem-vindo(a) ${response.nome}!`);
+              setTimeout(() => router.replace('home'), 2000);
+            })
+            .catch((error) => {
+              showAlert('error', 'Erro ao registrar sessão: ' + error);
+            });
+        }
+      })
+      .catch((error) => {
+        showAlert('error', 'Erro login ou senha: ' + error);
+        setUsernameError('Nome de usuário ou senha incorretos');
+        setPasswordError('Nome de usuário ou senha incorretos');
+        setIsValidUsername(false);
+        setIsValidPassword(false);
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    if (errorLoading) showAlert('error', 'Erro ao carregar: ' + errorLoading);
+  }, [errorLoading]);
+
+  const getAlertColor = () => {
+    switch (alertConfig.type) {
+      case 'success': return '#22c55e';
+      case 'error': return '#ef4444';
+      case 'loading': return '#3b82f6';
+      default: return '#3b82f6';
+    }
+  };
+
+  const getIcon = () => {
+    switch (alertConfig.type) {
+      case 'success': return <CheckCircle size={24} color="white" />;
+      case 'error': return <XCircle size={24} color="white" />;
+      case 'loading': return <AlertCircle size={24} color="white" />;
+      default: return null;
+    }
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1 , backgroundColor: 'white' }}> 
-     <ImageBackground 
-      source={backgroundImage} 
-      style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }} 
-      resizeMode="cover"
-    />
-        <ScrollView className="container  w-full h-full ">
-          <View className="flex-1 min-h-screen h-full ">
-          <View style={{justifyContent: 'center', alignItems: 'center', marginBottom: 2, height: 220 }}>
-            <Image 
-              source={backgroundImageLogo} 
-              resizeMode="contain" 
-              style={{ width: 100, height: 100 }} 
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ImageBackground
+        source={backgroundImage}
+        style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
+        resizeMode="cover"
+      />
+      <ScrollView className="container w-full h-full">
+        <View className="flex-1 min-h-screen h-full">
+          <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 2, height: 220 }}>
+            <Image
+              source={backgroundImageLogo}
+              resizeMode="contain"
+              style={{ width: 100, height: 100 }}
             />
           </View>
-            <Text className="text-2xl font-bold text-center text-secondary_black mb-4">BICITY</Text>
-            <FormField
-              title="Nome de usuário"
-              value={form.username}
-              handleChangeText={(e: string) => setForm({ ...form, username: e })}
-              otherStyles="mb-4"
-              keyboardType="default"
-              placeholder="Insira seu nome de usuário"
-            />
-            <FormField
-              title="Senha"
-              value={form.password}
-              handleChangeText={(e: string) => setForm({ ...form, password: e })}
-              otherStyles="mb-4"
-              placeholder="Insira sua senha"
-              secureTextEntry={true}
-            />
+          
+          <Text className="text-2xl font-bold text-center text-secondary_black mb-4">
+            BICITY
+          </Text>
 
-            
-            {/* 
-            <View className="flex-row justify-between mb-6">
-              {['Facebook', 'Gmail', 'Linkedin'].map((icon, index) => (
-                <View key={index} className="flex-col items-center">
-                  <View className="flex-col items-center border border-[#818181] rounded-[20px] p-2">
-                    <Svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                      {icon === 'Facebook' && (
-                        <Path d="M26.0828 20.8125L26.7484 17.0104H22.5813V14.5453C22.5813 13.5035 23.1625 12.4904 25.0281 12.4904H26.9219V9.2584C26.9219 9.2584 25.2063 9 23.5656 9C20.1344 9 17.8891 10.8211 17.8891 14.1146V17.0104H14.0734V20.8125H17.8891V30H22.5859V20.8125H26.0828Z" fill="black" />
-                      )}
-                      {icon === 'Gmail' && (
-                        <Path d="M24.082 17.1572C24.1523 17.6309 24.2031 18.1045 24.2031 18.7197C24.2031 24.0762 21.3281 27.875 17 27.875C12.8555 27.875 9.5 23.6807 9.5 18.5C9.5 13.3193 12.8555 9.125 17 9.125C19.0273 9.125 20.7148 10.0479 22.0234 11.5811L19.9883 14.0225C19.4375 13.3584 18.4648 12.5771 17 12.5771C14.4414 12.5771 12.3555 15.2236 12.3555 18.5C12.3555 21.7764 14.4414 24.4229 17 24.4229C19.9688 24.4229 21.082 21.752 21.2578 20.3799H17V17.1572H24.082ZM31.3242 17.4697V14.75H29.1367V17.4697H26.9609V20.2041H29.1367V22.9238H31.3242V20.2041H33.5V17.4697H31.3242Z" fill="black" />
-                      )}
-                      {icon === 'Linkedin' && (
-                        <Path d="M13.7016 26.375H9.34688V14.1072H13.7016V26.375ZM11.5219 12.4338C10.1297 12.4338 9 11.4248 9 10.2066C9 9.6214 9.2657 9.06014 9.73864 8.64631C10.2116 8.23248 10.853 8 11.5219 8C12.1907 8 12.8322 8.23248 13.3051 8.64631C13.7781 9.06014 14.0437 9.6214 14.0437 10.2066C14.0437 11.4248 12.9141 12.4338 11.5219 12.4338ZM29.9953 26.375H25.65V20.4031C25.65 18.9799 25.6172 17.1547 23.3859 17.1547C21.1219 17.1547 20.775 18.701 20.775 20.3006V26.375H16.425V14.1072H20.6016V15.7807H20.6625C21.2438 14.8168 22.6641 13.7996 24.7828 13.7996C29.1891 13.7996 30 16.3385 30 19.6361V26.375H29.9953Z" fill="black" />
-                      )}
-                    </Svg>
-                  </View>
+          <FormField
+            title="Nome de usuário"
+            value={form.username}
+            handleChangeText={checkUsername}
+            otherStyles="mb-4"
+            keyboardType="default"
+            placeholder="Insira seu nome de usuário"
+            msg={usernameError}
+            isValid={isValidUsername}
+          />
 
-                  Nome do ícone abaixo da bola
-                  <Text className="text-xs text-secondary_black_sub_title">{icon}</Text>
-                </View>
-              ))}
-            </View> */}
+          <FormField
+            title="Senha"
+            value={form.password}
+            handleChangeText={checkPassword}
+            otherStyles="mb-4"
+            placeholder="Insira sua senha"
+            secureTextEntry={true}
+            msg={passwordError}
+            isValid={isValidPassword}
+          />
 
-            <CustomButton 
-              title="Entrar"
-              handlePress={() => submitForm()}
-              containerStyles="mt-4"
-              isLoading={isLoading}
-            />
-            <View className="flex-row justify-center mt-4">
-              <Text className="text-secondary_black_sub_title">Não tem uma conta? </Text>
-              <Text
-                onPress={() => setFilterModalVisible(true)}
-                className="text-blue-500 font-bold"
-              >
-                Inscrever-se
-              </Text>
-  
-            </View>
+          <CustomButton
+            title="Entrar"
+            handlePress={submitForm}
+            containerStyles="mt-4"
+            isLoading={isLoading}
+          />
+
+          <View className="flex-row justify-center mt-16">
+            <Text className="text-secondary_black_sub_title">
+              Não tem uma conta?{' '}
+            </Text>
+            <Text
+              onPress={() => setFilterModalVisible(true)}
+               className="text-blue-500 font-bold"
+            >
+              Inscrever-se
+            </Text>
           </View>
-        </ScrollView>
 
-        <Terms
-          visible={filterModalVisible}
-          onClose={() => setFilterModalVisible(false)}
+          <View className="flex-row justify-center mt-4">
+            <Text className="text-secondary_black_sub_title">
+              Esqueceu a senha?{' '}
+            </Text>
+            <Text
+              onPress={() => router.push('/forgot-password')}
+              className={'text-secondary_black_sub_title text-blue-500 font-bold'}
+            >
+              Redefina
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
 
-        />
+      <Terms visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
 
+      {alertConfig.visible && (
+        <Modal transparent visible={alertConfig.visible}>
+          <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
+            <Animated.View
+              style={[
+                styles.alert,
+                {
+                  backgroundColor: getAlertColor(),
+                  transform: [{
+                    translateY: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-100, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <View className="flex-row items-center flex-1">
+                {getIcon()}
+                <Text className="text-white ml-3 text-base flex-1">{alertConfig.message}</Text>
+              </View>
+              <TouchableOpacity onPress={hideAlert} className="p-1">
+                <Text className="text-white text-2xl font-bold">×</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  alert: {
+    borderRadius: 8,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+});

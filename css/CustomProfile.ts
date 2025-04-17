@@ -3,9 +3,7 @@ import { StyleSheet } from 'react-native';
 
 const CustomProfile = StyleSheet.create({
   profileCard: {
-    backgroundColor: 'white',
     borderRadius: 10,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -16,7 +14,6 @@ const CustomProfile = StyleSheet.create({
   },
   topSection: {
     height: 400,
-    backgroundColor: '#C3FF00',
     // borderTopLeftRadius: 50,
     // borderTopRightRadius: 20,
     // borderBottomLeftRadius: 20,
@@ -26,15 +23,16 @@ const CustomProfile = StyleSheet.create({
   imageContainer: {
     position: 'absolute',
     top: 30,
+    // left: 3.5,
     alignSelf: 'center',
   },
-  profileImage: {
-    width: 350,
-    height: 350,
+  profileImage: { width: '100%',
+    height: '100%',
     borderRadius: 350,
-    borderWidth: 3,
+    borderWidth: 0,
     borderColor: 'white', 
     backgroundColor: 'white',   
+   
 
   },
   gradientOverlay: {
@@ -43,12 +41,12 @@ const CustomProfile = StyleSheet.create({
     height: 150,
     bottom: -20, 
     zIndex: 1,
+    borderTopRightRadius: 50,
   },
   editButton: {
     position: 'absolute',
     bottom: 20,
     right: 40,
-    backgroundColor: '#C3FF00',
     borderRadius: 50,
     padding: 8,
     borderWidth: 2,
@@ -88,16 +86,20 @@ const CustomProfile = StyleSheet.create({
     marginVertical: 4,
   },
   iconSection: {
-    backgroundColor: '#f3f4f6',
-    padding: 16,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    padding: 16,  
+    width: '100%',
+    height: 60,
+    justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   iconButton: {
-    backgroundColor: '#C3FF00',
-    width: 400,
-    height: 40,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius:10,
+    width: '108%',
+    height: 58,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -130,9 +132,21 @@ const CustomProfile = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#C3FF00',
     padding: 15,
+    paddingHorizontal: 30,
     borderRadius: 8,
     alignItems: 'center',
-    bottom: 110,
+    bottom: 95,
+    right: '5%',
+    alignSelf: 'center',
+  },
+  buttonSalve: {
+    position: 'absolute',
+    backgroundColor: '#C3FF00',
+    padding: 15,
+    paddingHorizontal: 35,
+    borderRadius: 8,
+    alignItems: 'center',
+    bottom: 150,
     right: '5%',
     alignSelf: 'center',
   }
@@ -140,148 +154,3 @@ const CustomProfile = StyleSheet.create({
 
 export default CustomProfile;
 
-
-{/* 
-  
-  Aqui esta como desclara as vairvel Global
-  import { StyleSheet } from 'react-native';
-import tailwindConfig from '../tailwind.config';
-
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
-
-const CustomProfile = StyleSheet.create({
-  profileCard: {
-    backgroundColor: colors?.white || 'white',
-    borderRadius: 10,
-    shadowColor: colors?.black || '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  topSection: {
-    height: 400,
-    backgroundColor: colors?.primary_green || '#C3FF00',
-    alignItems: 'center',
-  },
-  imageContainer: {
-    position: 'absolute',
-    top: 30,
-    alignSelf: 'center',
-  },
-  profileImage: {
-    width: 350,
-    height: 350,
-    borderRadius: 350,
-    borderWidth: 3,
-    borderColor: colors?.white || 'white',
-    backgroundColor: colors?.white || 'white',
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    width: 250,
-    height: 150,
-    bottom: -20,
-    zIndex: 1,
-  },
-  editButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 40,
-    backgroundColor: colors?.primary_green || '#C3FF00',
-    borderRadius: 50,
-    padding: 8,
-    borderWidth: 2,
-    borderColor: colors?.white || 'white',
-  },
-  bottomSection: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors?.secondary_black || '#1f2937',
-  },
-  title: {
-    fontSize: 14,
-    color: colors?.secondary_black_sub_title || '#6b7280',
-    marginTop: 8,
-  },
-  nivelHabilidadeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  nivelHabilidade: {
-    fontSize: 14,
-    color: colors?.secondary_black_sub_title,
-    marginRight: 5,
-  },
-  informaçõesContainer: {
-    marginTop: 16,
-  },
-  link: {
-    color: colors?.color_red_error || '#ff4500',
-    fontSize: 14,
-    fontWeight: '500',
-    marginVertical: 4,
-  },
-  iconSection: {
-    backgroundColor: colors?.color_lightGray || '#f3f4f6',
-    padding: 16,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    alignItems: 'center',
-  },
-  iconButton: {
-    backgroundColor: colors?.primary_green,
-    width: 400,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: colors?.black || '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  input: {
-    height: 40,
-    borderColor: colors?.color_lightGray || '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  passwordInput: {
-    position: 'relative',
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-  },
-  button: {
-    position: 'absolute',
-    backgroundColor: colors?.primary_green || '#C3FF00',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    bottom: 110,
-    right: '5%',
-    alignSelf: 'center',
-  },
-});
-
-export default CustomProfile;
-  
-  
-  */}

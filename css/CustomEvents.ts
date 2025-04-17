@@ -4,8 +4,8 @@ import CustomButton from '../components/CustomButton'
 const CustomEvents = StyleSheet.create({
   evento: {margin: 0, paddingBottom: 0, paddingTop: 30, },
   location: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  userImage: {width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10},
-  locationText: { fontSize: 15.5, fontWeight: "500", marginHorizontal: 5 },
+  
+  locationText: { fontSize: 15.5, fontWeight: "500", marginHorizontal: 5},
   nivelText: { fontSize: 14, fontWeight: "500", marginHorizontal: 5, color: "#555", opacity: 0.8 },
   // SearchBox
   searchBox: {
@@ -15,15 +15,13 @@ const CustomEvents = StyleSheet.create({
     borderRadius: 100,
     paddingHorizontal: 10,
     height: 50,
-    borderColor: "#555", 
-    shadowColor: "#555", 
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 3,
   },
   input: {
     flex: 1, 

@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, Animated, Linking, ScrollView, } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Linking, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import ButtonModal from '../../components/ButtonModal';
+
 
 type TermsProps = {
   visible: boolean;
@@ -17,7 +18,13 @@ export default function Terms({ visible, onClose }: TermsProps) {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: true
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
       }).start();
     }
   }, [visible, fadeAnim]);
@@ -30,50 +37,42 @@ export default function Terms({ visible, onClose }: TermsProps) {
   if (!visible) return null;
 
   return (
-    <Modal 
-      visible={visible} 
-      animationType="slide" 
-      transparent={true} 
-      onRequestClose={onClose}
-    >
-      <Animated.View style={{ flex: 1, opacity: fadeAnim, justifyContent: 'flex-end' }}>
-        <View className='flex-[1] justify-end bg-[rgba(0,0,0,0.5)]'>
-          <View className='bg-white rounded-t-3xl h-[300] p-[20px]'>
-            <View className='flex-row justify-between mb-[20px]'>
-              <Text className='text-[18px] font-bold'>Política de Privacidade</Text>
-              <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={24} color="#555" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView>
-              <Text className='mb-[20px]'>
-                Prezado Usuário,{"\n\n"}
-                Antes de prosseguir com o uso do aplicativo BiCity:{"\n"}
-                Ao clicar em "Aceitar", você concorda com o armazenamento de cookies do seu dispositivo para melhorar a navegação no aplicativo e experiência.{"\n\n"}
+    <Animated.View style={{ flex: 1, opacity: fadeAnim, justifyContent: 'flex-end' }}>
+    <View className='flex-[1] justify-end bg-[rgba(0,0,0,0.5)]'>
+      <View className='bg-white rounded-t-3xl h-[300] p-[20px]'>
+        <View className='flex-row justify-between mb-[20px]'>
+          <Text className='text-[18px] font-bold'>Política de Privacidade</Text>
+          <TouchableOpacity onPress={onClose}>
+            <Ionicons name="close" size={24} color="#555" />
+          </TouchableOpacity>
+        </View>
 
-                Acesse o link para saber mais: <Text onPress={handleOpenDocument} style={{ color: '#CCC' }}>Documento</Text>
-              </Text>
-            </ScrollView>
+          <ScrollView>
+            <Text className='mb-[20px]'>
+              Prezado Usuário,{"\n\n"}
+              Antes de prosseguir com o uso do aplicativo BiCity:{"\n"}
+              Ao clicar em "Aceitar", você concorda com o armazenamento de cookies do seu dispositivo para melhorar a navegação no aplicativo e experiência.{"\n\n"}
+              Acesse o link para saber mais: <Text onPress={handleOpenDocument} style={{ color: '#CCC' }}>Documento</Text>
+            </Text>
+          </ScrollView>
 
-            <View className="flex-row justify-between ">
-              <ButtonModal
-                title="Aceitar todos" 
-                handlePress={() => router.replace('sign-up')} 
-                textStyles='font-bold text-center'
-                customStyles="flex-row-reverse"
-                iconSource={require('../../assets/terms/icon.png')}
-              />
-              <ButtonModal 
-                  title="Recusar todos"  
-                  handlePress={onClose}  
-                  textStyles='font-bold text-center'
-                  customColor='bg-[#CCC]'
-              />
-            </View>
+          <View className="flex-row justify-between">
+            <ButtonModal
+              title="Aceitar todos"
+              handlePress={() => router.replace('sign-up')}
+              textStyles="font-bold text-center"
+              customStyles="flex-row-reverse"
+              iconSource={require('../../assets/terms/icon.png')}
+            />
+            <ButtonModal
+              title="Recusar todos"
+              handlePress={onClose}
+              textStyles="font-bold text-center"
+              customColor="bg-[#CCC]"
+            />
           </View>
         </View>
-      </Animated.View>
-    </Modal>
+      </View>
+    </Animated.View>
   );
 }
