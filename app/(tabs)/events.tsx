@@ -1,6 +1,5 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,9 +9,9 @@ import { useAuthProvider } from '../context/AuthProvider';
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { createEvento, createEventoImage, getEvento } from '../../api/evento';
 import EventView from '../view/EventView';
-import { set } from 'zod';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
+import { router } from 'expo-router';
 
 
 // interface EventItem {
@@ -217,7 +216,8 @@ export default function Events() {
   };
 
   const handleAddEvent = () => {
-    setModalVisible(true);
+    router.push('/event/event-user-menu')
+    // setModalVisible(true);
   };
   
   return (
@@ -414,14 +414,14 @@ export default function Events() {
         </TouchableOpacity>}
 
         {/* Modal Criar - Eventos */}
-        { modalVisible && <EventModal
+        {/* { modalVisible && <EventModal
           visible={modalVisible}
           closeModal={ (requestCreateEvento, imageURI) => {
             setRequestCreateEvento(requestCreateEvento)
             setEventoImage(imageURI)
             setModalVisible(false)
           }}
-          />}
+          />} */}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}

@@ -1,7 +1,5 @@
-import { View, Text, Image } from 'react-native';
 import React from 'react';
 import { Tabs } from 'expo-router';
-import icons from '../../constants/icons';
 import { TabBar } from '../../components/TabBar'; 
 
 export default function TabsLayout() {

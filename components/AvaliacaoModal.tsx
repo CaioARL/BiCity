@@ -118,7 +118,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
                 title="Enviar Avaliação"
                 handlePress={() => closeModal(requestCreateAvaliacao)}
                 customStyles='py-[10px] rounded-[8px] bg-green-500 border-[1px] border-green-300'
-                
+                disabled={requestCreateAvaliacao.nota===0}
                 textStyles='text-center color-black'
               />
             </View>
