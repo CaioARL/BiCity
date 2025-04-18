@@ -59,7 +59,6 @@ useEffect(() => {
 
 
   return (
-     <Modal transparent>
         <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
         <Animated.View
             style={[
@@ -84,7 +83,6 @@ useEffect(() => {
             </TouchableOpacity>
         </Animated.View>
         </View>
-    </Modal>
   )
 }
 

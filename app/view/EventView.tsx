@@ -1,27 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Modal, Animated, ScrollView} from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../../types/tipo-evento';
 import { getTipoEvento } from '../../api/tipo-evento';
 
-import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError, RequestUpdateEventoError, RequestUpdateEvento, Region } from '../../types';
+import { Evento, NivelHabilidade, RequestUpdateEventoError, RequestUpdateEvento, Region } from '../../types';
 import * as ImagePicker from 'expo-image-picker';
-import { getCep, getCepByLatAndLong, getViaCep } from '../../api/endereco';
+import { getCep, getCepByLatAndLong } from '../../api/endereco';
 import { upateEventSchema } from '../../util/validationSchemas';
-import { createEvento, updateEvento } from '../../api/evento';
+import {  updateEvento } from '../../api/evento';
 import FormFieldModal from '../../components/FormFieldModal';
 import FormSelectFieldModal from '../../components/FormSelectFieldModal';
 import FormFieldCalendarSelectModal from '../../components/FormFieldCalendarSelectModal';
 import ButtonModal from '../../components/ButtonModal';
 import LoadingActivity from '../../components/LoadingActivity';
 import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList';
-import FormFieldViewModal from '../../components/FormFieldViewModal';
 import MapModalView from '../../components/MapModalView';
 import MapModalEdit from '../../components/MapModalEdit';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
 
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 interface EventModalProps {
   closeModal: () => void
@@ -30,7 +25,6 @@ interface EventModalProps {
 }
 
 const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) => {
-  const { theme } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const abortControllerRef = useRef(new AbortController())
 
@@ -66,7 +60,7 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
 
 
   const [eventoToUpdate, setEventoToUpdate] = useState<RequestUpdateEvento>({id: evento.id, nome: evento.nome,descricao: evento.descricao,data: evento.data,endereco: {cep: evento.endereco.cep,cidade: evento.endereco.cidade,estado: evento.endereco.estado,bairro: evento.endereco.bairro,rua: evento.endereco.rua,numero: evento.endereco.numero,latitude: evento.endereco.latitude,longitude: evento.endereco.longitude    },faixaKm: evento.faixaKm,gratuito: evento.gratuito,tipoEvento: evento.tipoEvento })
-  const [eventoToUpdateError, setEventoToUpdateError] = useState<RequestUpdateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
+  const [eventoToUpdateError, setEventoToUpdateError] = useState<RequestUpdateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
 
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
@@ -168,7 +162,7 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
     //  console.log(result)
     if(!result.success){
       result.error.issues.map(issue => {
-        setEventoToUpdateError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', tipoEvento: ''})
+        setEventoToUpdateError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite:'', tipoEvento: ''})
         setEventoToUpdateError(prev => ({
             ...prev,
             [issue.path[0]]: issue.message
@@ -191,7 +185,7 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
       })
       return false
     }else{
-      setEventoToUpdateError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', tipoEvento: ''})
+      setEventoToUpdateError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
       return true
     }
 
@@ -425,16 +419,15 @@ const EventView: React.FC<EventModalProps> = ({ closeModal, evento, onUpdate}) =
               />
               
                 
-              <FormFieldModal
-                title='Nome'
-                value={nome}
-                handleChangeText={setNome}
-                validantionCheck={ e=> updateCampoNovoEvento('nome', e.nativeEvent.text)}
-                placeholder='Digite o nome do evento'
-                msg={eventoToUpdateError.nome}
-                disableEdit={!isEditing}
-              />
 
+              <FormFieldModal
+                title='LINK IMAGE'
+                value={evento.s3Url}
+                handleChangeText={() => {}}
+                validantionCheck={ e=> {}}
+                multiline={true}
+                disableEdit={true}
+              />
 
               
               <FormFieldModal

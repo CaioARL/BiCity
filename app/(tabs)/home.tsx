@@ -5,16 +5,21 @@ import * as Location from 'expo-location';
 import { useTheme } from '../context/ThemeProvider';
 import tailwindConfig from '../../tailwind.config';
 import { mapStylesLight, mapStylesDark } from '../../components/mapStyles';
-import { Evento, InfraestruturaGeoJson, Problema, RequestCreateProblema, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestProblemaByRadius, } from '../../types';
+import { Evento, InfraestruturaGeoJson, PageAvaliacao, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius, } from '../../types';
 import { getEventoByRadius } from '../../api/evento';
 import LoadingActivity from '../../components/LoadingActivity';
 import ButtonModal from '../../components/ButtonModal';
 import { getInfraestrutura } from '../../api/infraestrutura';
-import { createProblema, getProblemaByRadius } from '../../api/problema';
+import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema';
 import ShowAlert from '../../components/ShowAlert';
 import ProblemaModal from '../../components/ProblemaModal';
 import OpsModalMapView from '../../components/OpsModalMapView';
 import AvaliacaoModal from '../../components/AvaliacaoModal';
+import { createAvaliacao, getAvaliacoesByInfraestrutura } from '../../api/avaliacao';
+import { isPointNearLine } from '../../util/map-util';
+import PinProblemaView from '../view/PinProblemaView';
+import OpsModal from '../../components/OpsModalMap';
+import AvaliacaoView from '../view/AvaliacaoView';
 
 const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
@@ -34,35 +39,50 @@ export default function Home() {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null);
-  const [initialRegion, setInitialRegion] = useState<Region>({
-    latitude: -23.556312,
-    longitude: -46.637752,
-    latitudeDelta: 0.0043,
-    longitudeDelta: 0.0034,
-  });
-  const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null);
-  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null>(null);
-  const [isMoved, setIsMoved] = useState<boolean | undefined>(false);
-  const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>();
-  const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>();
-  const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>();
-  const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>();
-  const [problemas, setProblemas] = useState<Problema[]>([]);
-  const [problemaCoords, setProblemaCoords] = useState<{ latitude: number; longitude: number }>({
-    latitude: 0,
-    longitude: 0,
-  });
-  const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false);
-  const [showSelectionModal, setShowSelectionModal] = useState<boolean>(false);
-  const [showCyclewayModal, setShowCyclewayModal] = useState<boolean>(false);
-  const abortControllerRef = useRef<AbortController>();
-  const [initalLoading, setInitalLoading] = useState<boolean>(true);
-  const [isContentLoading, setIsContentLoading] = useState<boolean>(false);
-  const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>();
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
+
+  const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
+  const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
+  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
+  const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
+
+  const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
+  const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
+
+
+  const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>()
+  const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
+  const [problemas, setProblemas] = useState<Problema[]>([])
+  const [problemaCoords, setProblemaCoords] = useState<{latitude: number, longitude: number} | null>(null)
+  const [showProblemaModal, setShowProblemaModal] = useState<boolean>(false)
+  const [problemaImage ,setProblemaImage] = useState<string | null>(null)
+  const [requestProblemaImage, setRequestProblemaImage] = useState<RequestCreateProblemaImage | null>(null)
+
+  const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
+
+
+  const [requestCreateAvaliacao, setRequestCreateAvaliacao] = useState<RequestCreateAvaliacao | null>(null)
+  const [showAvaliacaoModal, setShowAvaliacaoModal] = useState<boolean>(false)
+  const [idInfraAvaliacao, setIdInfraAvaliacao] = useState<number | null>(null)
+  const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(null)
+  const [pageAvaliacoes, setPageAvaliacoes] = useState<PageAvaliacao | null>(null)
+  const [isRequestingPage, setIsRequestingPage] = useState<boolean>(false)
+
+  const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
+
+
+  const abortControllerRef = useRef<AbortController>()
+  const [initalLoading, setInitalLoading] = useState<boolean>(true)
+  
+  // const [isRequestInProgress, setIsRequestInProgress] = useState(false)
+  
+  const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
+  
+  const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
+  const [eventos, setEventos] = useState<Evento[]>([])
+
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const locationErrors = {
     PERMISSION: {
@@ -181,345 +201,396 @@ export default function Home() {
       });
   }, [requestInfraestrutura]);
 
-  const getEventsOnViewLocation = () => {
-    abortControllerRef.current?.abort();
-    if (!currentViewLocation) return;
-    setIsContentLoading(true);
-    setRequestInfraestrutura({
-      latitude: currentViewLocation.latitude,
-      longitude: currentViewLocation.longitude,
-      raio: 750,
-    });
-    setRequestProblemas({
-      latitude: currentViewLocation.latitude,
-      longitude: currentViewLocation.longitude,
-      raio: 7000,
-    });
-    setRequestEventos({
-      latitude: currentViewLocation.latitude,
-      longitude: currentViewLocation.longitude,
-      raio: 7000,
-    });
-  };
+    const getEventsOnViewLocation = () => {
+      abortControllerRef.current?.abort()
+      if(!currentViewLocation){return}
+      setIsContentLoading(true)
+      setRequestInfraestrutura({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 750
+        })
+        setRequestProblemas({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 7000
+        })
+        setRequestEventos({
+          latitude: currentViewLocation.latitude,
+          longitude: currentViewLocation.longitude,
+          raio: 7000
+        })
+    }
 
-  useEffect(() => {
-    if (!requestCreateProblema) return;
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-    setIsContentLoading(true);
-    createProblema(requestCreateProblema, abortControllerRef.current)
-      .then((response) => {
-        setSuccessMessage('Problema criado com sucesso');
+
+
+
+
+    useEffect(()=>{
+      if(!requestCreateAvaliacao){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
+      .then(() => {
+        setSuccessMessage("Avaliação criada com sucesso")
       })
       .catch((response) => {
-        setErrorMessage('Erro ao criar problema: ' + response.message);
+        setErrorMessage("Error ao criar avaliação: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+        setRequestCreateAvaliacao(null)
+        setIdInfraAvaliacao(null)
       })
-      .finally(() => {
-        setIsContentLoading(false);
-        setRequestCreateProblema(null);
-      });
-  }, [requestCreateProblema]);
 
-  // Raio da Terra em metros
-  const isPointNearLine = (
-    point: { latitude: number; longitude: number },
-    coordinates: [number, number][],
-    toleranceMeters: number = 5
-  ): boolean => {
-    const earthRadius = 6371000; 
+    },[requestCreateAvaliacao])
 
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const start = { lng: coordinates[i][0], lat: coordinates[i][1] };
-      const end = { lng: coordinates[i + 1][0], lat: coordinates[i + 1][1] };
-      const pointCoord = { lng: point.longitude, lat: point.latitude };
 
-      // Converter para radianos
-      const lat1 = (start.lat * Math.PI) / 180;
-      const lon1 = (start.lng * Math.PI) / 180;
-      const lat2 = (end.lat * Math.PI) / 180;
-      const lon2 = (end.lng * Math.PI) / 180;
-      const latP = (pointCoord.lat * Math.PI) / 180;
-      const lonP = (pointCoord.lng * Math.PI) / 180;
 
-      // Calcular distâncias usando fórmula de Haversine
-      const dLat1 = latP - lat1;
-      const dLon1 = lonP - lon1;
-      const a1 = Math.sin(dLat1 / 2) ** 2 + Math.cos(lat1) * Math.cos(latP) * Math.sin(dLon1 / 2) ** 2;
-      const c1 = 2 * Math.atan2(Math.sqrt(a1), Math.sqrt(1 - a1));
-      const distToStart = earthRadius * c1;
+    
 
-      const dLat2 = latP - lat2;
-      const dLon2 = lonP - lon2;
-      const a2 = Math.sin(dLat2 / 2) ** 2 + Math.cos(lat2) * Math.cos(latP) * Math.sin(dLon2 / 2) ** 2;
-      const c2 = 2 * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
-      const distToEnd = earthRadius * c2;
-
-      // Calcular distância perpendicular do ponto ao segmento de linha
-      const A = pointCoord.lat - start.lat;
-      const B = pointCoord.lng - start.lng;
-      const C = end.lat - start.lat;
-      const D = end.lng - start.lng;
-
-      const dot = A * C + B * D;
-      const lenSq = C * C + D * D;
-      const param = lenSq !== 0 ? dot / lenSq : -1;
-
-      let xx, yy;
-      if (param < 0) {
-        xx = start.lat;
-        yy = start.lng;
-      } else if (param > 1) {
-        xx = end.lat;
-        yy = end.lng;
-      } else {
-        xx = start.lat + param * C;
-        yy = start.lng + param * D;
-      }
-
-      const dLatP = ((pointCoord.lat - xx) * Math.PI) / 180;
-      const dLonP = ((pointCoord.lng - yy) * Math.PI) / 180;
-      const aP =
-        Math.sin(dLatP / 2) ** 2 +
-        Math.cos((pointCoord.lat * Math.PI) / 180) * Math.cos((xx * Math.PI) / 180) * Math.sin(dLonP / 2) ** 2;
-      const cP = 2 * Math.atan2(Math.sqrt(aP), Math.sqrt(1 - aP));
-      const distance = earthRadius * cP;
-
-      if (distance <= toleranceMeters) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const isPointInCiclovia = (point: { latitude: number; longitude: number }): boolean => {
-    if (!infraestrutura || !infraestrutura.features.length) return false;
-
-    for (const feature of infraestrutura.features) {
-      if (feature.geometry.type === 'LineString') {
-        const coordinates = feature.geometry.coordinates as [number, number][];
-        if (isPointNearLine(point, coordinates)) {
-          return true;
+    useEffect(()=>{
+      if(!requestCreateProblema){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createProblema(requestCreateProblema, abortControllerRef.current)
+      .then((response) => {
+        setSuccessMessage("Problema criado com sucesso")
+        if(problemaImage){
+          const formData = new FormData()
+          formData.append('file', {
+            uri: problemaImage,
+            name: 'problema.jpeg',
+            type: 'image/jpeg',
+          } as any)
+          setRequestProblemaImage({
+            id: response.id,
+            image: formData
+          })
         }
-      } else if (feature.geometry.type === 'MultiLineString') {
-        const multiCoordinates = feature.geometry.coordinates as [number, number][][];
-        for (const coords of multiCoordinates) {
-          if (isPointNearLine(point, coords)) {
-            return true;
-          }
+      })
+      .catch((response) => {
+        setErrorMessage("Error ao criar problema: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+        setRequestCreateProblema(null)
+        setProblemaCoords(null)
+      }) 
+    
+    },[requestCreateProblema])
+
+
+    useEffect(()=>{
+      if(!requestProblemaImage){return}
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      createProblemaImage(requestProblemaImage, abortControllerRef.current)
+      .then((response) => {
+        setSuccessMessage("Imagem enviada com sucesso" + response)
+      })
+      .catch((response) => {
+        setErrorMessage("Error ao enviar imagem: " + response.message)
+      }).finally(() => {
+        setIsContentLoading(false)
+        setRequestProblemaImage(null)
+      })
+    }, [requestProblemaImage])
+
+
+    useEffect(()=>{
+      if(!requestPageAvaliacao) return
+      setIsRequestingPage(true)
+      getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
+      .then((response)=>{        
+          setPageAvaliacoes(response)
+      })
+      .catch((reponse)=>{
+        setErrorMessage("Erro buscando avaliações: " + reponse.message)
+      })
+      .finally(()=>{
+        setIsRequestingPage(false)
+      })
+    },[requestPageAvaliacao])
+
+
+    /*
+    * Função chamada quando o usuário clicar o mapa
+    * Se o usuário clicar em cima de uma linha da infraestrutura,vai mostrar modal com avaliações da infraestrutura
+    */
+    const clicado = (latitude: number, longitude: number) => {
+      const matchedFeature = infraestrutura?.features.find((feature) => {
+        const geometry = feature.geometry
+        if (geometry.type === 'LineString') {
+          return isPointNearLine({latitude, longitude}, geometry.coordinates as [number, number][])  
         }
-      }
+        return false
+      })
+      if (!matchedFeature) return
+
+      setRequestPageAvaliacao({idInfraestruturaCicloviaria: parseInt(matchedFeature.properties.id), nota:null, pagina:null})
+
+     
     }
-    return false;
-  };
 
-  const pressionado = (latitude: number, longitude: number) => {
-    const point = { latitude, longitude };
-    const isInCiclovia = isPointInCiclovia(point);
-    if (isInCiclovia) {
-      setProblemaCoords({ latitude, longitude });
-      setShowSelectionModal(true);
-    } else {
-      setErrorMessage('Ação disponível apenas dentro de ciclovias');
+
+    /*
+    * Função chamada quando o usuário pressiona o mapa
+    * Se o usuário pressionar em cima de uma linha da infraestrutura,vai mostrar modal com opções de criar problema ou avaliar a infraestrutura
+    */
+    const pressionado = (latitude: number, longitude: number) => {
+      console.log('Long Press', latitude, longitude)
+      setIdInfraAvaliacao(null)
+      setProblemaCoords(null)
+      const matchedFeature = infraestrutura?.features.find((feature) => {
+        const geometry = feature.geometry
+        if (geometry.type === 'LineString') {
+          return isPointNearLine({latitude, longitude}, geometry.coordinates as [number, number][])  
+        }
+        return false
+      })
+      if (!matchedFeature) return
+      
+      setIdInfraAvaliacao(parseInt(matchedFeature.properties.id))
+      
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController
+      setIsContentLoading(true)
+      checkCreateViabilityProblema(latitude, longitude, abortControllerRef.current)
+      .then((reponse) => {
+        if(!reponse){
+          console.log('REPONSE DO CHECK: ', reponse) 
+          setErrorMessage("Não é possível criar um problema nesse local")
+          setShowOpsModal(true)
+          return
+        }
+        setProblemaCoords({latitude, longitude})
+        setShowOpsModal(true)
+      })
+      .catch((response)=>{
+        setErrorMessage("Não é possível criar um problema nesse local: "+ response.message)
+      })
+      .finally(()=>{
+        setIsContentLoading(false)
+      })
+
     }
-  };
 
-  const handleCyclewayRating = (rating: any) => {
-    if (!rating) {
-      setShowCyclewayModal(false);
-      return;
-    }
-    // TODO: Add API call to submit the rating
-    console.log('Submitting cycleway rating:', rating);
-    setSuccessMessage('Avaliação enviada com sucesso!');
-    setShowCyclewayModal(false);
-  };
 
-  if (initalLoading) return <LoadingActivity />;
 
-  return (
-    <SafeAreaView className={isDarkMode ? 'bg-gray-900' : 'bg-white'} style={{ flex: 1 }}>
-      <MapView
-        style={{ width: '100%', height: '100%' }}
-        provider={PROVIDER_GOOGLE}
-        customMapStyle={isDarkMode ? mapStylesDark : mapStylesLight}
-        onRegionChange={setCurrentViewLocation}
-        mapPadding={{ top: 0, right: 0, bottom: 100, left: 0 }}
-        initialRegion={initialRegion}
-        showsUserLocation={true}
-        onPress={(e) => {
-          console.log('Press ', e.nativeEvent.coordinate);
-        }}
-        onLongPress={(e) => {
-          console.log('Long Press', e.nativeEvent.coordinate);
-          pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude);
-        }}
-        onRegionChangeComplete={(e, { isGesture }) => {
-          setIsMoved(isGesture);
-        }}
-      >
-        {eventos.map((evento) => (
-          <View key={evento.id}>
-            <Circle
-              fillColor={
-                evento.gratuito
-                  ? isDarkMode
-                    ? 'rgba(195, 255, 0, 0.2)'
-                    : 'rgba(195, 255, 0, 0.2)'
-                  : isDarkMode
-                  ? 'rgba(192, 170, 129, 0.2)'
-                  : 'rgba(192, 170, 129, 0.2)'
-              }
-              strokeColor={
-                evento.gratuito
-                  ? isDarkMode
-                    ? 'rgba(195, 255, 0, 0.5)'
-                    : 'rgba(195, 255, 0, 0.5)'
-                  : isDarkMode
-                  ? 'rgba(192, 170, 129, 0.5)'
-                  : 'rgba(192, 170, 129, 0.5)'
-              }
-              center={evento.endereco}
-              radius={evento.faixaKm * 100}
-              strokeWidth={2}
-            />
-            <Marker
-              key={evento.id}
-              coordinate={evento.endereco}
-              title={evento.nome}
-              image={
-                evento.gratuito
-                  ? require('../../assets/pins/pin_free_evento.png')
-                  : require('../../assets/pins/pin_paid_evento.png')
-              }
-            />
-          </View>
-        ))}
 
-        {problemas.map((problema) => (
-          <Marker
-            key={problema.id}
-            coordinate={problema}
-            title={problema.descricao}
-            image={
-              problema.tipoProblema.id === 1
-                ? require('../../assets/pins/pin_problema_tipo_1.png')
-                : problema.tipoProblema.id === 2
-                ? require('../../assets/pins/pin_problema_tipo_2.png')
-                : problema.tipoProblema.id === 3
-                ? require('../../assets/pins/pin_problema_tipo_3.png')
-                : problema.tipoProblema.id === 4
-                ? require('../../assets/pins/pin_problema_tipo_4.png')
-                : problema.tipoProblema.id === 5
-                ? require('../../assets/pins/pin_problema_tipo_5.png')
-                : problema.tipoProblema.id === 6
-                ? require('../../assets/pins/pin_problema_tipo_6.png')
-                : problema.tipoProblema.id === 7
-                ? require('../../assets/pins/pin_problema_tipo_7.png')
-                : problema.tipoProblema.id === 8
-                ? require('../../assets/pins/pin_problema_tipo_8.png')
-                : require('../../assets/pins/pin_problema_tipo_1.png')
-            }
-          />
-        ))}
+    
+    if(initalLoading)
+      return (
+        <LoadingActivity/>
+      )
 
-        <Geojson
-          geojson={infraestrutura || emptyGeoJson}
-          strokeColor={isDarkMode ? 'rgba(255, 99, 71, 0.5)' : 'rgba(255, 0, 0, 0.35)'}
-          strokeWidth={10}
-        />
-      </MapView>
 
-      {currentLocationError && (
-        <View
-          className={`items-center justify-center h-[200px] w-[100%] absolute top-[50%] rounded-[100px] ${
-            isDarkMode ? 'bg-gray-800' : 'bg-primary_green'
-          }`}
-        >
-          <Text
-            className={`text-xl ${
-              isDarkMode ? 'color-white' : 'color-color_lightGray'
-            }`}
+    else
+      return (   
+        <SafeAreaView >
+        {/* <View className='h-[10%]'>
+          <Text > {JSON.stringify(currentLocation)} </Text>
+        </View> */}
+        
+
+        <MapView style={{width: '100%', height:'100%'}} 
+            onRegionChange={setCurrentViewLocation}
+            mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
+            initialRegion={initialRegion}
+            showsUserLocation={true} 
+            zoomEnabled={true}
+            provider={PROVIDER_GOOGLE}
+            customMapStyle={isDarkMode ? mapStylesDark : mapStylesLight}
+            onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
+            onLongPress={e=> {
+              console.log('Long Press', e.nativeEvent.coordinate)
+              pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
+            }}
+            onRegionChangeComplete={ (e, {isGesture}  ) => {setIsMoved(isGesture)}}
           >
-            {currentLocationError.message}
-          </Text>
-          {currentLocationError.key === 'SERVICE' && (
-            <ButtonModal
-              title="Tentar Novamente"
-              handlePress={getCurrentLocation}
-              customStyles={`w-[200px] h-[50px] px-4 py-2 rounded-[8px] ${
-                isDarkMode ? 'bg-green-700 border-[1px] border-green-500' : 'bg-primary_green_light border-[1px] border-green-300'
-              }`}
-              textStyles={`text-center ${isDarkMode ? 'color-white' : 'color-black'}`}
-            />
-          )}
-        </View>
-      )}
+            
 
-      {isMoved && (
-        <View className="items-center justify-center h-[50%] w-[100%] absolute top-[-20%]">
-          <ButtonModal
-            title="Achar Eventos Próximos"
-            handlePress={getEventsOnViewLocation}
-            textStyles={`text-center ${isDarkMode ? 'color-white' : 'color-black'}`}
-            customStyles={`min-w-[200px] min-h-[50px] px-4 py-2 rounded-[8px] ${
+              {eventos.map((evento) => (
+
+                  <View key={evento.id}>
+                    <Circle
+                      fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
+                      strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
+                      center={evento.endereco}
+                      radius={evento.faixaKm*100}
+                      strokeWidth={2}
+                    />  
+        
+                   <Marker 
+                      key={evento.id} 
+                      coordinate={evento.endereco} 
+                      title={evento.nome}
+                      image={evento.gratuito
+                        ? require('../../assets/pins/pin_free_evento.png')
+                        : require('../../assets/pins/pin_paid_evento.png')
+                      }
+
+                    />
+                  </View>
+                ))}
+
+                {problemas.map((problema) => (        
+                   <Marker 
+                      key={problema.id} 
+                      coordinate={problema} 
+                      title={problema.descricao}
+                      image={
+                        problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1.png')) 
+                        :
+                        problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2.png') )
+                        : 
+                        problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3.png') )
+                        :
+                        problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4.png') ) 
+                        :
+                        problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5.png') )   
+                        :
+                        problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6.png') )   
+                        :
+                        problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7.png') )   
+                        :  
+                        problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8.png') )   
+                        :  
+                          require('../../assets/pins/pin_problema_tipo_1.png')
+                          
+                      }
+                      onPress={()=>setPinProblemaSelector(problema)}
+                    >
+                    
+                    </Marker>
+                ))}
+
+          
+            
+        
+
+          <Geojson
+            geojson={infraestrutura || emptyGeoJson}
+            strokeColor={isDarkMode ? 'rgba(255, 99, 71, 0.5)' : 'rgba(255, 0, 0, 0.35)'}
+            strokeWidth={10}
+          />
+            
+
+  
+           </MapView>
+           {/**<Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>
+            //   <Image
+            //     source={evento.gratuito
+            //       ? require('../../assets/pins/pin_free_evento.png')
+            //       : require('../../assets/pins/pin_paid_evento.png')}
+            //       style={{width: 30, height: 35}} 
+            //       resizeMode="contain"
+            //       />
+            // </Marker>*/} 
+
+          {currentLocationError &&
+            (<View 
+            className={`items-center justify-center h-fit w-[90%] left-[5%] ${isDarkMode ? 'bg-gray-800' : 'bg-primary_green'} absolute top-[50%] rounded-[10px]`} >
+            <Text 
+              className={`text-xl ${
+                isDarkMode ? 'color-white' : 'color-color_lightGray'
+              }`}  
+          > {currentLocationError.message}</Text>
+              {currentLocationError.key === 'SERVICE' &&
+              <ButtonModal
+                title='Tentar Novamente'
+                handlePress={getCurrentLocation}
+                customColor={`${
+                  isDarkMode ? 'bg-green-700 border-[1px] border-green-500' : 'bg-primary_green_light border-[1px] border-green-300'
+                }`}
+                customStyles={`w-[200px] h-[50px] px-4 py-2 ${isDarkMode ? 'color-white' : 'color-black'}`}
+              />}
+            </View>)}
+
+          {pinProblemaSelector &&
+            <PinProblemaView
+              problema={pinProblemaSelector}
+              onClose={() => setPinProblemaSelector(null)}
+            />}
+                
+              {isMoved && (
+                <View className={`items-center justify-center h-[200px] w-[100%] absolute top-[50%] rounded-[100px] ${
+                  isDarkMode ? 'bg-gray-800' : 'bg-primary_green'
+                }`}
+            >
+              <ButtonModal
+                title='Achar Eventos Próximos'
+                handlePress={getEventsOnViewLocation}
+                textStyles={`text-[#000] text-center ${isDarkMode ? 'color-white' : 'color-black'}`}
+                customStyles={`min-w-[200px] min-h-[50px] px-4 py-2  ${
               isDarkMode ? 'bg-green-700 border-[1px] border-green-500' : 'bg-primary_green_light border-[1px] border-green-300'
             }`}
-          />
-        </View>
-      )}
+              />
+            </View>)}
+            {isContentLoading && <LoadingActivity/>}
+            {successMessage && 
+            <ShowAlert
+              message={successMessage}
+              type='success'
+              onClose={()=>setSuccessMessage(null)}
+            />}
+            {errorMessage && 
+            <ShowAlert
+              message={errorMessage}
+              type='error'
+              onClose={()=>setErrorMessage(null)}
+            />}
+            {showProblemaModal && problemaCoords &&
+            <ProblemaModal
+              coords={problemaCoords}
+              visible={showProblemaModal}
+              closeModal={(createProblema, image) => {
+                if(createProblema){setShowOpsModal(false)}
+                setRequestCreateProblema(createProblema)
+                setProblemaImage(image)
+                setShowProblemaModal(false)
+              }}
+              />
+            }
 
-      {isContentLoading && <LoadingActivity />}
+            {showAvaliacaoModal && idInfraAvaliacao &&
+              <AvaliacaoModal
+                idInfraestruturaCicloviaria={idInfraAvaliacao}
+                closeModal={(createAvaliacao)=>{
+                  if(createAvaliacao){setShowOpsModal(false)}
+                  setRequestCreateAvaliacao(createAvaliacao)
+                  setShowAvaliacaoModal(false)
+                }}
+                />
+            }
 
-      {successMessage && (
-        <ShowAlert
-          message={successMessage}
-          type="success"
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}
+            {showOpsModal && !showAvaliacaoModal && !showProblemaModal &&
+              <OpsModal
+                  onSelectInfraestrutura={()=>setShowAvaliacaoModal(true)}
+                  visible={showOpsModal}
+                  onSelectProblema={()=>setShowProblemaModal(true)}
+                  problemaAvailable={ problemaCoords !== null }
+                  onClose={()=>setShowOpsModal(false)}
+              />
+            }
 
-      {errorMessage && (
-        <ShowAlert
-          message={errorMessage}
-          type="error"
-          onClose={() => setErrorMessage(null)}
-        />
-      )}
+            {pageAvaliacoes && requestPageAvaliacao && 
+              <AvaliacaoView
+                pageAvaliacao={pageAvaliacoes}
+                requestPage={requestPageAvaliacao}
+                setRequestPage={setRequestPageAvaliacao}
+                isContentLoading={isRequestingPage}
+                onClose={()=>{
+                  setPageAvaliacoes(null)
+                  setRequestPageAvaliacao(null)
+                }}
+              />
+            }
 
-      {showSelectionModal && (
-        <OpsModalMapView
-          coords={problemaCoords}
-          visible={showSelectionModal}
-          onClose={() => setShowSelectionModal(false)}
-          onSelectProblem={() => {
-            setShowSelectionModal(false);
-            setShowProblemaModal(true);
-          }}
-          onSelectCycleway={() => {
-            setShowSelectionModal(false);
-            setShowCyclewayModal(true);
-          }}
-        />
-      )}
+      </SafeAreaView>
+    )
+  }
 
-      {showProblemaModal && (
-        <ProblemaModal
-          coords={problemaCoords}
-          visible={showProblemaModal}
-          closeModal={(e) => {
-            setRequestCreateProblema(e);
-            setShowProblemaModal(false);
-          }}
-        />
-      )}
-
-      {showCyclewayModal && (
-        <AvaliacaoModal
-          coords={problemaCoords}
-          visible={showCyclewayModal}
-          closeModal={handleCyclewayRating}
-        />
-      )}
-    </SafeAreaView>
-  );
-}
+  

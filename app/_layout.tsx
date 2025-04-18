@@ -27,7 +27,6 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
       <AuthProvider>
         <TabBarProvider> 
           <Stack>
@@ -39,6 +38,5 @@ export default function RootLayout() {
           <DarkMode /> 
         </TabBarProvider>
       </AuthProvider> 
-    </ThemeProvider>
   );
 }

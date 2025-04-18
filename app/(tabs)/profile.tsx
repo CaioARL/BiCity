@@ -1,16 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Image, useImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthProvider } from '../context/AuthProvider';
 import { router } from 'expo-router';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
-import { useTabBar } from '../context/TabBarContext'; 
-import { withSpring } from 'react-native-reanimated';
 import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario } from '../../types';
 import { updateImageUser, updateUser } from '../../api/usuario';
 import LoadingActivity from '../../components/LoadingActivity';
@@ -19,13 +14,10 @@ import { getNivelHabilidade } from '../../api/nivel-habilidade';
 import CustomButton from '../../components/CustomButton';
 import ShowAlert from '../../components/ShowAlert';
 
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 
 const Profile = () => {
-  const { theme } = useTheme()
   const { onLogout, authState, fetchUser } = useAuthProvider()
-  const { tabBarOffset } = useTabBar()
 
   const [image, setImage] = useState<string | null>()
   // const profileImg = useImage(  authState?.user?.s3Url , {
@@ -120,7 +112,7 @@ const Profile = () => {
         const formData = new FormData()
         formData.append('file', {
           uri: image,
-          name: authState.id+'profile.jpg',
+          name: authState.id+'profile.jpeg',
           type: 'image/jpeg',
         } as any)
         setIsLoading(true)
@@ -200,16 +192,6 @@ const Profile = () => {
     }
   };
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const currentScrollY = event.nativeEvent.contentOffset.y;
-    if (currentScrollY > lastScrollY && currentScrollY > 0) {
-      tabBarOffset.value = withSpring(30, { damping: 20, stiffness: 100 });
-    } else if (currentScrollY < lastScrollY) {
-      tabBarOffset.value = withSpring(0, { damping: 20, stiffness: 100 });
-    }
-    setLastScrollY(currentScrollY);
-  };
-
   
   const updateCampoUsuarioHabilidade = (nivel : NivelHabilidade) => {
     setUserToUpdate(prev => ({
@@ -237,39 +219,15 @@ const Profile = () => {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: theme === 'dark' ? colors.secondary_black || '#1f2937' : colors.white || '#FFF',
-        flex: 1,
-      }}
-    >
-      <ScrollView onScroll={handleScroll} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 107 }}>
-        
-      {authState?.user?.s3Url && (
-        <>
-          <Image className='w-[150] h-[150]' source={{ uri: authState.user.s3Url }} />
-          <Text>authState.user.s3Url: {authState.user.s3Url} </Text>
-        </>
-      )
-    } 
-        
-        <View
-          style={{
-            ...CustomProfile.profileCard,
-            backgroundColor: theme === 'dark' ? colors.secondary_black || '#1f2937' : colors.white || '#FFF',
-            shadowColor: theme === 'dark' ? '#FFF' : '#000',
-          }}
-        >
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ScrollView scrollEventThrottle={16}  contentContainerStyle={{ paddingBottom: 107 }}>
+      
+        <View style={{...CustomProfile.profileCard, backgroundColor: 'white', shadowColor: '#000'}}>
 
 
           {isLoading && <LoadingActivity></LoadingActivity>}
 
-          <View
-            style={{
-              ...CustomProfile.topSection,
-              backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green
-            }}
-          >
+          <View style={{ ...CustomProfile.topSection, backgroundColor: '#C3FF00'  }} >
             <View style={CustomProfile.imageContainer}>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
 
@@ -278,21 +236,21 @@ const Profile = () => {
                 <Ionicons name="pencil" size={16} color="#1f2937" />
               </TouchableOpacity>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
-              <View
-                className={`w-[350px] h-[350px] rounded-[350px] border-[3px] border-white items-center shadow-md ${
-                  theme === 'dark' ? 'bg-[#1f2937]' : 'bg-white'
-                }`}
-              >
-            {image? 
-              (<Image style={CustomProfile.profileImage} source={image} />)
-              :
-              <Text className={`text-[250px] ${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>
-                {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
-              </Text>
+              <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
+
+            {image ? 
+                (<Image style={CustomProfile.profileImage} src={image} />)
+            :
+            authState?.user?.s3Url ? 
+                (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
+                :
+                (<Text className='text-[245px]'>
+                  {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
+                </Text>)
             }
 
-                {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor: theme === 'dark' ?  colors.secondary_black : colors.primary_green }} onPress={pickImage} >
-                 <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: theme === 'dark' ? 'white' : 'secondary_black' }}/>
+                {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor : '#C3FF00'}} onPress={pickImage} >
+                 <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: '#1f2937' }} />
                 </TouchableOpacity>}
               </View>
             </View>
@@ -303,77 +261,47 @@ const Profile = () => {
             {isEditing ? (
               <>
                 {authState?.user?.nome && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.nome}
                   onChangeText={text => updateCampoUsuario('nome', text)} 
                 />}
                 {authState?.user?.nomeUsuario && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.nomeUsuario}
                   onChangeText={text => updateCampoUsuario('nomeUsuario', text)}
                 />}
                 {authState?.user?.endereco?.cep && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.endereco.cep}
                   onChangeText={text => updateCampoUsuarioEndereco('cep', parseInt(text))}
                 />}
                 {authState?.user?.endereco?.rua &&<TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.endereco.rua}
                   onChangeText={text => updateCampoUsuarioEndereco('rua', text)}
                 />}
                 {authState?.user?.endereco?.cidade && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.endereco.cidade}
                   onChangeText={text => updateCampoUsuarioEndereco('cidade', text)}
                 />}
                 {authState?.user?.endereco?.bairro && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.endereco.bairro}
                   onChangeText={text => updateCampoUsuarioEndereco('bairro', text)}
                 />}
                 {authState?.user?.endereco?.estado && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.endereco.estado}
                   onChangeText={text => updateCampoUsuarioEndereco('estado', text)}
                 />}
                 {authState?.user?.endereco?.numero && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                  }}
+                  style={CustomProfile.input}
                   value={String(userToUpdate.endereco.numero)}
                   onChangeText={(text) => updateCampoUsuarioEndereco("numero",Number(text.replace(/\D/g, '')))} // Ensure only numbers are set
                 />}
                 {authState?.user?.email && <TextInput
-                  style={{
-                    ...CustomProfile.input,
-                    opacity: 2,
-                    backgroundColor: theme === 'dark' ? '#444' : '#f0f0f0',
-                    color: theme === 'dark' ? '#FFF' : '#1f2937',
-                    borderColor: theme === 'dark' ? '#666' : '#ccc',
-                  }}
+                  style={CustomProfile.input}
                   value={userToUpdate.email}
                   onChangeText={text => updateCampoUsuario('email', text)}
                   editable={false}
@@ -389,14 +317,13 @@ const Profile = () => {
                         }
                       }
                       msg={nivelHabilidadeError}
-                      theme={theme}
                     />  
                   }
                
               </>
             ) : (
               <>
-                <Text style={{...CustomProfile.name, color: theme === 'dark' ? colors.white : '' }}>{authState?.user?.nome}</Text>
+                <Text style={{...CustomProfile.name}}>{authState?.user?.nome}</Text>
                 <Text style={CustomProfile.title}>@{authState?.user?.nomeUsuario}</Text>
               </>
             )}
@@ -409,18 +336,12 @@ const Profile = () => {
             {authState?.user?.nivelHabilidade && <View style={CustomProfile.nivelHabilidadeContainer}>
               <Text style={CustomProfile.nivelHabilidade}>{authState.user.nivelHabilidade.nome}</Text>
             </View>}
-{/* 
-
             
-            {showMoreInfo && (
-              <View style={CustomProfile.informaçõesContainer}>
-                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>Endereço: {endereco}</Text>
-                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>E-mail: {email}</Text>
-                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>CPF: {formatCPF(cpf)}</Text>
-                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>CNPJ: {formatCNPJ(cnpj)}</Text>
-                <Text style={{ color: theme === 'dark' ? colors.white : '' }}>Data de Criação: {formattedDate}</Text>
-              </View>
-            )} */}
+
+
+
+
+
           </View>
 
             {isEditing && (
@@ -433,10 +354,7 @@ const Profile = () => {
 
           <View style={CustomProfile.iconSection}>
             <TouchableOpacity
-              style={{
-                ...CustomProfile.iconButton,
-                backgroundColor: theme === 'dark' ? colors.primary_green : colors.primary_green,
-              }}
+              style={{ ...CustomProfile.iconButton, backgroundColor: '#C3FF00' }}
               onPress={toggleEdit}
             >
               {isEditing ? <Text className='text-lg font-robotobold text-secondary_black'>Cancelar</Text> : <Ionicons name="chevron-down" size={24} color="white" />}

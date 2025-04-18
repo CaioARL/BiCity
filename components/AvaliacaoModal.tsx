@@ -1,103 +1,106 @@
-import { View, Text, Animated, Modal, ScrollView, TouchableOpacity } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import ButtonModal from './ButtonModal';
-import FormFieldModal from './FormFieldModal';
-import { useTheme } from '../app/context/ThemeProvider';
+import { View, Text, Animated, Modal, TouchableOpacity } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import ButtonModal from './ButtonModal'
+import FormFieldModal from './FormFieldModal'
+import { RequestCreateAvaliacao } from '../types'
+import { useAuthProvider } from '../app/context/AuthProvider'
+import { useTheme } from '../app/context/ThemeProvider'
 
-interface CyclewayRatingModalProps {
-  visible: boolean;
-  closeModal: (rating: CyclewayRating | null) => void;
-  coords: { latitude: number; longitude: number };
+
+interface AvalicaoModalProps {
+    idInfraestruturaCicloviaria: number 
+    visible?: boolean
+    closeModal: (requestCreateAvaliacao: RequestCreateAvaliacao | null ) => void
 }
 
-interface CyclewayRating {
-  comentario: string;
-  nota: number;
-  latitude: number;
-  longitude: number;
-}
 
-export default function CyclewayRatingModal({ visible, closeModal, coords }: CyclewayRatingModalProps) {
+
+export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCicloviaria}: AvalicaoModalProps) {
+  const { authState } = useAuthProvider()
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [comentario, setComentario] = useState<string>('');
-  const [rating, setRating] = useState<number>(3);
 
-  const [cyclewayRating, setCyclewayRating] = useState<CyclewayRating>({
+  const [requestCreateAvaliacao, setRequestCreateAvaliacao] = useState({
+    idUsuario: authState?.user?.id || 0,
+    idInfraestruturaCicloviaria: idInfraestruturaCicloviaria,
+    nota: 0,
     comentario: '',
-    nota: 3,
-    latitude: coords.latitude,
-    longitude: coords.longitude,
-  });
+    })
 
-  useEffect(() => {
-    if (visible) {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, fadeAnim]);
+  // useEffect(() => {
+  //   if (visible) {
+  //     Animated.timing(fadeAnim, {
+  //       toValue: 1,
+  //       duration: 800,
+  //       useNativeDriver: true,
+  //     }).start()
+  //   } else {
+  //     Animated.timing(fadeAnim, {
+  //       toValue: 0,
+  //       duration: 300,
+  //       useNativeDriver: true,
+  //     }).start()
+  //   }
+  // }, [visible, fadeAnim])
 
-  useEffect(() => {
-    setCyclewayRating((prev) => ({
-      ...prev,
-      comentario,
-      nota: rating,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-    }));
-  }, [comentario, rating, coords]);
+  // useEffect(() => {
+  //   setRequestCreateAvaliacao((prev) => ({
+  //     ...prev,
+  //     comentario,
+  //     nota: nota
+  //   }))
+  // }, [comentario, nota])
 
   const renderStars = () => {
-    const stars = [1, 2, 3, 4, 5];
+    const stars = [1, 2, 3, 4, 5]
     return (
       <View className="flex-row justify-center mb-4">
         {stars.map((star) => (
           <TouchableOpacity
             key={star}
-            onPress={() => setRating(star)}
+            onPress={() => updateCampoAvaliacao("nota",star)}
             className="mx-1"
           >
             <Text
-              className={`text-3xl ${isDarkMode ? 'color-white' : 'color-black'}`}
-              style={{ color: star <= rating ? '#FFD700' : isDarkMode ? '#555' : '#CCC' }}
+               className={`text-3xl ${isDarkMode ? 'color-white' : 'color-black'}`}
+              style={{ color: star <= requestCreateAvaliacao.nota ? '#FFD700' : isDarkMode ? '#555' : '#CCC' }}
             >
               ★
             </Text>
           </TouchableOpacity>
         ))}
       </View>
-    );
-  };
+    )
+  }
+
+
+
+  const updateCampoAvaliacao = (campo: string, value: string | number) => {
+    setRequestCreateAvaliacao((prev)=>{
+      return { 
+        ...prev,
+        [campo]: value
+      }      
+    })
+  }
+
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <Animated.View style={{ opacity: fadeAnim }}>
+    <Modal animationType="slide" transparent={true}>
+      {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
-          <ScrollView
+          <View 
             className={`rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto ${
               isDarkMode ? 'bg-gray-800' : 'bg-white'
             }`}
           >
-            <Text
-              className={`text-xl font-bold text-center mb-4 ${
-                isDarkMode ? 'color-white' : 'color-black'
-              }`}
-            >
+            <Text className={'text-xl font-bold text-center mb-4 color-black'} >
               Avaliar Ciclovia
             </Text>
 
             <View className="mb-4">
-              <Text
+              <Text 
                 className={`text-base mb-2 ${isDarkMode ? 'color-gray-300' : 'color-gray-600'}`}
               >
                 Qualidade da ciclovia:
@@ -110,8 +113,8 @@ export default function CyclewayRatingModal({ visible, closeModal, coords }: Cyc
               placeholder="Deixe seu comentário sobre a ciclovia"
               multiline={true}
               maxLength={200}
-              handleChangeText={setComentario}
-              value={comentario}
+              handleChangeText={e=> updateCampoAvaliacao("comentario",e)}
+              value={requestCreateAvaliacao.comentario}
               validantionCheck={() => {}}
             />
 
@@ -123,19 +126,20 @@ export default function CyclewayRatingModal({ visible, closeModal, coords }: Cyc
                   isDarkMode ? 'bg-gray-600 border-[1px] border-gray-400' : 'bg-gray-300 border-[1px] border-gray-200'
                 }`}
                 textStyles={`text-center ${isDarkMode ? 'color-white' : 'color-black'}`}
+
               />
               <ButtonModal
                 title="Enviar Avaliação"
-                handlePress={() => closeModal(cyclewayRating)}
+                handlePress={() => closeModal(requestCreateAvaliacao)}
                 customStyles={`py-[10px] rounded-[8px] ${
                   isDarkMode ? 'bg-green-700 border-[1px] border-green-500' : 'bg-green-500 border-[1px] border-green-300'
                 }`}
                 textStyles={`text-center ${isDarkMode ? 'color-white' : 'color-black'}`}
               />
             </View>
-          </ScrollView>
+          </View>
         </View>
-      </Animated.View>
+      {/* </Animated.View> */}
     </Modal>
-  );
+  )
 }

@@ -4,12 +4,10 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { useTabBar } from '../app/context/TabBarContext'; 
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number }>({ height: 20, width: 100 });
   const tabPositionX = useSharedValue(0);
-  const { tabBarOffset } = useTabBar(); 
 
   const onTabLayout = (e: LayoutChangeEvent) => {
     setDimensions({
@@ -29,16 +27,12 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     };
   });
 
-  const animatedTabBarStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: tabBarOffset.value }],
-    };
-  });
+
 
   const buttonWidth = dimensions.width / state.routes.length;
 
   return (
-    <Animated.View style={[CustomTabBar.tabbar, animatedTabBarStyle]} onLayout={onTabLayout}>
+    <Animated.View style={[CustomTabBar.tabbar]} onLayout={onTabLayout}>
       <Animated.View
         className={`absolute bg-primary_green rounded-[30] mx-[12px]`}
         style={[animatedStyle, {

@@ -16,12 +16,6 @@ import { checkToken, sendToken } from '../../api/token';
 import { useAuthProvider } from '../context/AuthProvider';
 import { router, useNavigation } from 'expo-router';
 import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-native';
-import { useTheme } from '../context/ThemeProvider';
-import tailwindConfig from '../../tailwind.config';
-
-
-
-const colors = (tailwindConfig as any)?.theme?.colors as Record<string, string>;
 
 type AlertType = 'success' | 'error' | 'loading';
 
@@ -29,7 +23,6 @@ export default function SignUp() {
   const [userName, setUserName] = useState('');
   const [userNameError, setUserNameError] = useState('');
   const [isValidUserName, setIsValidUserName] = useState<boolean | undefined>(undefined);
-  const { theme } = useTheme();
 
   const [firstName, setFirstName] = useState('');
   const [firstNameError, setFirstNameError] = useState('');
@@ -446,7 +439,7 @@ export default function SignUp() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? colors.secondary_black : colors.white, justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
     <ImageBackground
       source={backgroundImage}
       style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -456,11 +449,12 @@ export default function SignUp() {
     <TouchableOpacity
       style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
         paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-        className={theme === 'dark' ? 'bg-secondary_black' : 'bg-primary_green'}
+        className='bg-primary_green'
+
         onPress={prevStep}
       >
-      <ArrowLeft size={24} color={theme === 'dark' ? colors.primary_green  : colors.white} />
-    </TouchableOpacity>
+      <ArrowLeft size={24} color="white" />
+      </TouchableOpacity>
       
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
      
@@ -474,7 +468,6 @@ export default function SignUp() {
                   handleChangeText={checkFirstName}
                   msg={firstNameError}
                   isValid={isValidFirstName}
-                  theme={theme}
                 />
                 <FormField
                   title="Último Nome"
@@ -483,7 +476,6 @@ export default function SignUp() {
                   handleChangeText={checkLastName}
                   msg={lastNameError}
                   isValid={isValidLastName}
-                  theme={theme}
                 />
                 <FormField
                   title="Username"
@@ -492,7 +484,6 @@ export default function SignUp() {
                   handleChangeText={checkUsername}
                   msg={userNameError}
                   isValid={isValidUserName}
-                  theme={theme}
                 />
                 <FormFieldSelectList
                   title="Nível de habilidade"
@@ -501,7 +492,6 @@ export default function SignUp() {
                   handleChange={setHabilidade}
                   msg={nivelHabilidadeError}
                   isValid={isValidHabilidade}
-                  theme={theme}
                 />
 
                 <CustomButton title="Próximo" handlePress={nextStep} />
