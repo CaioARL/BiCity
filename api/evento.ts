@@ -113,3 +113,26 @@ export const createEventoImage = async (eventoImage: RequestCreateEventoImage, a
     })
     return response
 }
+
+
+
+export const getEventoByUsuario = async (pageEvento: RequestPageEvento, idUsuario: number, abortSignal: AbortController) => {
+    const response = await api.get<PageEvento>(ENDPOINTS.EVENTO_GET_BY_USUARIO + idUsuario, 
+        { 
+            params: {
+            pagina: pageEvento.page,
+            nome: pageEvento.nome,
+            descricao: pageEvento.descricao,
+            data: pageEvento.data,
+            cidade: pageEvento.cidade,
+            estado: pageEvento.estado,
+            faixaKm: pageEvento.faixaKm,
+            tipoEvento: pageEvento.tipoEvento?.id,
+            nivelHabilidade: pageEvento.nivelHabilidade?.id,
+            gratuito: pageEvento.gratuito
+        }, 
+        signal: abortSignal.signal
+        }
+    )
+    return response.data
+}

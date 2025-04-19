@@ -144,8 +144,8 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
 
                                 <View className="flex-col flex-grow-[1px] justify-center items-center my-4">
                                     <Image
-                                        // source={{ uri: item.usuario.s3Url }}
-                                        source = { require("../../assets/img/profile.jpg")}
+                                        source={{ uri: item.usuario.s3Url }}
+                                        // source = { require("../../assets/img/profile.jpg")}
                                         className="w-20 h-20 rounded-full"
                                     />
                                         <Text className="text-lg font-semibold">{item.usuario.nome}</Text>

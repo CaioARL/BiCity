@@ -216,8 +216,7 @@ export default function Events() {
   };
 
   const handleAddEvent = () => {
-    router.push('/event/event-user-menu')
-    // setModalVisible(true);
+    setModalVisible(true);
   };
   
   return (
@@ -231,37 +230,51 @@ export default function Events() {
               //width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10
               
             }
-            { authState?.user?.s3Url ? 
-            
-            <Image
-              src={authState.user.s3Url}
-              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
-              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
-            />
-            :
-            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
-              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
-            </View>
-            
-            }
 
-
-            <View style={{ flexDirection: 'column' }}>
-              <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
-              <View style={{ flexDirection: 'row' }}>
-                <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
-                {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
-                {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
+            <View style={{flexDirection:'row'}}>
+                { authState?.user?.s3Url ? 
                 
-                {authState?.user?.nivelHabilidade && (
-                  <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
+                <Image
+                  src={authState.user.s3Url}
+                  // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
+                />
+                :
+                <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                  <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+                </View>
+                
                 }
+              <View style={{ flexDirection: 'column' }}>
+                <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
+                  {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
+                  {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                  <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
+                  
+                  {authState?.user?.nivelHabilidade && (
+                    <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
+                  }
 
+                </View>
               </View>
             </View>
+
+                {authState?.user?.role !== 'PF' &&
+                <View>
+                  <TouchableOpacity 
+                  className='flex-col flex-nowrap items-center justify-center'
+                  onPress={()=>{
+                          router.push('/event/event-user-menu')
+                  }}>
+                      <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
+                      <Text>Meus Eventos</Text>
+                  </TouchableOpacity>
+                </View>}
+
           </View>
 
           <View style={{ ...CustomEvents.searchBox, }}>
@@ -409,19 +422,8 @@ export default function Events() {
         </View>
 
         {/* Add - Eventos */}
-        {authState?.user?.role !== 'PF' && <TouchableOpacity style={CustomEvents.addButton} onPress={handleAddEvent}>
-         <Ionicons name="add-circle-outline" size={24} color="#333" />
-        </TouchableOpacity>}
 
         {/* Modal Criar - Eventos */}
-        {/* { modalVisible && <EventModal
-          visible={modalVisible}
-          closeModal={ (requestCreateEvento, imageURI) => {
-            setRequestCreateEvento(requestCreateEvento)
-            setEventoImage(imageURI)
-            setModalVisible(false)
-          }}
-          />} */}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}
