@@ -32,7 +32,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
     <>
         {/* Event Type Filter */}
         <View className={`mb-[10] ${otherStyles} `}>
-        <Text className={`text-[16px] mb-[2px]` }>{title}</Text>
+        <Text className={`className='text-[16px] text-matte_gray mb-[5px]` }>{title}</Text>
         <TouchableOpacity 
               className='flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px]'
               
