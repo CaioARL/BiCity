@@ -4,11 +4,9 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
-import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, TipoEvento, Usuario } from '../../types';
-import { createEvento, createEventoImage, getEvento } from '../../api/evento';
-import EventView from '../view/EventView';
+import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
+import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
@@ -50,15 +48,12 @@ export default function Events() {
   //modals - filtro e criar evento
   const [modalVisible, setModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
 
 
 
   const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [eventoImage, setEventoImage] = useState<string | null>(null)
-  const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   
 
 
@@ -133,60 +128,11 @@ export default function Events() {
     setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
   }
 
-  useEffect( () => {
-      if(!requestCreateEvento) return 
-      setIsContentLoading(true)
-      abortControllerRef.current?.abort
-      abortControllerRef.current = new AbortController
-        createEvento(requestCreateEvento, abortControllerRef.current)
-        .then((response)=>{
-          setSuccessMessage('Evento: ' + response.nome + ' criado com sucesso')
-          if(eventoImage){
-            const formData = new FormData()
-            formData.append('file', {
-              uri: eventoImage,
-              name: 'evento.jpeg',
-              type: 'image/jpeg',
-            } as any)
-            setRequestEventoImage({
-              id: response.id,
-              image: formData
-            })
-          }else{
-            refreshContent()
-          }
-        })
-        .catch((response)=>{
-          setErrorMessage('falha na criação do Evento. \n Code error: ' + response.message)
-          
-        })
-        .finally(()=>{
-          setIsContentLoading(false)
-          setRequestCreateEvento(null)
-        })
-      }, [requestCreateEvento])
 
 
 
-  useEffect(()=>{
-    if(!requestCreateEventoImage){return}
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = new AbortController
-    setIsContentLoading(true)
-    createEventoImage(requestCreateEventoImage, abortControllerRef.current)
-    .then((response) => {
-      setSuccessMessage("Imagem enviada com sucesso" + response)
-      
-    })
-    .catch((response) => {
-      setErrorMessage("Error ao enviar imagem: " + response.message)
-    }).finally(() => {
-      setIsContentLoading(false)
-      setRequestEventoImage(null)
-      setEventoImage(null)
-      refreshContent()
-    })
-  }, [requestCreateEventoImage])
+
+
 
  
   const searchName = () => {
@@ -225,7 +171,7 @@ export default function Events() {
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
-          <View style={CustomEvents.location}>
+          <View style={CustomEvents.location} className='justify-between'>
             {
               //width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10
               
@@ -268,7 +214,7 @@ export default function Events() {
                   <TouchableOpacity 
                   className='flex-col flex-nowrap items-center justify-center'
                   onPress={()=>{
-                          router.push('/event/event-user-menu')
+                          router.push('event-user-menu')
                   }}>
                       <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
                       <Text>Meus Eventos</Text>
@@ -340,7 +286,8 @@ export default function Events() {
                       CustomEvents.card,
                       isSelected && { backgroundColor: "#d3e5ff" }
                     ]}
-                    onPress={() => setModalViewEvento(item)}
+                    // onPress={() => setModalViewEvento(item)}
+                    onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id }})}
                   >
                     <ImageBackground  
                       source={{uri: item.s3Url}} 
@@ -432,14 +379,7 @@ export default function Events() {
         />
 
         {/* Modal Visualizar - Eventos */}  
-        {modalViewEvento && 
-          <EventView
-            closeModal={ () => setModalViewEvento(null) }
-            onUpdate={refreshContent}
-            evento={modalViewEvento}
-          />
-        }
-
+        
         {successMessage && 
           <ShowAlert
             message={successMessage}

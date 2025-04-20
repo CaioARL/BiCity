@@ -1,7 +1,6 @@
-import { View, Text, ActivityIndicator } from 'react-native'
+import { View, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
-import MapView, { Circle, Marker } from 'react-native-maps'
-import { set } from 'zod'
+import MapView, { Marker } from 'react-native-maps'
 
 
 interface MapModalViewProps {

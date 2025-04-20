@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Text, View , FlatList, Image, ScrollView} from 'react-native'
-import { Avaliacao, PageAvaliacao, RequestPageAvaliacao } from '../../types'
-import CustomButton from '../../components/CustomButton'
+import { Avaliacao, PageAvaliacao, RequestPageAvaliacao } from '../types'
+import CustomButton from './CustomButton'
 import { Ionicons } from '@expo/vector-icons'
 
 /*

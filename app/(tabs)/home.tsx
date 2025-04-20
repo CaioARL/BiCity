@@ -10,13 +10,13 @@ import { getInfraestrutura } from '../../api/infraestrutura'
 import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
-import PinProblemaView from '../view/PinProblemaView'
+import PinProblemaView from '../../components/PinProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
 import { isPointNearLine } from '../../util/map-util'
 import OpsModal from '../../components/OpsModalMap'
 import { set } from 'zod'
 import { createAvaliacao, getAvaliacoesByInfraestrutura } from '../../api/avaliacao'
-import AvaliacaoView from '../view/AvaliacaoView'
+import AvaliacaoView from '../../components/AvaliacaoView'
 
 interface Region {
   latitude: number
