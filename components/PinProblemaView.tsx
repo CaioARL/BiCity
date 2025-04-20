@@ -1,7 +1,7 @@
 import React from 'react'
-import { Problema } from '../../types'
+import { Problema } from '../types'
 import { Text, View, Image } from 'react-native'
-import CustomButton from '../../components/CustomButton'
+import CustomButton from './CustomButton'
 
 
 

@@ -4,7 +4,7 @@ import { Region } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
-import { NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
+import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
 import { getCep, getCepByLatAndLong } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
@@ -21,13 +21,11 @@ import CustomButton from './CustomButton';
 
 interface EventModalProps {
   visible: boolean
+  evento?: Evento
   closeModal: ( requestCreateEvento: RequestCreateEvento | null, requestCreateEventoImage: string | null ) => void
 }
 
-const EventModal: React.FC<EventModalProps> = ({
-  visible,
-  closeModal,
-}) => {
+const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
 
   const { authState } = useAuthProvider()
@@ -36,22 +34,22 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const abortControllerRef = useRef(new AbortController())
 
-  const [cep, setCep] = useState('')
+  const [cep, setCep] = useState( evento?.endereco.cep ||'')
   const [cepError, setCepError] = useState('')
   const [isCepLoading, setIsCepLoading] = useState(false)
 
-  const [estado, setEstado] = useState('')
-  const [cidade, setCidade] = useState('')
-  const [bairro, setBairro] = useState('')
-  const [rua, setRua] = useState('')
-  const [numero, setNumero] = useState('')
+  const [estado, setEstado] = useState( evento?.endereco.estado ||'')
+  const [cidade, setCidade] = useState( evento?.endereco.cidade ||'')
+  const [bairro, setBairro] = useState( evento?.endereco.bairro ||'')
+  const [rua, setRua] = useState( evento?.endereco.rua ||'')
+  const [numero, setNumero] = useState( evento?.endereco.numero.toString() ||'')
 
-  const [nome, setNome] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [faixaKm, setfaixaKm] = useState('')
+  const [nome, setNome] = useState( evento?.nome ||'')
+  const [descricao, setDescricao] = useState( evento?.descricao ||'')
+  const [faixaKm, setfaixaKm] = useState( evento?.faixaKm.toString() ||'')
 
-  const [site, setSite]= useState('')
-  const [image, setImage] = useState<string | null>(null)
+  const [site, setSite]= useState( evento?.urlSite ||'')
+  const [image, setImage] = useState<string | null>( evento?.s3Url || null)
 
 
 
@@ -61,7 +59,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
 
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: 0, gratuito: false, urlSite: '' , tipoEvento: {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }},idUsuario: authState?.user?.id || 0  })
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: evento?.data || '', endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
 
@@ -184,9 +182,6 @@ const EventModal: React.FC<EventModalProps> = ({
     }
   }
 
-
-  
-
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -208,14 +203,12 @@ const EventModal: React.FC<EventModalProps> = ({
     }
   }
 
-
   const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
     setRequestCreateEvento(prev => ({
       ...prev,
       [campo]: valor
     }))
   }
-
 
   const updateCampoNovoEventoEndereco = (campo: string, valor: number | string) => {
     setRequestCreateEvento(prev => ({
@@ -226,7 +219,6 @@ const EventModal: React.FC<EventModalProps> = ({
       }
     }))
   }
-
 
   const updateCampoNovoEventoTipoEvento = (campo: string, valor: TipoEvento) => {
     setRequestCreateEvento(prev => ({
@@ -492,7 +484,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 />
 
                 <ButtonModal
-                  title='Salvar Evento'
+                  title={evento? 'Salvar Evento' : 'Criar Evento'}
                   handlePress={validateEventAndClose}
                   // disabled={}
                 />

@@ -1,18 +1,15 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import MapView, { Marker } from 'react-native-maps';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
-import EventModal from '../../components//EventModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, TipoEvento, Usuario } from '../../types';
-import { createEvento, createEventoImage, getEvento } from '../../api/evento';
-import EventView from '../view/EventView';
-import { set } from 'zod';
+import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
+import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
+import { router } from 'expo-router';
 
 
 // interface EventItem {
@@ -51,15 +48,12 @@ export default function Events() {
   //modals - filtro e criar evento
   const [modalVisible, setModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
 
 
 
   const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [eventoImage, setEventoImage] = useState<string | null>(null)
-  const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   
 
 
@@ -134,60 +128,11 @@ export default function Events() {
     setRequestPageEvento({...requestPageEvento, tipoEvento: tipoEvento, faixaKm: faixaKm, data: data ,page: 1})
   }
 
-  useEffect( () => {
-      if(!requestCreateEvento) return 
-      setIsContentLoading(true)
-      abortControllerRef.current?.abort
-      abortControllerRef.current = new AbortController
-        createEvento(requestCreateEvento, abortControllerRef.current)
-        .then((response)=>{
-          setSuccessMessage('Evento: ' + response.nome + ' criado com sucesso')
-          if(eventoImage){
-            const formData = new FormData()
-            formData.append('file', {
-              uri: eventoImage,
-              name: 'evento.jpeg',
-              type: 'image/jpeg',
-            } as any)
-            setRequestEventoImage({
-              id: response.id,
-              image: formData
-            })
-          }else{
-            refreshContent()
-          }
-        })
-        .catch((response)=>{
-          setErrorMessage('falha na criação do Evento. \n Code error: ' + response.message)
-          
-        })
-        .finally(()=>{
-          setIsContentLoading(false)
-          setRequestCreateEvento(null)
-        })
-      }, [requestCreateEvento])
 
 
 
-  useEffect(()=>{
-    if(!requestCreateEventoImage){return}
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = new AbortController
-    setIsContentLoading(true)
-    createEventoImage(requestCreateEventoImage, abortControllerRef.current)
-    .then((response) => {
-      setSuccessMessage("Imagem enviada com sucesso" + response)
-      
-    })
-    .catch((response) => {
-      setErrorMessage("Error ao enviar imagem: " + response.message)
-    }).finally(() => {
-      setIsContentLoading(false)
-      setRequestEventoImage(null)
-      setEventoImage(null)
-      refreshContent()
-    })
-  }, [requestCreateEventoImage])
+
+
 
  
   const searchName = () => {
@@ -226,42 +171,56 @@ export default function Events() {
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
-          <View style={CustomEvents.location}>
+          <View style={CustomEvents.location} className='justify-between'>
             {
               //width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10
               
             }
-            { authState?.user?.s3Url ? 
-            
-            <Image
-              src={authState.user.s3Url}
-              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
-              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
-            />
-            :
-            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
-              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
-            </View>
-            
-            }
 
-
-            <View style={{ flexDirection: 'column' }}>
-              <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
-              <View style={{ flexDirection: 'row' }}>
-                <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
-                {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
-                {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
+            <View style={{flexDirection:'row'}}>
+                { authState?.user?.s3Url ? 
                 
-                {authState?.user?.nivelHabilidade && (
-                  <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
+                <Image
+                  src={authState.user.s3Url}
+                  // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
+                />
+                :
+                <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                  <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+                </View>
+                
                 }
+              <View style={{ flexDirection: 'column' }}>
+                <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
+                  {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
+                  {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                  <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
+                  
+                  {authState?.user?.nivelHabilidade && (
+                    <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
+                  }
 
+                </View>
               </View>
             </View>
+
+                {authState?.user?.role !== 'PF' &&
+                <View>
+                  <TouchableOpacity 
+                  className='flex-col flex-nowrap items-center justify-center'
+                  onPress={()=>{
+                          router.push('event-user-menu')
+                  }}>
+                      <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
+                      <Text>Meus Eventos</Text>
+                  </TouchableOpacity>
+                </View>}
+
           </View>
 
           <View style={{ ...CustomEvents.searchBox, }}>
@@ -327,7 +286,8 @@ export default function Events() {
                       CustomEvents.card,
                       isSelected && { backgroundColor: "#d3e5ff" }
                     ]}
-                    onPress={() => setModalViewEvento(item)}
+                    // onPress={() => setModalViewEvento(item)}
+                    onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id }})}
                   >
                     <ImageBackground  
                       source={{uri: item.s3Url}} 
@@ -409,19 +369,8 @@ export default function Events() {
         </View>
 
         {/* Add - Eventos */}
-        {authState?.user?.role !== 'PF' && <TouchableOpacity style={CustomEvents.addButton} onPress={handleAddEvent}>
-         <Ionicons name="add-circle-outline" size={24} color="#333" />
-        </TouchableOpacity>}
 
         {/* Modal Criar - Eventos */}
-        { modalVisible && <EventModal
-          visible={modalVisible}
-          closeModal={ (requestCreateEvento, imageURI) => {
-            setRequestCreateEvento(requestCreateEvento)
-            setEventoImage(imageURI)
-            setModalVisible(false)
-          }}
-          />}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
           visible={filterModalVisible}
@@ -430,14 +379,7 @@ export default function Events() {
         />
 
         {/* Modal Visualizar - Eventos */}  
-        {modalViewEvento && 
-          <EventView
-            closeModal={ () => setModalViewEvento(null) }
-            onUpdate={refreshContent}
-            evento={modalViewEvento}
-          />
-        }
-
+        
         {successMessage && 
           <ShowAlert
             message={successMessage}

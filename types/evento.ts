@@ -40,7 +40,9 @@ export interface RequestUpdateEvento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    urlSite: string
     tipoEvento: TipoEvento
+    idUsuario : number
 }
 
 

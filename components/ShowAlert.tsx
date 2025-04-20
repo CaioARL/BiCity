@@ -9,15 +9,26 @@ interface AlertConfig {
     onClose: () => void 
     type: 'success' | 'error' | 'loading'
     message: string
+    isStatic?: boolean
 }
 
-export default function ShowAlert( { type, message, onClose }: AlertConfig ) {
+export default function ShowAlert( { type, message, onClose, isStatic }: AlertConfig ) {
 
 
 
 
 const [animation] = useState(new Animated.Value(0))
 useEffect(() => {
+  if(isStatic) {
+    Animated.sequence([
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      })
+  ]).start()
+    return
+  }
   Animated.sequence([
     Animated.timing(animation, {
       toValue: 1,
@@ -59,7 +70,7 @@ useEffect(() => {
 
 
   return (
-        <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
+        <View className="absolute top-10 left-0 bottom-0 z-10 right-0 px-4">
         <Animated.View
             style={[
             styles.alert,

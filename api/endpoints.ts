@@ -37,6 +37,7 @@ const ENDPOINTS = {
     EVENTO_GET_BY_ID: '/evento/',
     EVENTO_POST: '/evento/',
     EVENTO_PUT: '/evento/',
+    EVENTO_GET_BY_USUARIO: '/evento/usuario/',
 
     ENDERECO_CEP_GET: '/endereco/get/by/cep',
     ENDERECO_VIACEP_GET: 'https://viacep.com.br/ws/',

@@ -62,7 +62,7 @@ export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByR
 }
 
 export const updateEvento = async (requestUpdateEvento: RequestUpdateEvento, abortSignal: AbortController) : Promise<Evento> => {
-    const response = await api.put<Evento>(ENDPOINTS.EVENTO_PUT,
+    const response = await api.put<Evento>(ENDPOINTS.EVENTO_PUT+ requestUpdateEvento.id,
         {
             nome: requestUpdateEvento.nome,
             descricao: requestUpdateEvento.descricao,
@@ -77,25 +77,21 @@ export const updateEvento = async (requestUpdateEvento: RequestUpdateEvento, abo
             },
             faixaKm: requestUpdateEvento.faixaKm,
             gratuito: requestUpdateEvento.gratuito,
+            urlSite: requestUpdateEvento.urlSite,
             idTipoEvento: requestUpdateEvento.tipoEvento.id,
-        }
-    ,{ 
-        params:{
-            id: requestUpdateEvento.id
-        }
-        , signal: abortSignal.signal 
-    })
+            idUsuario: requestUpdateEvento.idUsuario,
+        },
+        { 
+            signal: abortSignal.signal 
+        })
     return response.data
 }
 
 
 
-const getEventoById = async (id: number, abortSignal: AbortController) : Promise<Evento> => {
-    const response = await api.get<Evento>(ENDPOINTS.EVENTO_GET_BY_ID, {
-        params: {
-            id: id
-        }, 
-        signal: abortSignal.signal
+export const getEventoById = async (id: number | string, abortSignal: AbortController | null) : Promise<Evento> => {
+    const response = await api.get<Evento>(ENDPOINTS.EVENTO_GET_BY_ID + id, { 
+        signal: abortSignal?.signal
     })
     return response.data
 }
@@ -112,4 +108,27 @@ export const createEventoImage = async (eventoImage: RequestCreateEventoImage, a
 
     })
     return response
+}
+
+
+
+export const getEventoByUsuario = async (pageEvento: RequestPageEvento, idUsuario: number, abortSignal: AbortController) => {
+    const response = await api.get<PageEvento>(ENDPOINTS.EVENTO_GET_BY_USUARIO + idUsuario, 
+        { 
+            params: {
+            pagina: pageEvento.page,
+            nome: pageEvento.nome,
+            descricao: pageEvento.descricao,
+            data: pageEvento.data,
+            cidade: pageEvento.cidade,
+            estado: pageEvento.estado,
+            faixaKm: pageEvento.faixaKm,
+            tipoEvento: pageEvento.tipoEvento?.id,
+            nivelHabilidade: pageEvento.nivelHabilidade?.id,
+            gratuito: pageEvento.gratuito
+        }, 
+        signal: abortSignal.signal
+        }
+    )
+    return response.data
 }
