@@ -86,14 +86,16 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
       {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
           <View className='rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto bg-white'>
-            <Text className={'text-xl font-bold text-center mb-4 color-black'} >
+            <Text className={'text-xl font-bold text-center mb-4 color-color__lightGray'} >
               Avaliar Ciclovia
             </Text>
 
             <View className="mb-4">
-              <Text className='text-base mb-2 color-gray-600' >
-                Qualidade da ciclovia:
-              </Text>
+              <Text className='text-[16px] text-matte_gray mb-[5px]' >
+                Qualidade da Ciclovia:
+              </Text> 
+              <Text className="text-xs text-gray-400 text-center py-2">1 ★ = Insatisfatório ||
+                 5 ★ = Muito satisfatório</Text>
               {renderStars()}
             </View>
 
@@ -111,14 +113,11 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               <ButtonModal
                 title="Cancelar"
                 handlePress={() => closeModal(null)}
-                customStyles='py-[10px] rounded-[8px] bg-gray-300 border-[1px] border-gray-200'
                 textStyles='text-center color-black'
               />
               <ButtonModal
                 title="Enviar Avaliação"
                 handlePress={() => closeModal(requestCreateAvaliacao)}
-                customStyles='py-[10px] rounded-[8px] bg-green-500 border-[1px] border-green-300'
-                
                 textStyles='text-center color-black'
               />
             </View>

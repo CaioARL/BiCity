@@ -131,8 +131,12 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
         <Animated.View style={{ opacity: fadeAnim }}>
           <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
             <ScrollView className={'rounded-[10px] p-[20px] m-[20px] bg-white w-[90%] h-auto'}>
+              <Text className={'text-xl font-bold text-center mb-4 color-color__lightGray'} >
+                Reportar Problema
+              </Text>
+
               <FormFieldModal
-                title="Descrição do problema"
+                title="Descrição do Problema"
                 placeholder="Descreva o problema"
                 multiline={true}
                 maxLength={100}
