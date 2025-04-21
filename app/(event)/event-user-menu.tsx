@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text} from "react-native";
+import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text, Image } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -191,9 +191,23 @@ export default function EventDetail() {
                               <View style={CustomEvents.overlay}>
                                
                                 <View style={CustomEvents.cardInfo}>
-                                  <View  className='relative top-10 flex-row items-center z-[3px]'>
-                                    {/* visual component */}
+                                 <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 3, position: 'relative', top: 10 }}>
+                                 
+                                      { authState?.user?.s3Url ? 
+                                        <Image
+                                          src={authState.user.s3Url}
+                                          className="w-20 h-20 rounded-full border-color_light_gray"
+                                          style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, marginRight: 10 }}
+                                        />
+                                        :
+                                        <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                                          <Text className='text-[45px]'>{authState?.user?.nome?.[0]}</Text>
+                                        </View>
+                                      }
+                                      <Text style={{ ...CustomEvents.cardUserTitle}}>{authState?.user?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                                   </View>
+                                  <View style={CustomEvents.cardLine}/> 
+                                  
                                   <View style={CustomEvents.cardInfoBox}>
                                     <Text style={CustomEvents.cardTitle}>{item.nome}</Text>
                                     <Text style={CustomEvents.cardLocation}>{item.endereco.bairro}</Text>
@@ -207,6 +221,7 @@ export default function EventDetail() {
                                      <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
                                     <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                                   </View>
+                                  
                                 </View>
                               </View>
                               
