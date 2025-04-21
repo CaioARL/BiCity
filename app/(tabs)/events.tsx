@@ -312,6 +312,23 @@ export default function Events() {
                             position: 'relative', 
                             top: 10 
                           }}>
+
+                          { authState?.user?.s3Url ? 
+                            
+                            <Image
+                              src={authState.user.s3Url}
+                              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+                              className="w-20 h-20 rounded-full border-color_light_gray"
+                              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                            />
+                            :
+                            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+                            </View>
+                            
+                            }
+                            
+                            <Text style={{ ...CustomEvents.cardUserTitle}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                             {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
                             {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
                           </View>
@@ -328,7 +345,8 @@ export default function Events() {
                             >
                               {item.descricao}
                             </Text>
-                            <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                            <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
+                            <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                           </View>
                         </View>
                       </View>
