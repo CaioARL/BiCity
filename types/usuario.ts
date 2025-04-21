@@ -1,7 +1,7 @@
 import { NivelHabilidade } from "./nivel-habilidade"
 
 
-export interface CriarUsuarioRequest {
+export interface CreateUsuarioRequest {
     nome: string
     nomeUsuario: string
     endereco: {
@@ -14,10 +14,50 @@ export interface CriarUsuarioRequest {
     }
     email: string
     senha: string
-    cpf: string
-    cnpj: string
+    cpf: string | null
+    cnpj: string | null
     nivelHabilidade: number
 }
+
+
+export interface CreateUsuarioForms {
+    firstName: string 
+    secondName: string 
+    nomeUsuario: string 
+    cep: string 
+    estado: string 
+    cidade: string  
+    bairro: string 
+    rua: string 
+    numero: string 
+    email: string 
+    senha: string 
+    confirmaSenha: string 
+    cpf: string | null
+    cnpj: string | null
+    nivelHabilidade: NivelHabilidade
+}
+
+
+
+export interface ErrorCreateUsuarioForms {
+    firstName : string
+    secondName : string
+    nomeUsuario: string
+    cep: string
+    estado: string
+    cidade: string
+    bairro: string
+    rua: string
+    numero: string
+    email: string
+    senha: string
+    confirmaSenha: string 
+    cpf: string
+    cnpj: string
+    nivelHabilidade: string
+}
+
 
 
 export interface Usuario {
@@ -87,15 +127,12 @@ export interface CriarUsuarioResponse {
 
 
 export interface EnderecoUsuario {
-    endereco: {
       rua: string,
       numero: number,
-      complemento: string,
       bairro: string,
       cidade: string,
       estado: string,
       cep: string
-    }
 }
 
 

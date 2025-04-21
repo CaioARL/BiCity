@@ -1,91 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet, BackHandler } from 'react-native'
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground, BackHandler } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
-import { masks } from '../../util/masks'
-import { valid } from '../../util/validationSchemas'
+import { signInStep1, signInStep2, signInStep3, signInStep4 } from '../../util/validationSchemas'
 import { getViaCep } from '../../api/endereco'
 import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilidade'
 import FormFieldSelectList from '../../components/FormFieldSelectList'
 import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { createUser, validateCPF } from '../../api/usuario'
-import { CriarUsuarioRequest } from '../../types'
+import { createUser } from '../../api/usuario'
+import { CreateUsuarioForms, CreateUsuarioRequest, ErrorCreateUsuarioForms } from '../../types'
 import { checkToken, sendToken } from '../../api/token'
 import { useAuthProvider } from '../context/AuthProvider'
-import { router, useNavigation } from 'expo-router'
-import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-native'
+import { router } from 'expo-router'
+import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from '../../components/ShowAlert'
 
-type AlertType = 'success' | 'error' | 'loading'
-
 export default function SignUp() {
-  const [userName, setUserName] = useState('')
-  const [userNameError, setUserNameError] = useState('')
-  const [isValidUserName, setIsValidUserName] = useState<boolean | undefined>(undefined)
-
-  const [firstName, setFirstName] = useState('')
-  const [firstNameError, setFirstNameError] = useState('')
-  const [isValidFirstName, setIsValidFirstName] = useState<boolean | undefined>(undefined)
-
-  const [lastName, setLastName] = useState('')
-  const [lastNameError, setLastNameError] = useState('')
-  const [isValidLastName, setIsValidLastName] = useState<boolean | undefined>(undefined)
-
-  const [cep, setCep] = useState('')
-  const [cepError, setCepError] = useState('')
-  const [isCepLoading, setIsCepLoading] = useState(false)
-  const [isValidCep, setIsValidCep] = useState<boolean | undefined>(undefined)
-  
-  const [estado, setEstado] = useState('')
-  const [cidade, setCidade] = useState('')
-  const [bairro, setBairro] = useState('')
-  const [rua, setRua] = useState('')
-
-  const [numero, setNumero] = useState('')
-  const [numberError, setNumberError] = useState('')
-  const [isValidNumber, setIsValidNumber] = useState<boolean | undefined>(undefined)
-
-  const [email, setEmail] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined)
-
-  const [password, setPassword] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-  const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined)
-
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [confirmPasswordError, setConfirmPasswordError] = useState('')
-  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined)
-
-  const [cpfCnpj, setCpfCnpj] = useState('')
-  const [cpfCnpjError, setCpfCnpjError] = useState('')
-  const [isCpfLoading, setIsCpfLoading] = useState(false)
-  const [isValidCpfCnpj, setIsValidCpfCnpj] = useState<boolean | undefined>(undefined)
-  //const [cnpjError, setCnpjError] = useState('')
-  //const [isValidCnpj, setIsValidCnpj] = useState(false)
-
+  const [createUsuarioRequest, setCreateUsuarioRequest] = useState<CreateUsuarioRequest | null>()
+  const [createUsuarioForms, setCreateUsuarioForms] = useState<CreateUsuarioForms>({ firstName: '', secondName: '', nomeUsuario: '', cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: '', email: '', senha: '', confirmaSenha: '', cpf: '', cnpj: null, nivelHabilidade: { id: 0, nome: '', descricao: '' } })	
+  const [errorCreateUsuarioForms, setErrorCreateUsuarioForms] = useState<ErrorCreateUsuarioForms>({ bairro: '', cep: '', cidade: '', cnpj: '', cpf: '', email: '', estado: '', nivelHabilidade: '', firstName: '' , secondName: '', nomeUsuario: '', numero: '', rua: '',  senha: '', confirmaSenha: ''})
 
   const [codigo, setCodigo] = useState('')
+  const [createCodigoRequest, setCreateCodigoRequest] = useState<string>()
   const [codigoError, setCodigoError] = useState('')
-  const [isValidCodigo, setIsValidCodigo] = useState<boolean | undefined>(undefined)
-  const [isEmailCodeLoading, setIsEmailCodeLoading] = useState(false)
-  const [isCodigoLoading, setIsCodigoLoading] = useState(false)
-  
-  const [habilidade, setHabilidade] = useState<NivelHabilidade>({ id: 0, nome: '', descricao: '' })
-  const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
-  const [nivelHabilidadeError, setNivelHabilidadeError] = useState('')
-  const [isValidHabilidade, setIsValidHabilidade] = useState<boolean | undefined>(undefined)
 
+  const [isEmailCodeLoading, setIsEmailCodeLoading] = useState(false)
+
+  const [listNivelHabilidade, setListNivelHabilidade] = useState<ListNivelHabilidade[]>([])
+  
   const [step, setStep] = useState(1)
-  const abortControllerRef = useRef<AbortController | null>(null)
   
   const { onRegister } = useAuthProvider()
-  const navigation = useNavigation()
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png')
-
+  
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const [isRequesting, setIsRequesting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>()
+  const [staticErrorMessage, setStaticErrorMessage] = useState<string | null>()
   const [successMessage, setSuccessMessage] = useState<string | null>()
 
   useEffect(() => {
@@ -99,10 +51,17 @@ export default function SignUp() {
         setListNivelHabilidade(niveles)
       })
       .catch((response) => {
-        setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message)
+        setStaticErrorMessage('Erro ao carregar níveis de habilidade: ' + response.message)
       })
   }, [])
 
+  const prevStep = () => {
+    if (step === 1 || step === 5) {
+      router.replace('/sign-in') // Ajustado para corresponder ao caminho padrão
+    } else if (step > 1 && step < 5) {
+      setStep(step - 1)
+    }
+  }
   // Handler para voltar com botão físico ou gesto
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -117,284 +76,226 @@ export default function SignUp() {
         return true
       }
     })
-
     return () => backHandler.remove()
-  }, [step])
-
-  const validateRequiredFields = (
-    fields: { value: string; setError:(msg: string) => void; check: () => void }[]
-  ) => {
-    let allFilledAndValid = true
-    fields.forEach(({ value, setError, check }) => {
-      if (!value.trim()) {
-        setError('Campo obrigatório')
-        allFilledAndValid = false
-      } else {
-        check()
-      }
-    })
-    return allFilledAndValid
-  }
+  }, [])
 
   const nextStep = () => {
+    setErrorCreateUsuarioForms({ bairro: '', cep: '', cidade: '', cnpj: '', cpf: '', email: '', estado: '', nivelHabilidade: '', firstName: '' , secondName: '', nomeUsuario: '', numero: '', rua: '',  senha: '', confirmaSenha: ''})
     if (step === 1) {
-      const fields = [
-        { value: firstName, setError: setFirstNameError, check: () => checkFirstName(firstName) },
-        { value: lastName, setError: setLastNameError, check: () => checkLastName(lastName) },
-        { value: userName, setError: setUserNameError, check: () => checkUsername(userName) },
-      ]
-      const allFilled = validateRequiredFields(fields)
-      const habilidadeValida = habilidade.id !== 0
-      if (!allFilled || !habilidadeValida || !isValidFirstName || !isValidLastName || !isValidUserName) {
-        if (!habilidadeValida) {
-          setNivelHabilidadeError('Selecione um nível de habilidade')
-          setIsValidHabilidade(false)
-        } else {
-          setNivelHabilidadeError('') 
-          setIsValidHabilidade(true) 
+
+      const validationResult = signInStep1.safeParse(createUsuarioForms)
+      if (!validationResult.success) {
+        validationResult.error.issues.forEach((issue) => {
+          setErrorCreateUsuarioForms((prevState) => ({
+            ...prevState,
+            [issue.path[0]]: issue.message,
+          }))
+        })
+          setErrorMessage('Preencha todos os campos corretamente')
+          return
         }
-        setErrorMessage('Preencha todos os campos corretamente')
-        return
-      }
+      
       setStep(2)
+
     } else if (step === 2) {
-      const fields = [
-        { value: cep, setError: setCepError, check: () => checkCep(cep) },
-        { value: numero, setError: setNumberError, check: () => checkNumber(numero) },
-      ]
-      if (!validateRequiredFields(fields) || !isValidCep || !isValidNumber) {
-        setErrorMessage('Preencha todos os campos corretamente')
-        return
-      }
-      setStep(3)
-    } else if (step === 3) {
-      const fields = [
-        { value: cpfCnpj, setError: setCpfCnpjError, check: () => checkCpfCnpj(cpfCnpj) },
-        { value: password, setError: setPasswordError, check: () => checkPassword(password) },
-        { value: confirmPassword, setError: setConfirmPasswordError, check: () => checkConfirmPassword(confirmPassword) },
-      ]
-      if (!validateRequiredFields(fields) || !isValidCpfCnpj || !isValidPassword || !isValidConfirmPassword || password !== confirmPassword) {
-        if (password !== confirmPassword) setConfirmPasswordError('As senhas não coincidem')
-        setErrorMessage('Preencha todos os campos corretamente')
-        return
-      }
-      setStep(4)
-    } else if (step === 4) {
-      const fields = [{ value: email, setError: setEmailError, check: () => checkEmail(email) }]
-      if (!validateRequiredFields(fields) || !isValidEmail) {
-        setErrorMessage('Preencha todos os campos corretamente')
-        return
-      }
-      setIsEmailCodeLoading(true)
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      sendToken(email, abortControllerRef.current as AbortController)
-        .then((response) => {
-          setSuccessMessage(`${response} Verifique seu email.`)
-          setStep(5)
+
+      const validationResult = signInStep2.safeParse(createUsuarioForms)
+      if (!validationResult.success) {
+        validationResult.error.issues.forEach((issue) => {
+          setErrorCreateUsuarioForms((prevState) => ({
+            ...prevState,
+            [issue.path[0]]: issue.message,
+          }))
         })
-        .catch((response) => {
-          setErrorMessage('Erro ao enviar código: ' + response.message)
-        })
-        .finally(() => setIsEmailCodeLoading(false))
-    } else if (step === 5) {
-      const fields = [{ value: codigo, setError: setCodigoError, check: () => checkCodigo(codigo) }]
-      if (!validateRequiredFields(fields) || !isValidCodigo) {
-        setErrorMessage('Preencha todos os campos corretamente')
-        return
-      }
-      handleSubmit()
-    }
-  }
-
-  const prevStep = () => {
-    if (step === 1 || step === 5) {
-      router.replace('/sign-in') // Ajustado para corresponder ao caminho padrão
-    } else if (step > 1 && step < 5) {
-      setStep(step - 1)
-    }
-  }
-
-  // Funções de validação ajustadas
-  const checkUsername = (text: string) => {
-    setUserName(text)
-    const result = valid.usernameSchema.safeParse(text)
-    setIsValidUserName(text.trim() ? result.success : undefined)
-    setUserNameError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkFirstName = (text: string) => {
-    setFirstName(text)
-    const result = valid.nameSchema.safeParse(text)
-    setIsValidFirstName(text.trim() ? result.success : undefined)
-    setFirstNameError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkLastName = (text: string) => {
-    setLastName(text)
-    const result = valid.nameSchema.safeParse(text)
-    setIsValidLastName(text.trim() ? result.success : undefined)
-    setLastNameError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkCep = (text: string) => {
-    setCep(text)
-    const cepText = text.replace('-', '')
-    const result = valid.cepSchemaRegex.safeParse(cepText)
-    setIsValidCep(text.trim() ? result.success : undefined)
-    if (text.trim() && !result.success) {
-      setCepError(result.error.issues[0].message)
-    } else if (text.trim()) {
-      setIsCepLoading(true)
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      getViaCep(cepText, abortControllerRef.current as AbortController)
-        .then((response) => {
-          // Verifica se os campos obrigatórios estão vazios
-          if (!response.localidade || !response.estado || !response.logradouro || !response.bairro) {
-            setCepError('CEP inválido: informações incompletas')
-            setIsValidCep(false)
-            setRua('')
-            setBairro('')
-            setCidade('')
-            setEstado('')
-          } else {
-            setRua(response.logradouro)
-            setBairro(response.bairro)
-            setCidade(response.localidade)
-            setEstado(response.estado)
-            setCepError('')
-            setIsValidCep(true)
-          }
-        })
-        .catch((response) => {
-          setCepError('CEP inválido ou não encontrado')
-          setIsValidCep(false)
-          setRua('')
-          setBairro('')
-          setCidade('')
-          setEstado('')
-        })
-        .finally(() => setIsCepLoading(false))
-    } else {
-      setCepError('')
-    }
-  }
-  const checkNumber = (text: string) => {
-    setNumero(text)
-    const result = valid.houseNumberSchema.safeParse(text)
-    setIsValidNumber(text.trim() ? result.success : undefined)
-    setNumberError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkCpfCnpj = (text: string) => {
-    if (text.length <= 14) {
-      setCpfCnpj(masks.CPF(text))
-      const cpfText = text.replace(/\.|-/g, '')
-      const result = valid.cpfSchema.safeParse(cpfText)
-      setIsValidCpfCnpj(text.trim() ? result.success : undefined)
-      if (text.trim() && !result.success) {
-        setCpfCnpjError(result.error.issues[0].message)
-      } else if (text.trim()) {
-        setIsCpfLoading(true)
-        abortControllerRef.current?.abort()
-        abortControllerRef.current = new AbortController()
-        validateCPF(cpfText, abortControllerRef.current as AbortController)
-          .then(() => {
-            setCpfCnpjError('')
-            setIsValidCpfCnpj(true)
-          })
-          .catch((response) => {
-            setCpfCnpjError(response)
-            setIsValidCpfCnpj(false)
-          })
-          .finally(() => setIsCpfLoading(false))
-      } else {
-        setCpfCnpjError('')
-      }
-    } else {
-      setCpfCnpj(masks.CNPJ(text))
-      const cnpjText = text.replace(/\.|\/|-/g, '')
-      const result = valid.cnpjSchema.safeParse(cnpjText)
-      setIsValidCpfCnpj(text.trim() ? result.success : undefined)
-      setCpfCnpjError(text.trim() && !result.success ? result.error.issues[0].message : '')
-    }
-  }
-
-  const checkPassword = (text: string) => {
-    setPassword(text)
-    const result = valid.passwordSchema.safeParse(text)
-    setIsValidPassword(text.trim() ? result.success : undefined)
-    setPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '')
-    if (confirmPassword) checkConfirmPassword(confirmPassword)
-  }
-
-  const checkConfirmPassword = (text: string) => {
-    setConfirmPassword(text)
-    const result = valid.passwordSchema.safeParse(text)
-    const passwordsMatch = password === text
-    setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined)
-    setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '')
-  }
-
-  const checkEmail = (text: string) => {
-    setEmail(text)
-    const result = valid.emailSchema.safeParse(text)
-    setIsValidEmail(text.trim() ? result.success : undefined)
-    setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkCodigo = (text: string) => {
-    setCodigo(text)
-    const result = valid.codeUserValidationSchema.safeParse(text)
-    setIsValidCodigo(text.trim() ? result.success : undefined)
-    setCodigoError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const handleSubmit = () => {
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = new AbortController()
-    setIsCodigoLoading(true)
-    checkToken(codigo, email, abortControllerRef.current as AbortController)
-      .then(() => {
-        const novoUsuario: CriarUsuarioRequest = {
-          nome: firstName + ' ' + lastName,
-          nomeUsuario: userName,
-          endereco: { cep, estado, cidade, bairro, rua, numero: parseInt(numero) },
-          email,
-          senha: password,
-          cpf: cpfCnpj.length <= 14 ? cpfCnpj.replace(/\.|-/g, '') : '',
-          cnpj: cpfCnpj.length > 14 ? cpfCnpj.replace(/\.|\/|-/g, '') : '',
-          nivelHabilidade: habilidade.id,
+          setErrorMessage('Preencha todos os campos corretamente')
+          return
         }
-        createUser(novoUsuario, abortControllerRef.current as AbortController)
-          .then((response) => {
-            if (onRegister) {
-              onRegister(response)
-                .then(() => {
-                  setSuccessMessage('Cadastro realizado com sucesso!')
-                  router.replace('home')
-                })
-                .catch((response) => {
-                  setErrorMessage('Erro ao registrar na memória: ' + response.message)
-                })
-            }
+
+        setStep(3)
+
+      } else if (step === 3) {
+        
+        const validationResult = signInStep3.safeParse(createUsuarioForms)
+        if (!validationResult.success) {
+          validationResult.error.issues.forEach((issue) => {
+            setErrorCreateUsuarioForms((prevState) => ({
+              ...prevState,
+              [issue.path[0]]: issue.message,
+            }))
           })
-          .catch((response) => {
-            setErrorMessage('Erro ao cadastrar: ' + response.message)
+            setErrorMessage('Preencha todos os campos corretamente')
+            return
+          }
+
+          if( createUsuarioForms.confirmaSenha !== createUsuarioForms.senha) {
+            setErrorCreateUsuarioForms((prevState) => ({
+              ...prevState,
+              confirmaSenha: 'As senhas não coincidem',
+            }))
+            setErrorMessage('As senhas não coincidem')
+            return
+          }
+
+      setStep(4)
+
+    } else if (step === 4) {
+
+        const validationResult = signInStep4.safeParse(createUsuarioForms)
+        if (!validationResult.success) {
+          validationResult.error.issues.forEach((issue) => {
+            setErrorCreateUsuarioForms((prevState) => ({
+              ...prevState,
+              [issue.path[0]]: issue.message,
+            }))
           })
+            setErrorMessage('Preencha todos os campos corretamente')
+            return
+          }
+
+          setIsEmailCodeLoading(true)
+          sendToken(createUsuarioForms.email,null)
+            .then((response) => {
+              setSuccessMessage(`${response} Verifique seu email.`)
+              setStep(5)
+            })
+            .catch((response) => {
+              setErrorMessage('Erro ao enviar código: ' + response.message)
+            })
+            .finally(() => setIsEmailCodeLoading(false))
+
+    } else if (step === 5) {
+
+      if(codigo.length !== 4) {
+        setErrorMessage('Código inválido')
+        return
+      }
+
+      setCreateCodigoRequest(codigo)
+    }
+  }
+
+  const checkCep = () => {
+      setIsRequesting(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+      getViaCep(createUsuarioForms.cep, abortControllerRef.current)
+      .then((response) => {
+        if (!response.localidade || !response.estado || !response.logradouro || !response.bairro) {
+          setErrorMessage('CEP: Alguns dados não foram encontrados')
+        } else {
+          setCreateUsuarioForms((prevState) => ({
+            ...prevState,
+            rua: response.logradouro,
+            bairro: response.bairro,
+            cidade: response.localidade,
+            estado: response.estado,
+          }))
+        }
       })
       .catch((response) => {
-        setErrorMessage('Erro ao validar código: ' + response.message)
+        setErrorCreateUsuarioForms((prevState) => ({
+          ...prevState,
+          cep: response.message,
+        }))
+        setErrorMessage('Erro ao buscar CEP: ' + response.message)
       })
-      .finally(() => setIsCodigoLoading(false))
+      .finally(() => setIsRequesting(false)) 
   }
 
+    // const checkCPF = () => {
+    //   if(!createUsuarioForms.cpf) return
+    //   setIsRequesting(true)
+    //   validateCPF(createUsuarioForms.cpf, null)
+    //     .then((response) => {
+    //   })
+    //   .catch((response) => {
+    //     setErrorMessage(response)
+    //   })
+    //   .finally(() => setIsRequesting(false))
+    // }
+  
+    // const checkCNPJ = () => {
+    //   if(!createUsuarioForms.cpf) return
+    //   setIsRequesting(true)
+    //   validateCNPJ(createUsuarioForms.cpf, null)
+    //     .then((response) => {
+    //   })
+    //   .catch((response) => {
+    //     setErrorMessage(response)
+    //   })
+    //   .finally(() => setIsRequesting(false))
+    // }
+
+    useEffect(() => {
+      if(!createUsuarioRequest) return
+      createUser(createUsuarioRequest, null)
+      .then((response) => {
+        if (onRegister) {
+          onRegister(response)
+            .then(() => {
+              setSuccessMessage('Cadastro realizado com sucesso!')
+              router.replace('home')
+            })
+            .catch((response) => {
+              setErrorMessage('Erro ao registrar-se: ' + response.message)
+            })
+        }
+      })
+      .catch((response) => {
+        setErrorMessage('Erro ao cadastrar: ' + response.message)
+      })
+    },[createUsuarioRequest]) 
+
+    useEffect(() =>  {
+      if(!createCodigoRequest) return
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+      setIsRequesting(true)
+      checkToken(createCodigoRequest, createUsuarioForms.email, null)
+        .then(() => {
+          setCreateUsuarioRequest({
+            nome: createUsuarioForms.firstName + ' ' + createUsuarioForms.secondName,
+            nomeUsuario: createUsuarioForms.nomeUsuario,
+            endereco: { 
+              numero: parseInt(createUsuarioForms.numero),
+              cep: createUsuarioForms.cep,
+              estado: createUsuarioForms.estado,
+              cidade: createUsuarioForms.cidade,
+              bairro: createUsuarioForms.bairro,
+              rua: createUsuarioForms.rua,
+            } ,
+            email: createUsuarioForms.email,
+            senha: createUsuarioForms.senha,
+            cpf: createUsuarioForms.cpf,
+            cnpj: createUsuarioForms.cnpj,
+            nivelHabilidade: createUsuarioForms.nivelHabilidade.id,
+          })
+        })
+        .catch((response) => {
+          setErrorMessage('Erro ao validar código: ' + response.message)
+          setCodigoError('Erro ao validar, confira o seu email')
+        })
+        .finally(() => setIsRequesting(false))
+      },[createCodigoRequest])
+
+  const updateCampoCreateUsuario = (campo: string , valor: string | number | null) => {
+    setCreateUsuarioForms((prevState) => ({
+      ...prevState,
+      [campo]: valor,
+    }))
+  }
+
+  const updateCampoUsuarioNivelHabilidade = (valor: NivelHabilidade) => {
+    setCreateUsuarioForms((prevState) => ({
+      ...prevState,
+      nivelHabilidade: valor,
+    }))
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
     <ImageBackground
-      source={backgroundImage}
+      source={require('../../assets/img/background-fundo-figura.png')}
       style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
       resizeMode="cover"
     />
@@ -403,7 +304,6 @@ export default function SignUp() {
       style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
         paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
         className='bg-primary_green'
-
         onPress={prevStep}
       >
       <ArrowLeft size={24} color="white" />
@@ -416,37 +316,32 @@ export default function SignUp() {
               <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}} className="flex-1">
                 <FormField
                   title="Primeiro Nome"
-                  value={firstName}
+                  value={createUsuarioForms.firstName}
                   placeholder="Digite seu primeiro nome"
-                  handleChangeText={checkFirstName}
-                  msg={firstNameError}
-                  isValid={isValidFirstName}
+                  handleChangeText={input => updateCampoCreateUsuario('firstName', input)}
+                  msg={errorCreateUsuarioForms.firstName}
                 />
                 <FormField
                   title="Último Nome"
-                  value={lastName}
+                  value={createUsuarioForms.secondName}
                   placeholder="Digite seu último nome"
-                  handleChangeText={checkLastName}
-                  msg={lastNameError}
-                  isValid={isValidLastName}
+                  handleChangeText={input => updateCampoCreateUsuario('secondName', input)}
+                  msg={errorCreateUsuarioForms.secondName}
                 />
                 <FormField
                   title="Username"
-                  value={userName}
+                  value={createUsuarioForms.nomeUsuario}
                   placeholder="Digite seu username"
-                  handleChangeText={checkUsername}
-                  msg={userNameError}
-                  isValid={isValidUserName}
+                  handleChangeText={input => updateCampoCreateUsuario('nomeUsuario', input)}
+                  msg={errorCreateUsuarioForms.nomeUsuario}
                 />
                 <FormFieldSelectList
                   title="Nível de habilidade"
-                  selectedValue={habilidade}
+                  selectedValue={createUsuarioForms.nivelHabilidade}
                   options={listNivelHabilidade}
-                  handleChange={setHabilidade}
-                  msg={nivelHabilidadeError}
-                  isValid={isValidHabilidade}
+                  handleChange={input => updateCampoUsuarioNivelHabilidade(input)}
+                  msg={errorCreateUsuarioForms.nivelHabilidade}
                 />
-
                 <CustomButton title="Próximo" handlePress={nextStep} />
               </View>
               </>
@@ -456,50 +351,50 @@ export default function SignUp() {
               <View style={{position: 'absolute', width: '100%', bottom: 0, top: 105}}>
                 <FormField
                   title="CEP"
-                  value={masks.CEP(cep)}
+                  value={createUsuarioForms.cep}
                   placeholder="Digite seu CEP"
-                  handleChangeText={checkCep}
-                  msg={cepError}
-                  isValid={isValidCep}
-                  isLoading={isCepLoading}
-                  maxLength={9}
-                  keyboardType="numeric"
+                  handleChangeText={input => updateCampoCreateUsuario('cep', input)}
+                  msg={errorCreateUsuarioForms.cep}
+                  isLoading={isRequesting}
+                  handleEndEditing={() => checkCep()}
+                  maxLength={8}
+                  keyboardType="number-pad"
                 />
                 <FormField
                   title="Cidade"
-                  value={cidade}
+                  value={createUsuarioForms.cidade}
                   placeholder="Digite sua Cidade"
-                  handleChangeText={setCidade}
-                  disableEdit={true}
+                  msg={errorCreateUsuarioForms.cidade}
+                  handleChangeText={input => updateCampoCreateUsuario('cidade', input)}
                 />
                 <FormField
                   title="Estado"
-                  value={estado}
+                  value={createUsuarioForms.estado}
                   placeholder="Digite seu Estado"
-                  handleChangeText={setEstado}
-                  disableEdit={true}
+                  handleChangeText={input => updateCampoCreateUsuario('estado', input)}
+                  msg={errorCreateUsuarioForms.estado}
                 />
                 <FormField
                   title="Rua"
-                  value={rua}
+                  value={createUsuarioForms.rua}
+                  msg={errorCreateUsuarioForms.rua}
                   placeholder="Digite sua rua"
-                  handleChangeText={setRua}
-                  disableEdit={true}
+                  handleChangeText={ input => updateCampoCreateUsuario('rua', input)}
                 />
                 <FormField
                   title="Número"
-                  value={numero}
+                  value={createUsuarioForms.numero}
                   placeholder="Digite seu número"
-                  handleChangeText={checkNumber}
-                  msg={numberError}
-                  isValid={isValidNumber}
+                  keyboardType='number-pad'
+                  handleChangeText={ input => updateCampoCreateUsuario('numero', input)}
+                  msg={errorCreateUsuarioForms.numero}
                 />
                 <FormField
                   title="Bairro"
-                  value={bairro}
+                  value={createUsuarioForms.bairro}
                   placeholder="Digite seu bairro"
-                  handleChangeText={setBairro}
-                  disableEdit={true}
+                  msg={errorCreateUsuarioForms.bairro}
+                  handleChangeText={ input => updateCampoCreateUsuario('bairro', input)}
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
               </View>
@@ -508,49 +403,67 @@ export default function SignUp() {
             {step === 3 && (
               <>
                <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}}>
-               {cpfCnpj.length <= 14 ? (
-                    <FormField
-                      title="CPF ou CNPJ"
-                      value={masks.CPF(cpfCnpj)}
-                      placeholder="Digite seu CPF"
-                      handleChangeText={checkCpfCnpj}
-                      msg={cpfCnpjError}
-                      isValid={isValidCpfCnpj}
-                      isLoading={isCpfLoading}
-                      keyboardType="numeric"
-                      maxLength={18}
-                    />
-                  ) : ( 
-                    <FormField
-                    title="CNPJ"
-                    value={masks.CNPJ(cpfCnpj)}
-                    placeholder="Digite seu CNPJ"
-                    handleChangeText={checkCpfCnpj}
-                    msg={cpfCnpjError}
-                    isValid={isValidCpfCnpj}
-                    isLoading={isCpfLoading}
-                    keyboardType="numeric"
-                    maxLength={18}
-                  />
+                  {createUsuarioForms.cpf !== null && (
+                    <>
+                      <FormField
+                        title="CPF ou CNPJ"
+                        value={createUsuarioForms.cpf}
+                        placeholder="Digite seu CPF"
+                        handleChangeText={input => updateCampoCreateUsuario('cpf', input )}
+                        msg={errorCreateUsuarioForms.cpf}
+                        isLoading={isRequesting}
+                        keyboardType="number-pad"
+                        maxLength={11}
+                      />
+                      <TouchableOpacity
+                        onPress={()=>{
+                          updateCampoCreateUsuario('cpf', null)
+                          updateCampoCreateUsuario('cnpj', '')
+                        }}
+                      >
+                        <Text>{'Sou Empresa (usar CNPJ)'}</Text>
+                      </TouchableOpacity>
+                    </>
+                  )} 
+                  { createUsuarioForms.cnpj !== null && ( 
+                    <>
+                      <FormField
+                      title="CNPJ"
+                      value={createUsuarioForms.cnpj}
+                      placeholder="Digite seu CNPJ"
+                      handleChangeText={input => updateCampoCreateUsuario('cnpj', input)}
+                      msg={errorCreateUsuarioForms.cnpj}
+                      isLoading={isRequesting}
+                      keyboardType="number-pad"
+                      maxLength={12}
+                      />
+                    <TouchableOpacity
+                      onPress={()=>{
+                        updateCampoCreateUsuario('cnpj', null)
+                        updateCampoCreateUsuario('cpf', '')
+                      }}
+                    >
+                      <Text>{"Sou Pessoa Fisica (Usar CPF)"}</Text>
+                    </TouchableOpacity>
+                  </>
                   )  
                 }
                 
+                
                 <FormField
                   title="Senha"
-                  value={password}
+                  value={createUsuarioForms.senha}
                   placeholder="Digite sua senha"
-                  handleChangeText={checkPassword}
-                  msg={passwordError}
-                  isValid={isValidPassword}
+                  handleChangeText={input => updateCampoCreateUsuario('senha', input)}
+                  msg={errorCreateUsuarioForms.senha}
                   secureTextEntry={true}
                 />
                 <FormField
                   title="Confirmar Senha"
-                  value={confirmPassword}
+                  value={createUsuarioForms.confirmaSenha}
                   placeholder="Confirme sua senha"
-                  handleChangeText={checkConfirmPassword}
-                  msg={confirmPasswordError}
-                  isValid={isValidConfirmPassword}
+                  handleChangeText={input => updateCampoCreateUsuario('confirmaSenha', input)}
+                  msg={errorCreateUsuarioForms.confirmaSenha}
                   secureTextEntry={true}
                   maxLength={20}
                 />
@@ -563,11 +476,10 @@ export default function SignUp() {
                <View style={{position: 'absolute', width: '100%', bottom: 0, top: 250}}>
                 <FormField
                   title="Email"
-                  value={masks.EMAIL(email)}
+                  value={createUsuarioForms.email}
                   placeholder="Digite seu email"
-                  handleChangeText={checkEmail}
-                  msg={emailError}
-                  isValid={isValidEmail}
+                  handleChangeText={input => updateCampoCreateUsuario('email', input)}
+                  msg={errorCreateUsuarioForms.email}
                   isLoading={isEmailCodeLoading}
                   keyboardType="email-address"
                 />
@@ -581,16 +493,15 @@ export default function SignUp() {
                 <TokenInput
                   title="Código de confirmação"
                   value={codigo}
-                  handleChangeText={checkCodigo}
+                  handleChangeText={setCodigo}
                   msg={codigoError}
-                  isValid={isValidCodigo}
+                  isValid={codigo.length===4}
                   maxLength={4}
                 />
-                <CustomButton title="Confirmar Código" isLoading={isCodigoLoading} handlePress={nextStep} />
+                <CustomButton title="Confirmar Código" isLoading={isRequesting} handlePress={nextStep} />
               </View>
               </>
             )}
-  
       </ScrollView>
  
       {errorMessage && (
@@ -604,25 +515,18 @@ export default function SignUp() {
         <ShowAlert
           message={successMessage}
           type='success'
-          onClose={() => setErrorMessage(null)}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
+      {staticErrorMessage && (
+        <ShowAlert
+          message={staticErrorMessage}
+          type='error'
+          isStatic={true}
+          onClose={() => setStaticErrorMessage(null)}
         />
       )}
     </SafeAreaView>
       
   )
 }
-
-const styles = StyleSheet.create({
-  alert: {
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-})
