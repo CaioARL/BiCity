@@ -211,14 +211,15 @@ export default function Events() {
             </View>
 
                 {authState?.user?.role !== 'PF' &&
-                <View>
+                <View className='mr-[10px]'>
                   <TouchableOpacity 
                   className='flex-col flex-nowrap items-center justify-center'
                   onPress={()=>{
                           router.push('event-user-menu')
                   }}>
-                      <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
-                      <Text>Meus Eventos</Text>
+                      <Image source={require('../../assets/img/1581943.png')} style={{ width: 25, height: 25, tintColor: '#555' }} resizeMode="contain" />
+
+                      <Text className='text-xs text-matte_gray text-center'>Meus {'\n'} Eventos</Text>
                   </TouchableOpacity>
                 </View>}
 
@@ -305,14 +306,7 @@ export default function Events() {
                           </TouchableOpacity>
                         </View> */}
                         <View style={CustomEvents.cardInfo}>
-                          <View style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            zIndex: 3, 
-                            position: 'relative', 
-                            top: 10 
-                          }}>
-
+                          <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 3, position: 'relative', top: 10 }}>
                           { authState?.user?.s3Url ? 
                             
                             <Image
