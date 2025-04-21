@@ -132,7 +132,8 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
                             <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[20px]">
                                 <Image
                                     source={{ uri: item.usuario.s3Url }}
-                                    className="w-20 h-20 rounded-full"
+                                    className="w-20 h-20 rounded-full border-color_light_gray"
+                                    style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
                                 />
                                 <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.usuario.nome}</Text>
                             </View>
