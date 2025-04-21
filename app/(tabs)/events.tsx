@@ -183,7 +183,8 @@ export default function Events() {
                 <Image
                   src={authState.user.s3Url}
                   // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
-                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
+                  className="w-20 h-20 rounded-full border-color_light_gray"
+                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
                 />
                 :
                 <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
@@ -210,14 +211,15 @@ export default function Events() {
             </View>
 
                 {authState?.user?.role !== 'PF' &&
-                <View>
+                <View className='mr-[10px]'>
                   <TouchableOpacity 
                   className='flex-col flex-nowrap items-center justify-center'
                   onPress={()=>{
                           router.push('event-user-menu')
                   }}>
-                      <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
-                      <Text>Meus Eventos</Text>
+                      <Image source={require('../../assets/img/1581943.png')} style={{ width: 25, height: 25, tintColor: '#555' }} resizeMode="contain" />
+
+                      <Text className='text-xs text-matte_gray text-center'>Meus {'\n'} Eventos</Text>
                   </TouchableOpacity>
                 </View>}
 
@@ -304,13 +306,23 @@ export default function Events() {
                           </TouchableOpacity>
                         </View> */}
                         <View style={CustomEvents.cardInfo}>
-                          <View style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            zIndex: 3, 
-                            position: 'relative', 
-                            top: 10 
-                          }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 3, position: 'relative', top: 10 }}>
+                          { authState?.user?.s3Url ? 
+                            
+                            <Image
+                              src={authState.user.s3Url}
+                              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+                              className="w-20 h-20 rounded-full border-color_light_gray"
+                              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                            />
+                            :
+                            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                              <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+                            </View>
+                            
+                            }
+                            
+                            <Text style={{ ...CustomEvents.cardUserTitle}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                             {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
                             {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
                           </View>
@@ -327,7 +339,8 @@ export default function Events() {
                             >
                               {item.descricao}
                             </Text>
-                            <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                            <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
+                            <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                           </View>
                         </View>
                       </View>

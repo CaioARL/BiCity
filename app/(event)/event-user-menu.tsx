@@ -164,7 +164,7 @@ export default function EventDetail() {
                     <FlatList
                       className="min-h-[100%] my-10"
                       ListHeaderComponent={
-                        <Text className="font-robotobold text-4xl my-4" >Meus Eventos</Text>
+                        <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
                       }
                       onEndReached={loadMorePage}
                       onEndReachedThreshold={0.1}
@@ -204,13 +204,12 @@ export default function EventDetail() {
                                     >
                                       {item.descricao}
                                     </Text>
-                                    <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                                     <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
+                                    <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                                   </View>
                                 </View>
                               </View>
                               
-        
-                        
                             </ImageBackground>
                           </TouchableOpacity>
                       )

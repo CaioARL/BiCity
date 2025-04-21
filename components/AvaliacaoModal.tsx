@@ -86,7 +86,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
       {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
           <View className='rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto bg-white'>
-            <Text className={'text-xl font-bold text-center mb-4 color-color__lightGray'} >
+            <Text className='flex-col text-lg font-bold text-center mb-10' >
               Avaliar Ciclovia
             </Text>
 
