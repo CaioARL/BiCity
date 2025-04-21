@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text, Image } from "react-native";
+import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -9,6 +9,7 @@ import ShowAlert from "../../components/ShowAlert";
 import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
+import { ArrowLeft } from 'lucide-react-native'
 
 
 
@@ -35,6 +36,8 @@ export default function EventDetail() {
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
   
+  const backgroundImageLogo = require('../../assets/img/logo.png');
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png');
 
   useEffect(()=>{
     if(!requestUpdateEvento) return
@@ -157,9 +160,23 @@ export default function EventDetail() {
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-white h-full w-full">
+      <ImageBackground
+        source={backgroundImage}
+        style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
+      />
+
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
+          paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
+          className='bg-primary_green'
+          // onPress={prevStep}
+        >
+        <ArrowLeft size={24} color="#555" />
+      </TouchableOpacity>
+      
       {isContentLoading && <LoadingActivity/>}
-      <View className="h-full w-full container bg-white">
+      <View className="h-full w-full container" >
         {eventos && (
                     <FlatList
                       className="min-h-[100%] my-10"
@@ -200,14 +217,15 @@ export default function EventDetail() {
                                           style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, marginRight: 10 }}
                                         />
                                         :
-                                        <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                                        <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center bg-white text-white'>
                                           <Text className='text-[45px]'>{authState?.user?.nome?.[0]}</Text>
                                         </View>
                                       }
                                       <Text style={{ ...CustomEvents.cardUserTitle}}>{authState?.user?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                                   </View>
-                                  <View style={CustomEvents.cardLine}/> 
                                   
+                                  <View style={CustomEvents.cardLine}/> 
+
                                   <View style={CustomEvents.cardInfoBox}>
                                     <Text style={CustomEvents.cardTitle}>{item.nome}</Text>
                                     <Text style={CustomEvents.cardLocation}>{item.endereco.bairro}</Text>

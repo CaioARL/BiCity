@@ -30,6 +30,7 @@ module.exports = {
             black: "#000000",
             matte_gray: "#555",
             color_light_gray: "#ddd",
+            color_light_gray_2: "#222224db",
         },
 
         /* ===== Container Responsivel ===== */

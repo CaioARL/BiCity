@@ -237,6 +237,26 @@ const CustomEvents = StyleSheet.create({
     paddingHorizontal: 20, 
     paddingVertical: 15, 
   },
+
+  // Customização para o Event-View Também
+  containerButtonEventView: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: "center",
+    width: '100%',
+  },
+
+  customButtonEventView:{
+    flexDirection: 'row',  
+    backgroundColor: '#01010154', 
+    borderRadius: 30, 
+    padding: 15, 
+    marginLeft: 'auto',
+    alignItems: 'center', 
+    marginRight: 10,
+    
+  },
+
 });
 
 export default CustomEvents;
