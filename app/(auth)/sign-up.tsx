@@ -475,7 +475,7 @@ export default function SignUp() {
                       msg={errorCreateUsuarioForms.cnpj}
                       isLoading={isRequesting}
                       keyboardType="number-pad"
-                      maxLength={12}
+                      maxLength={14}
                       />
                     <TouchableOpacity
                       onPress={()=>{
