@@ -1,11 +1,11 @@
 import api from ".";
-import { InfraestruturaGeoJson, RequestInfraestruturaByRadius } from "../types";
+import { InfraestruturaGeoJson, InfraestruturaGeoJsonResponse, RequestInfraestruturaByRadius } from "../types";
 import ENDPOINTS from "./endpoints";
 
 
 
 export const getInfraestrutura = async (request: RequestInfraestruturaByRadius, abortSignal: AbortController | null) => {
-    const response = await api.get<InfraestruturaGeoJson>(ENDPOINTS.INFRAESTRUTURA_GET, {
+    const response = await api.get<InfraestruturaGeoJsonResponse>(ENDPOINTS.INFRAESTRUTURA_GET, {
         params: {
             latitude: request.latitude,
             longitude: request.longitude,

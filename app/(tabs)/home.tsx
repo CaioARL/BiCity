@@ -17,6 +17,7 @@ import OpsModal from '../../components/OpsModalMap'
 import { set } from 'zod'
 import { createAvaliacao, getAvaliacoesByInfraestrutura } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
+import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
 
 interface Region {
   latitude: number
@@ -65,8 +66,6 @@ export default function Home() {
   const [showAvaliacaoModal, setShowAvaliacaoModal] = useState<boolean>(false)
   const [idInfraAvaliacao, setIdInfraAvaliacao] = useState<number | null>(null)
   const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(null)
-  const [pageAvaliacoes, setPageAvaliacoes] = useState<PageAvaliacao | null>(null)
-  const [isRequestingPage, setIsRequestingPage] = useState<boolean>(false)
 
   const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
 
@@ -200,7 +199,7 @@ export default function Home() {
       if (!requestInfraestrutura) {return}
       getInfraestrutura(requestInfraestrutura, null)
       .then((response) => {
-        setInfraestrutura(response)
+        setInfraestrutura(mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response))
       })
       .catch((response)=>{
         setErrorMessage("Error ao carregar infraestrutura: " + response.message)
@@ -309,23 +308,6 @@ export default function Home() {
       })
     }, [requestProblemaImage])
 
-
-    useEffect(()=>{
-      if(!requestPageAvaliacao) return
-      setIsRequestingPage(true)
-      getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
-      .then((response)=>{        
-          setPageAvaliacoes(response)
-      })
-      .catch((reponse)=>{
-        setErrorMessage("Erro buscando avaliações: " + reponse.message)
-      })
-      .finally(()=>{
-        setIsRequestingPage(false)
-      })
-    },[requestPageAvaliacao])
-
-
     /*
     * Função chamada quando o usuário clicar o mapa
     * Se o usuário clicar em cima de uma linha da infraestrutura,vai mostrar modal com avaliações da infraestrutura
@@ -412,7 +394,7 @@ export default function Home() {
             initialRegion={initialRegion}
             showsUserLocation={true} 
             zoomEnabled={true}
-
+            googleMapId={"700c4bf5b104e27b"}
 
             onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
             onLongPress={e=> {
@@ -484,7 +466,6 @@ export default function Home() {
 
           <Geojson
             geojson={infraestrutura || emptyGeoJson}
-            strokeColor='rgba(255, 0, 0, 0.35)'
             strokeWidth={10}
           />
             
@@ -575,14 +556,10 @@ export default function Home() {
               />
             }
 
-            {pageAvaliacoes && requestPageAvaliacao && 
+            {requestPageAvaliacao && 
               <AvaliacaoView
-                pageAvaliacao={pageAvaliacoes}
                 requestPage={requestPageAvaliacao}
-                setRequestPage={setRequestPageAvaliacao}
-                isContentLoading={isRequestingPage}
                 onClose={()=>{
-                  setPageAvaliacoes(null)
                   setRequestPageAvaliacao(null)
                 }}
               />

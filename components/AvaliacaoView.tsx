@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Text, View, FlatList, Image, ScrollView, TouchableOpacity } from 'react-native'
-import { Avaliacao, PageAvaliacao, RequestPageAvaliacao } from '../types'
+import { Text, View, FlatList, Image, TouchableOpacity } from 'react-native'
+import { Avaliacao, RequestPageAvaliacao } from '../types'
 import ButtonModal from './ButtonModal'
 import { Ionicons } from '@expo/vector-icons'
+import { getAvaliacoesByInfraestrutura } from '../api/avaliacao'
+import ShowAlert from './ShowAlert'
+import { set } from 'zod'
 
 interface AvaliacaoViewProps {
-    pageAvaliacao: PageAvaliacao
     requestPage: RequestPageAvaliacao
-    setRequestPage: (requestPageAvaliacao: RequestPageAvaliacao) => void
-    isContentLoading: boolean
     onClose: () => void
 }
 
@@ -19,50 +19,48 @@ interface Ratings {
     counts: number[]
 }
 
-export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isContentLoading, setRequestPage }: AvaliacaoViewProps) {
+export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewProps) {
     const currentPageRef = useRef<number>(1)
-    const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>(pageAvaliacao.avaliacoes)
+    const totalRegistros = useRef<number>(0)
+    const totalPaginas = useRef<number>(0)
+    const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(requestPage)
+    const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
+    const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>()
     const [ratings, setRatings] = useState<Ratings>({ ratings: [], total: 0, average: 0, counts: [] })
     const [filtroAtivo, setFiltroAtivo] = useState<boolean>(false)
-
-    useEffect(() => {
-        currentPageRef.current = requestPage.pagina || 1
-        avaliacoes ? (
-            setAvaliacoes([...avaliacoes, ...pageAvaliacao.avaliacoes])
-        )
-            :
-            setAvaliacoes(pageAvaliacao.avaliacoes)
-    }, [pageAvaliacao])
+    const [errorMessage, setErrorMessage] = useState<string | null>()
+    const [loadPageButton, setLoadPageButton] = useState<boolean>(false)
 
     const onRefresh = () => {
         setAvaliacoes(null)
         currentPageRef.current = 1
-        setRequestPage({ ...requestPage, nota: null, pagina: 1 })
+        setRequestPageAvaliacao({ ...requestPage, nota: null, pagina: 1 })
         setFiltroAtivo(false)
+        setLoadPageButton(true)
     }
 
     const loadMorePage = () => {
-        if (currentPageRef.current >= pageAvaliacao.totalPaginas) return
-        setRequestPage({ ...requestPage, pagina: currentPageRef.current + 1 })
+        if (currentPageRef.current >= totalPaginas.current) return setLoadPageButton(false)
+        setRequestPageAvaliacao({ ...requestPage, pagina: currentPageRef.current + 1 })
         currentPageRef.current = currentPageRef.current + 1
     }
-
+    
     const filterByRating = (rating: number) => {
         setAvaliacoes(null)
         currentPageRef.current = 1
-        setRequestPage({ ...requestPage, nota: rating, pagina: 1 })
+        setRequestPageAvaliacao({ ...requestPage, nota: rating, pagina: 1 })
         setFiltroAtivo(true)
     }
-
+    
     const limparFiltro = () => {
         setAvaliacoes(null)
         currentPageRef.current = 1
-        setRequestPage({ ...requestPage, nota: null, pagina: 1 })
+        setRequestPageAvaliacao({ ...requestPage, nota: null, pagina: 1 })
         setFiltroAtivo(false)
     }
 
     useEffect(() => {
-        const todasAvaliacoes = pageAvaliacao.avaliacoes
+        const todasAvaliacoes = avaliacoes
         if (!todasAvaliacoes) return
         setRatings({
             ratings: todasAvaliacoes.map((item) => item.nota),
@@ -72,7 +70,23 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
                 todasAvaliacoes.filter(r => r.nota === star).length
             )
         })
-    }, [pageAvaliacao.avaliacoes])
+    }, [avaliacoes])
+
+    useEffect(()=>{
+          if(!requestPageAvaliacao) return
+          setIsContentLoading(true)
+          getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
+          .then((response)=>{        
+              setAvaliacoes(response.avaliacoes)
+          })
+          .catch((reponse)=>{
+            setErrorMessage("Erro buscando avaliações: " + reponse.message)
+          })
+          .finally(()=>{
+            setRequestPageAvaliacao(null)
+            setIsContentLoading(false)
+          })
+        },[requestPageAvaliacao])
 
     return (
         <View className="p-[30px] obsolute bg-white rounded-lg shadow-md h-[80%] w-[94%] top-[3%] left-[3%] absolute justify-center">
@@ -122,8 +136,14 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
                 data={avaliacoes}
                 refreshing={isContentLoading}
                 onRefresh={onRefresh}
-                onEndReached={loadMorePage}
+                ListFooterComponent={
+                    <TouchableOpacity className={`flex-col flex-nowrap my-5 items-center justify-center rounded-full ${loadPageButton? 'visible' : 'hidden'} `} onPress={loadMorePage}>
+                        <Image source={require('../assets/loadMore.png')} style={{ width: 50, height: 50, tintColor: '#555' }} resizeMode="contain" />
+                        <Text className='text-xs text-matte_gray text-center'>Carregar {'\n'} Mais</Text>
+                    </TouchableOpacity>
+                }
                 onEndReachedThreshold={0.1}
+                onEndReached={() => currentPageRef.current < totalPaginas.current && loadMorePage()}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => {
@@ -160,7 +180,7 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
             />
 
             <View className="px-4 py-2">
-                <Text className="text-gray-500">{"Comentários: " + pageAvaliacao.totalRegistros}</Text>
+                <Text className="text-gray-500">{"Comentários: " + ratings.total}</Text>
                 <View className="mt-4 mb-2 flex-row justify-between">
                     <ButtonModal
                         title="Fechar"
@@ -175,6 +195,14 @@ export default function AvaliacaoView({ pageAvaliacao, onClose, requestPage, isC
                     />
                 </View>
             </View>
+            {errorMessage && (
+                <ShowAlert
+                    message={errorMessage}
+                    onClose={()=>setErrorMessage(null)}
+                    type='error'
+                />
+            )}
+
         </View>
     )
 }

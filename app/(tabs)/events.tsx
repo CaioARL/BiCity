@@ -288,7 +288,6 @@ export default function Events() {
                       CustomEvents.card,
                       isSelected && { backgroundColor: "#d3e5ff" }
                     ]}
-                    // onPress={() => setModalViewEvento(item)}
                     onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id }})}
                   >
                     <ImageBackground  

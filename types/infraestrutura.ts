@@ -5,9 +5,15 @@ export interface InfraestruturaGeoJson extends FeatureCollection<Geometry, {
     name: string
     id: string
     type: string
+    stroke: string
 }> {}
 
-
+export interface InfraestruturaGeoJsonResponse extends FeatureCollection<Geometry, {
+    name: string
+    id: string
+    type: string
+    notaMedia: number
+}> {}
 
 export interface RequestInfraestruturaByRadius {
     latitude:number
