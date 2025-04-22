@@ -9,7 +9,7 @@ import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilida
 import FormFieldSelectList from '../../components/FormFieldSelectList'
 import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { createUser, validateCNPJ, validateCPF } from '../../api/usuario'
+import { createUser, validateCNPJ, validateCNPJAuthenticity, validateCPF, validateUser } from '../../api/usuario'
 import { CreateUsuarioForms, CreateUsuarioRequest, ErrorCreateUsuarioForms } from '../../types'
 import { checkToken, sendToken } from '../../api/token'
 import { useAuthProvider } from '../context/AuthProvider'
@@ -39,7 +39,6 @@ export default function SignUp() {
   const [errorMessage, setErrorMessage] = useState<string | null>()
   const [staticErrorMessage, setStaticErrorMessage] = useState<string | null>()
   const [successMessage, setSuccessMessage] = useState<string | null>()
-  const [isLocked, setIslocked] = useState<boolean>(false)
 
   useEffect(() => {
     getNivelHabilidade()
@@ -96,9 +95,21 @@ export default function SignUp() {
         return
       }
 
-      if(isLocked) return
+      setIsRequesting(true)
+      validateUser({email: null, nomeUsuario: createUsuarioForms.nomeUsuario}, null) //NOMEUSUARIO
+        .then((response) => {
+          if(response) {
+            updateCampoErrorForms('nomeUsuario', 'Nome de usuario já utilizado, tente outro.')            
+          }else{
+            updateCampoErrorForms('nomeUsuario', '')
+            setStep(2)
+          }
+      })
+      .catch((response) => {
+        setErrorMessage(response)
+      })
+      .finally(() => setIsRequesting(false))
       
-      setStep(2)
 
     } else if (step === 2) {
 
@@ -113,8 +124,6 @@ export default function SignUp() {
         setErrorMessage('Preencha todos os campos corretamente')
         return
       }
-
-      if(isLocked) return
 
       setStep(3)
 
@@ -132,7 +141,7 @@ export default function SignUp() {
         return
       }
 
-      if( createUsuarioForms.confirmaSenha !== createUsuarioForms.senha) {
+      if(createUsuarioForms.confirmaSenha !== createUsuarioForms.senha) {
         setErrorCreateUsuarioForms((prevState) => ({
           ...prevState,
           confirmaSenha: 'As senhas não coincidem',
@@ -141,9 +150,52 @@ export default function SignUp() {
         return
       }
 
-      if(isLocked) return
+      if(createUsuarioForms.cpf !== null){
+        setIsRequesting(true)
+        validateCPF(createUsuarioForms.cpf, null)
+          .then((response) => {
+            if(response.isValid) {
+              setStep(4)
+            }else{
+              updateCampoErrorForms('cpf', response.message)
+            }
+        })
+        .catch((response) => {
+          setErrorMessage(response)
+        })
+        .finally(() => setIsRequesting(false))
+      }
 
-      setStep(4)
+      if(createUsuarioForms.cnpj !== null){
+        setIsRequesting(true)
+        validateCNPJAuthenticity(createUsuarioForms.cnpj, null)
+          .then((response) => {
+            if(!response) {
+              updateCampoErrorForms('cnpj', 'CNPJ inválido')
+              return
+            }
+        })
+        .catch((response) => {
+          setErrorMessage(response)
+        })
+        .finally(() => setIsRequesting(false))
+
+        setIsRequesting(true)
+        validateCNPJ(createUsuarioForms.cnpj, null)
+          .then((response) => {
+            if(response) {
+              updateCampoErrorForms('cnpj', 'CNPJ já cadastrado')
+              return
+            }
+            else {
+              setStep(4)
+            }
+        })
+        .catch((response) => {
+          setErrorMessage(response)
+        })
+        .finally(() => setIsRequesting(false))
+      }
 
     } else if (step === 4) {
 
@@ -159,16 +211,28 @@ export default function SignUp() {
         return
       }
 
-      setIsEmailCodeLoading(true)
-      sendToken(createUsuarioForms.email,null)
+      setIsRequesting(true)
+      validateUser({email:createUsuarioForms.email, nomeUsuario: null}, null) //EMAIL
         .then((response) => {
-          setSuccessMessage(`${response} Verifique seu email.`)
-          setStep(5)
-        })
-        .catch((response) => {
-          setErrorMessage('Erro ao enviar código: ' + response.message)
-        })
-        .finally(() => setIsEmailCodeLoading(false))
+          if(response) {
+            updateCampoErrorForms('email', 'Email já cadastrado')
+          }else{
+            setIsEmailCodeLoading(true)
+            sendToken(createUsuarioForms.email,null)
+              .then((response) => {
+                setSuccessMessage(`${response} Verifique seu email.`)
+                setStep(5)
+              })
+              .catch((response) => {
+                setErrorMessage('Erro ao enviar código: ' + response.message)
+              })
+              .finally(() => setIsEmailCodeLoading(false))
+          }
+      })
+      .catch((response) => {
+        setErrorMessage(response)
+      })
+      .finally(() => setIsRequesting(false))
 
     } else if (step === 5) {
 
@@ -176,8 +240,6 @@ export default function SignUp() {
         setErrorMessage('Código inválido')
         return
       }
-
-      if(isLocked) return
 
       setCreateCodigoRequest(codigo)
     }
@@ -207,63 +269,6 @@ export default function SignUp() {
       })
       .finally(() => setIsRequesting(false)) 
   }
-
-    const checkCPF = () => {
-      if(!createUsuarioForms.cpf) return
-      setIsRequesting(true)
-      validateCPF(createUsuarioForms.cpf, null)
-        .then((response) => {
-          if(response.isValid) {
-            updateCampoErrorForms('cpf', '')
-            setIslocked(false)
-          }else{
-            updateCampoErrorForms('cpf', response.message)
-            setIslocked(true)
-          }
-      })
-      .catch((response) => {
-        setErrorMessage(response)
-      })
-      .finally(() => setIsRequesting(false))
-    }
-  
-    const checkCNPJ = () => {
-      if(!createUsuarioForms.cpf) return
-      setIsRequesting(true)
-      validateCNPJ(createUsuarioForms.cpf, null)
-        .then((response) => {
-          if(response) {
-            updateCampoErrorForms('cnpj', '')
-            setIslocked(false)
-          }else{
-            updateCampoErrorForms('cnpj', 'CNPJ inválido')
-            setIslocked(true)
-          }
-      })
-      .catch((response) => {
-        setErrorMessage(response)
-      })
-      .finally(() => setIsRequesting(false))
-    }
-
-    // const checkEMAIL = () => {
-    //   if(!createUsuarioForms.email) return
-    //   setIsRequesting(true)
-    //   validateEmail(createUsuarioForms.email, null)
-    //     .then((response) => {
-    //       if(response) {
-    //         updateCampoErrorForms('email', '')
-    //         setIslocked(false)
-    //       }else{
-    //         updateCampoErrorForms('email', 'Email já cadastrado')
-    //         setIslocked(true)
-    //       }
-    //   })
-    //   .catch((response) => {
-    //     setErrorMessage(response)
-    //   })
-    //   .finally(() => setIsRequesting(false))
-    // }
 
     useEffect(() => {
       if(!createUsuarioRequest) return
@@ -367,6 +372,7 @@ export default function SignUp() {
                   value={createUsuarioForms.nomeUsuario}
                   placeholder="Digite seu username"
                   handleChangeText={input => updateCampoCreateUsuario('nomeUsuario', input)}
+                  isLoading={isRequesting}
                   msg={errorCreateUsuarioForms.nomeUsuario}
                 />
                 <FormFieldSelectList
@@ -444,14 +450,12 @@ export default function SignUp() {
                         value={createUsuarioForms.cpf}
                         placeholder="Digite seu CPF"
                         handleChangeText={input => updateCampoCreateUsuario('cpf', input )}
-                        handleEndEditing={() => checkCPF()}
                         msg={errorCreateUsuarioForms.cpf}
                         isLoading={isRequesting}
                         keyboardType="number-pad"
                         maxLength={11}
                       />
                       <TouchableOpacity
-                        className='bg-color__lightGray rounded-[2px] border-1 border-[#6e6d6d]'
                         onPress={()=>{
                           updateCampoCreateUsuario('cpf', null)
                           updateCampoCreateUsuario('cnpj', '')
@@ -468,7 +472,6 @@ export default function SignUp() {
                       value={createUsuarioForms.cnpj}
                       placeholder="Digite seu CNPJ"
                       handleChangeText={input => updateCampoCreateUsuario('cnpj', input)}
-                      handleEndEditing={() => checkCNPJ()}
                       msg={errorCreateUsuarioForms.cnpj}
                       isLoading={isRequesting}
                       keyboardType="number-pad"
@@ -480,7 +483,7 @@ export default function SignUp() {
                         updateCampoCreateUsuario('cpf', '')
                       }}
                     >
-                      <Text>{"Sou Pessoa Fisica (Usar CPF)"}</Text>
+                      <Text className='text-[#3643ff]'>{"Sou Pessoa Fisica (Usar CPF)"}</Text>
                     </TouchableOpacity>
                   </>
                   )  
@@ -517,7 +520,7 @@ export default function SignUp() {
                   placeholder="Digite seu email"
                   handleChangeText={input => updateCampoCreateUsuario('email', input)}
                   msg={errorCreateUsuarioForms.email}
-                  isLoading={isEmailCodeLoading}
+                  isLoading={isEmailCodeLoading || isRequesting}
                   keyboardType="email-address"
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />

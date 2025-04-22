@@ -6,7 +6,8 @@ const ENDPOINTS = {
     USUARIO_GET: '/usuario/',
     USUARIO: '/usuario',
     USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
-    USUARIO_VALIDAR_CNPJ: '/empresa/is/active/cnpj',
+    USUARIO_VALIDAR_CNPJ: '/usuario/cnpj/validate',
+    USUARIO_VALIDAR_CNPJ_AUTHENTICITY: '/empresa/is/active/cnpj',
     USUARIO_VALIDAR: '/usuario/validate',
     USUARIO_GET_IMAGE: '/usuario/foto/file',
 

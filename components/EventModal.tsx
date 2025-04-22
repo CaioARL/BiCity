@@ -220,7 +220,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
     }))
   }
 
-  const updateCampoNovoEventoTipoEvento = (campo: string, valor: TipoEvento) => {
+  const updateCampoNovoEventoTipoEvento = (valor: TipoEvento) => {
     setRequestCreateEvento(prev => ({
       ...prev,
       tipoEvento: valor
@@ -413,7 +413,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 title='Tipos de Eventos'
                 selectedValue={requestCreateEvento.tipoEvento}
                 options={listTipoEvento}
-                handleChange={(value) => updateCampoNovoEventoTipoEvento('tipoEvento', value)}     
+                handleChange={(value) => updateCampoNovoEventoTipoEvento(value)}     
               />
 
             

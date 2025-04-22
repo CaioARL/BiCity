@@ -153,6 +153,11 @@ export interface CpfValidationResponse {
     message: string
 }
 
+export interface CnpjValidationResponse {
+    isValid: boolean
+    message: string
+}
+
 export interface ValidateUsuarioRequest {
     email: string | null
     nomeUsuario: string | null

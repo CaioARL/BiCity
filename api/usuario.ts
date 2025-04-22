@@ -1,5 +1,5 @@
 import api from ".";
-import { CpfValidationResponse, CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, UsuarioLoginRequest, ValidateUsuarioRequest } from "../types";
+import { CnpjValidationResponse, CpfValidationResponse, CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, UsuarioLoginRequest, ValidateUsuarioRequest } from "../types";
 import ENDPOINTS from "./endpoints";
 
 export const createUser = async (data: CreateUsuarioRequest, abortSignal: AbortController | null): Promise<CriarUsuarioResponse> => {
@@ -13,6 +13,16 @@ export const validateCPF = async (cpf: string , abortSignal: AbortController | n
     const response = await api.get<CpfValidationResponse>(ENDPOINTS.USUARIO_VALIDAR_CPF, {
         params: {
             cpf: cpf
+        },
+        signal: abortSignal?.signal
+    })
+    return response.data
+}
+
+export const validateCNPJAuthenticity = async (cnpj: string , abortSignal: AbortController | null ) => {
+    const response = await api.get<boolean>(ENDPOINTS.USUARIO_VALIDAR_CNPJ_AUTHENTICITY, { //retorna true se o cnpj é existe na base da dados governamental
+        params: {
+            cnpj: cnpj
         },
         signal: abortSignal?.signal
     })

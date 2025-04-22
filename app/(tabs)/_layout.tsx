@@ -9,6 +9,7 @@ export default function TabsLayout() {
         tabBar={props => <TabBar {...props} />}
         screenOptions={{
           headerShown: false,
+          tabBarHideOnKeyboard: true,
         }}
       >
         <Tabs.Screen 
