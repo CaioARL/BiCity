@@ -1,8 +1,6 @@
 import api from ".";
-import { CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, UsuarioLoginRequest } from "../types";
+import { CpfValidationResponse, CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, UsuarioLoginRequest, ValidateUsuarioRequest } from "../types";
 import ENDPOINTS from "./endpoints";
-
-
 
 export const createUser = async (data: CreateUsuarioRequest, abortSignal: AbortController | null): Promise<CriarUsuarioResponse> => {
     const response = await api.post<CriarUsuarioResponse>(ENDPOINTS.USUARIO_CADASTRO, data ,{
@@ -11,9 +9,8 @@ export const createUser = async (data: CreateUsuarioRequest, abortSignal: AbortC
     return response.data
 }
 
-
 export const validateCPF = async (cpf: string , abortSignal: AbortController | null) => {
-    const response = await api.get<string>(ENDPOINTS.USUARIO_VALIDAR_CPF, {
+    const response = await api.get<CpfValidationResponse>(ENDPOINTS.USUARIO_VALIDAR_CPF, {
         params: {
             cpf: cpf
         },
@@ -22,6 +19,23 @@ export const validateCPF = async (cpf: string , abortSignal: AbortController | n
     return response.data
 }
 
+export const validateCNPJ = async (cnpj: string , abortSignal: AbortController | null) => {
+    const response = await api.get<boolean>(ENDPOINTS.USUARIO_VALIDAR_CNPJ, {
+        params: {
+            cnpj: cnpj
+        },
+        signal: abortSignal?.signal
+    })
+    return response.data
+}
+
+export const validateUser = async (validateUsuario : ValidateUsuarioRequest  , abortSignal: AbortController | null) => {
+    const response = await api.get<boolean>(ENDPOINTS.USUARIO_VALIDAR,{
+        params: validateUsuario, 
+        signal: abortSignal?.signal
+    })
+    return response.data
+}
 
 export const loginUser = async (usuarioLogin: UsuarioLoginRequest, abortSignal: AbortController) => {
     const response = await api.post<Usuario>(ENDPOINTS.USUARIO_LOGIN, usuarioLogin, {
@@ -30,17 +44,14 @@ export const loginUser = async (usuarioLogin: UsuarioLoginRequest, abortSignal: 
     return response.data
 }
 
-
 export const getUserById = async (id: number ) => {
     const response = await api.get<Usuario>(ENDPOINTS.USUARIO_GET + id, {
     })
     return response.data
 }
 
-
 export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSignal: AbortController | null ) => {
     const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT+ id , {
-        
                 nome: user.nome, 
                 nomeUsuario: user.nomeUsuario,
                 endereco: {
@@ -62,7 +73,6 @@ export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSi
     return response
 }
 
-
 export const updateImageUser = async (id: number, image: FormData, abortSignal: AbortController | null ) => {
     const response = await api.put<Usuario>(ENDPOINTS.USUARIO_PUT + id + '/foto', image, {
         signal: abortSignal?.signal,
@@ -73,8 +83,6 @@ export const updateImageUser = async (id: number, image: FormData, abortSignal: 
     return response.data
 }
 
-
-
 export const getImageUser = async (id: number, s3Key: string) => {
     const response = await api.get<any, string >(ENDPOINTS.USUARIO_GET_IMAGE + '/' + id,{
         params: {
@@ -84,5 +92,3 @@ export const getImageUser = async (id: number, s3Key: string) => {
     })
     return response
 }
-
-

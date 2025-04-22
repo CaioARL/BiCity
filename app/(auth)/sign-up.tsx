@@ -9,7 +9,7 @@ import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilida
 import FormFieldSelectList from '../../components/FormFieldSelectList'
 import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { createUser } from '../../api/usuario'
+import { createUser, validateCNPJ, validateCPF } from '../../api/usuario'
 import { CreateUsuarioForms, CreateUsuarioRequest, ErrorCreateUsuarioForms } from '../../types'
 import { checkToken, sendToken } from '../../api/token'
 import { useAuthProvider } from '../context/AuthProvider'
@@ -39,6 +39,7 @@ export default function SignUp() {
   const [errorMessage, setErrorMessage] = useState<string | null>()
   const [staticErrorMessage, setStaticErrorMessage] = useState<string | null>()
   const [successMessage, setSuccessMessage] = useState<string | null>()
+  const [isLocked, setIslocked] = useState<boolean>(false)
 
   useEffect(() => {
     getNivelHabilidade()
@@ -91,9 +92,11 @@ export default function SignUp() {
             [issue.path[0]]: issue.message,
           }))
         })
-          setErrorMessage('Preencha todos os campos corretamente')
-          return
-        }
+        setErrorMessage('Preencha todos os campos corretamente')
+        return
+      }
+
+      if(isLocked) return
       
       setStep(2)
 
@@ -107,61 +110,65 @@ export default function SignUp() {
             [issue.path[0]]: issue.message,
           }))
         })
-          setErrorMessage('Preencha todos os campos corretamente')
-          return
-        }
+        setErrorMessage('Preencha todos os campos corretamente')
+        return
+      }
 
-        setStep(3)
+      if(isLocked) return
 
-      } else if (step === 3) {
-        
-        const validationResult = signInStep3.safeParse(createUsuarioForms)
-        if (!validationResult.success) {
-          validationResult.error.issues.forEach((issue) => {
-            setErrorCreateUsuarioForms((prevState) => ({
-              ...prevState,
-              [issue.path[0]]: issue.message,
-            }))
-          })
-            setErrorMessage('Preencha todos os campos corretamente')
-            return
-          }
+      setStep(3)
 
-          if( createUsuarioForms.confirmaSenha !== createUsuarioForms.senha) {
-            setErrorCreateUsuarioForms((prevState) => ({
-              ...prevState,
-              confirmaSenha: 'As senhas não coincidem',
-            }))
-            setErrorMessage('As senhas não coincidem')
-            return
-          }
+    } else if (step === 3) {
+      
+      const validationResult = signInStep3.safeParse(createUsuarioForms)
+      if (!validationResult.success) {
+        validationResult.error.issues.forEach((issue) => {
+          setErrorCreateUsuarioForms((prevState) => ({
+            ...prevState,
+            [issue.path[0]]: issue.message,
+          }))
+        })
+        setErrorMessage('Preencha todos os campos corretamente')
+        return
+      }
+
+      if( createUsuarioForms.confirmaSenha !== createUsuarioForms.senha) {
+        setErrorCreateUsuarioForms((prevState) => ({
+          ...prevState,
+          confirmaSenha: 'As senhas não coincidem',
+        })) 
+        setErrorMessage('As senhas não coincidem')
+        return
+      }
+
+      if(isLocked) return
 
       setStep(4)
 
     } else if (step === 4) {
 
-        const validationResult = signInStep4.safeParse(createUsuarioForms)
-        if (!validationResult.success) {
-          validationResult.error.issues.forEach((issue) => {
-            setErrorCreateUsuarioForms((prevState) => ({
-              ...prevState,
-              [issue.path[0]]: issue.message,
-            }))
-          })
-            setErrorMessage('Preencha todos os campos corretamente')
-            return
-          }
+      const validationResult = signInStep4.safeParse(createUsuarioForms)
+      if (!validationResult.success) {
+        validationResult.error.issues.forEach((issue) => {
+          setErrorCreateUsuarioForms((prevState) => ({
+            ...prevState,
+            [issue.path[0]]: issue.message,
+          }))
+        })
+        setErrorMessage('Preencha todos os campos corretamente')
+        return
+      }
 
-          setIsEmailCodeLoading(true)
-          sendToken(createUsuarioForms.email,null)
-            .then((response) => {
-              setSuccessMessage(`${response} Verifique seu email.`)
-              setStep(5)
-            })
-            .catch((response) => {
-              setErrorMessage('Erro ao enviar código: ' + response.message)
-            })
-            .finally(() => setIsEmailCodeLoading(false))
+      setIsEmailCodeLoading(true)
+      sendToken(createUsuarioForms.email,null)
+        .then((response) => {
+          setSuccessMessage(`${response} Verifique seu email.`)
+          setStep(5)
+        })
+        .catch((response) => {
+          setErrorMessage('Erro ao enviar código: ' + response.message)
+        })
+        .finally(() => setIsEmailCodeLoading(false))
 
     } else if (step === 5) {
 
@@ -169,6 +176,8 @@ export default function SignUp() {
         setErrorMessage('Código inválido')
         return
       }
+
+      if(isLocked) return
 
       setCreateCodigoRequest(codigo)
     }
@@ -193,32 +202,62 @@ export default function SignUp() {
         }
       })
       .catch((response) => {
-        setErrorCreateUsuarioForms((prevState) => ({
-          ...prevState,
-          cep: response.message,
-        }))
+        updateCampoErrorForms('cep', response.message)
         setErrorMessage('Erro ao buscar CEP: ' + response.message)
       })
       .finally(() => setIsRequesting(false)) 
   }
 
-    // const checkCPF = () => {
-    //   if(!createUsuarioForms.cpf) return
-    //   setIsRequesting(true)
-    //   validateCPF(createUsuarioForms.cpf, null)
-    //     .then((response) => {
-    //   })
-    //   .catch((response) => {
-    //     setErrorMessage(response)
-    //   })
-    //   .finally(() => setIsRequesting(false))
-    // }
+    const checkCPF = () => {
+      if(!createUsuarioForms.cpf) return
+      setIsRequesting(true)
+      validateCPF(createUsuarioForms.cpf, null)
+        .then((response) => {
+          if(response.isValid) {
+            updateCampoErrorForms('cpf', '')
+            setIslocked(false)
+          }else{
+            updateCampoErrorForms('cpf', response.message)
+            setIslocked(true)
+          }
+      })
+      .catch((response) => {
+        setErrorMessage(response)
+      })
+      .finally(() => setIsRequesting(false))
+    }
   
-    // const checkCNPJ = () => {
-    //   if(!createUsuarioForms.cpf) return
+    const checkCNPJ = () => {
+      if(!createUsuarioForms.cpf) return
+      setIsRequesting(true)
+      validateCNPJ(createUsuarioForms.cpf, null)
+        .then((response) => {
+          if(response) {
+            updateCampoErrorForms('cnpj', '')
+            setIslocked(false)
+          }else{
+            updateCampoErrorForms('cnpj', 'CNPJ inválido')
+            setIslocked(true)
+          }
+      })
+      .catch((response) => {
+        setErrorMessage(response)
+      })
+      .finally(() => setIsRequesting(false))
+    }
+
+    // const checkEMAIL = () => {
+    //   if(!createUsuarioForms.email) return
     //   setIsRequesting(true)
-    //   validateCNPJ(createUsuarioForms.cpf, null)
+    //   validateEmail(createUsuarioForms.email, null)
     //     .then((response) => {
+    //       if(response) {
+    //         updateCampoErrorForms('email', '')
+    //         setIslocked(false)
+    //       }else{
+    //         updateCampoErrorForms('email', 'Email já cadastrado')
+    //         setIslocked(true)
+    //       }
     //   })
     //   .catch((response) => {
     //     setErrorMessage(response)
@@ -252,28 +291,16 @@ export default function SignUp() {
       abortControllerRef.current = new AbortController()
       setIsRequesting(true)
       checkToken(createCodigoRequest, createUsuarioForms.email, null)
-        .then(() => {
-          setCreateUsuarioRequest({
-            nome: createUsuarioForms.firstName + ' ' + createUsuarioForms.secondName,
-            nomeUsuario: createUsuarioForms.nomeUsuario,
-            endereco: { 
-              numero: parseInt(createUsuarioForms.numero),
-              cep: createUsuarioForms.cep,
-              estado: createUsuarioForms.estado,
-              cidade: createUsuarioForms.cidade,
-              bairro: createUsuarioForms.bairro,
-              rua: createUsuarioForms.rua,
-            } ,
-            email: createUsuarioForms.email,
-            senha: createUsuarioForms.senha,
-            cpf: createUsuarioForms.cpf,
-            cnpj: createUsuarioForms.cnpj,
-            nivelHabilidade: createUsuarioForms.nivelHabilidade.id,
-          })
+        .then((response) => {
+          if(response){
+            setCreateUsuarioRequest({ nome: createUsuarioForms.firstName + ' ' + createUsuarioForms.secondName, nomeUsuario: createUsuarioForms.nomeUsuario, endereco: {  numero: parseInt(createUsuarioForms.numero), cep: createUsuarioForms.cep, estado: createUsuarioForms.estado, cidade: createUsuarioForms.cidade, bairro: createUsuarioForms.bairro, rua: createUsuarioForms.rua, } , email: createUsuarioForms.email, senha: createUsuarioForms.senha, cpf: createUsuarioForms.cpf, cnpj: createUsuarioForms.cnpj, nivelHabilidade: createUsuarioForms.nivelHabilidade.id })
+          } else {
+            setCodigoError('Código inválido')
+            setErrorMessage('Código inválido')
+          }
         })
         .catch((response) => {
           setErrorMessage('Erro ao validar código: ' + response.message)
-          setCodigoError('Erro ao validar, confira o seu email')
         })
         .finally(() => setIsRequesting(false))
       },[createCodigoRequest])
@@ -289,6 +316,13 @@ export default function SignUp() {
     setCreateUsuarioForms((prevState) => ({
       ...prevState,
       nivelHabilidade: valor,
+    }))
+  }
+
+  const updateCampoErrorForms = (campo: string , valor: string) => {
+    setErrorCreateUsuarioForms((prevState) => ({
+      ...prevState,
+      [campo]: valor,
     }))
   }
 
@@ -410,18 +444,20 @@ export default function SignUp() {
                         value={createUsuarioForms.cpf}
                         placeholder="Digite seu CPF"
                         handleChangeText={input => updateCampoCreateUsuario('cpf', input )}
+                        handleEndEditing={() => checkCPF()}
                         msg={errorCreateUsuarioForms.cpf}
                         isLoading={isRequesting}
                         keyboardType="number-pad"
                         maxLength={11}
                       />
                       <TouchableOpacity
+                        className='bg-color__lightGray rounded-[2px] border-1 border-[#6e6d6d]'
                         onPress={()=>{
                           updateCampoCreateUsuario('cpf', null)
                           updateCampoCreateUsuario('cnpj', '')
                         }}
                       >
-                        <Text>{'Sou Empresa (usar CNPJ)'}</Text>
+                        <Text className='text-[#3643ff]'>{'Sou Empresa (usar CNPJ)'}</Text>
                       </TouchableOpacity>
                     </>
                   )} 
@@ -432,6 +468,7 @@ export default function SignUp() {
                       value={createUsuarioForms.cnpj}
                       placeholder="Digite seu CNPJ"
                       handleChangeText={input => updateCampoCreateUsuario('cnpj', input)}
+                      handleEndEditing={() => checkCNPJ()}
                       msg={errorCreateUsuarioForms.cnpj}
                       isLoading={isRequesting}
                       keyboardType="number-pad"

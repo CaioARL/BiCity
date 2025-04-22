@@ -6,8 +6,9 @@ const ENDPOINTS = {
     USUARIO_GET: '/usuario/',
     USUARIO: '/usuario',
     USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
+    USUARIO_VALIDAR_CNPJ: '/empresa/is/active/cnpj',
+    USUARIO_VALIDAR: '/usuario/validate',
     USUARIO_GET_IMAGE: '/usuario/foto/file',
-
 
     PROBLEMA_GET_BY_RADIUS: '/problema/radius',
     PROBLEMA_GET_BY_ID: '/problema/',

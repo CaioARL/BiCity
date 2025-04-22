@@ -1,6 +1,5 @@
 import { NivelHabilidade } from "./nivel-habilidade"
 
-
 export interface CreateUsuarioRequest {
     nome: string
     nomeUsuario: string
@@ -18,7 +17,6 @@ export interface CreateUsuarioRequest {
     cnpj: string | null
     nivelHabilidade: number
 }
-
 
 export interface CreateUsuarioForms {
     firstName: string 
@@ -38,8 +36,6 @@ export interface CreateUsuarioForms {
     nivelHabilidade: NivelHabilidade
 }
 
-
-
 export interface ErrorCreateUsuarioForms {
     firstName : string
     secondName : string
@@ -57,8 +53,6 @@ export interface ErrorCreateUsuarioForms {
     cnpj: string
     nivelHabilidade: string
 }
-
-
 
 export interface Usuario {
     id: number
@@ -91,8 +85,6 @@ export interface Usuario {
     s3Url: string
 }
 
-
-
 export interface CriarUsuarioResponse {
     id: number
     nome: string
@@ -124,8 +116,6 @@ export interface CriarUsuarioResponse {
     s3Url: string
 }
 
-
-
 export interface EnderecoUsuario {
       rua: string,
       numero: number,
@@ -135,7 +125,6 @@ export interface EnderecoUsuario {
       cep: string
 }
 
-
 export interface UsuarioLoginRequest {
     nomeUsuario: string
     email: string
@@ -143,7 +132,6 @@ export interface UsuarioLoginRequest {
     cnpj: string
     senha: string
 }
-
 
 export interface RequestUpdateUsuario {
     nome: string
@@ -158,4 +146,14 @@ export interface RequestUpdateUsuario {
     }
     email: string
     nivelHabilidade: NivelHabilidade
+}
+
+export interface CpfValidationResponse {
+    isValid: boolean
+    message: string
+}
+
+export interface ValidateUsuarioRequest {
+    email: string | null
+    nomeUsuario: string | null
 }
