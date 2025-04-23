@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { ListTipoProblema, RequestCreateProblema } from '../types'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
 import { getTipoProblema } from '../api/tipo-problema'
-import ImageSelectionPopup from '../components/ImageSelectionPopupProblema'
+import ImageSelectionPopup from '../components/ImgPickerModal'
 
 interface ModalProps {
   visible: boolean

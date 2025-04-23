@@ -58,20 +58,25 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
   
           {/* Dropdown Menu */}
           {eventTypeOptionsVisible && (
-            <ScrollView  className={`border-[1px] border-color_light_gray rounded-[8] shadow-[2px]`} style={{maxHeight: dropDownSize || '100%'}}>
-                  {options.map((item)=>(
-                    <TouchableOpacity key={item.id}
+            <ScrollView
+            className={`border-[1px] border-color_light_gray rounded-[8] shadow-[2px]`}
+            style={{ maxHeight: dropDownSize || '100%' }}
+          >
+            {options.map((item, index) => (
+              <TouchableOpacity
+                    key={item.id}
                     onPress={() => {
-                      handleChange(item.value)
-                      setEventTypeOptionsVisible(false)
+                      handleChange(item.value);
+                      setEventTypeOptionsVisible(false);
                     }}
-                    className={`py-[15px] px-[10px] border-color_light_gray rounded-[6px] border-b-[1px] mb-[4px]`}
-                    >
-                            <Text className={`capitalize md:uppercase `}>{item.nome}</Text>
-                        </TouchableOpacity>
-                      
-                    ))}
-            </ScrollView>
+                    className={`py-[15px] px-[10px] rounded-[6px] mb-[4px] ${
+                      index !== options.length - 1 ? 'border-b-[1px] border-color_light_gray' : ''
+                    }`}
+                  >
+                    <Text className={`capitalize md:uppercase`}>{item.nome}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             )}
         </View>
       </>

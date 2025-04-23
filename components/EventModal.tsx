@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, Animated, ScrollView, Image} from 'react-native';
+import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native';
 import { Region } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
@@ -17,7 +17,7 @@ import MapModalView from './MapModalView';
 import { useAuthProvider } from '../app/context/AuthProvider';
 import FormFieldTime from './FormFieldTime';
 import CustomButton from './CustomButton';
-
+import ImageSelectionPopup from '../components/ImgPickerModal'
 
 interface EventModalProps {
   visible: boolean
@@ -63,6 +63,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
 
+  const [showImagePopup, setShowImagePopup] = useState(false)
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
 
@@ -227,7 +228,59 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
     }))
   }
 
-
+  const pickImageFromGallery = async () => {
+      try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+        if (status !== 'granted') {
+          alert('Desculpe, precisamos de permissão para acessar a galeria!')
+          return
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          quality: 0.8,
+        })
+  
+        if (!result.canceled && result?.assets?.[0]?.uri) {
+          setImage(result.assets[0].uri)
+        }
+        setShowImagePopup(false)
+      } catch (error) {
+        console.error('Error picking image:', error)
+        setShowImagePopup(false)
+      }
+    }
+  
+    const takePhoto = async () => {
+      try {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        if (status !== 'granted') {
+          alert('Desculpe, precisamos de permissão para acessar a câmera!')
+          return
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          quality: 0.8,
+        })
+  
+        if (!result.canceled && result?.assets?.[0]?.uri) {
+          setImage(result.assets[0].uri)
+        }
+        setShowImagePopup(false)
+      } catch (error) {
+        console.error('Error taking photo:', error)
+        setShowImagePopup(false)
+      }
+    }
+  
+    const handleCloseImagePopup = () => {
+      setShowImagePopup(false)
+    }
+  
+    const showImageOptions = () => {
+      setShowImagePopup(true)
+    }
   useEffect(() => {
     if(!mapRegion) return
 
@@ -277,8 +330,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
             {/* <Animated.View style={{ opacity: fadeAnim }}> */}
 
                <View  className='mb-[2px]'>
-                  
-
                   {mapViewRegion?(
                     <>
                       <MapModalView
@@ -325,8 +376,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 maxLength={8}
                 keyboardType='numeric'
                 isLoading={isCepLoading}
-                msg={cepError? cepError : novoEventoError.endereco.cep}
-                
+                msg={cepError? cepError : novoEventoError.endereco.cep}     
               />
               
               <FormFieldModal
@@ -453,25 +503,24 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 
               />
 
-
-
-              {image ?
-                (<View>
-                    <Image className='h-[120px] w-[100%] rounded-[10px] mb-1 border-[1px] border-color__lightGray' src={image}></Image>
-                </View>)
-                :
-                (<View className='h-[120px] w-[100%] mb-1 bg-[#f0f0f0] rounded-[10px] items-center justify-center'>
-                    <Text>Nenhuma Imagem selecionada</Text>
-                </View>)
-              }
-              <View className='mb-16 mt-[-40px]'>
-                  <CustomButton
-                      title='Selecionar Imagem'
-                      handlePress={pickImage}
-                      containerStyles='w-[100%] h-fit rounded-[10px]'
-                      textStyles='text-black'
-                  />
-              </View>
+                <TouchableOpacity onPress={showImageOptions} activeOpacity={0.7}>
+                    {image ? (
+                      <View>
+                        <Image
+                          className="h-[120px] w-[100%] rounded-[10px] mb-4 border-[1px] border-color__lightGray"
+                          source={{ uri: image }}
+                        />
+                        <Text className="text-center text-xs text-gray-500 mb-4">
+                          Toque para alterar a imagem
+                        </Text>
+                      </View>
+                    ) : (
+                      <View className="h-[120px] w-[100%] mb-4 bg-[#f0f0f0] rounded-[10px] items-center justify-center">
+                        <Text className="text-gray-500 mb-2">Toque para adicionar uma imagem</Text>
+                        <Text className="text-xs text-gray-400">Você pode tirar uma foto ou escolher da galeria</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
 
 
 
@@ -500,7 +549,12 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
       </View>
     </Modal>
 
-    
+    <ImageSelectionPopup
+      visible={showImagePopup}
+      onClose={handleCloseImagePopup}
+      onTakePhoto={takePhoto}
+      onPickFromGallery={pickImageFromGallery}
+    />
     </>
   );
 };
