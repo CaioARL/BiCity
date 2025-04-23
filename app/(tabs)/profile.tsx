@@ -9,7 +9,7 @@ import { router } from 'expo-router';
 import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario } from '../../types';
 import { updateImageUser, updateUser } from '../../api/usuario';
 import LoadingActivity from '../../components/LoadingActivity';
-import FormFieldSelectList from '../../components/FormFieldSelectList';
+import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
 import CustomButton from '../../components/CustomButton';
 import ShowAlert from '../../components/ShowAlert';
@@ -260,6 +260,7 @@ const Profile = () => {
           <View style={CustomProfile.bottomSection}>
             {isEditing ? (
               <>
+                <Text className='text-[16px] text-matte_gray mb-[5px]'>Nome</Text>
                 {authState?.user?.nome && <TextInput
                   style={CustomProfile.input}
                   value={userToUpdate.nome}
@@ -270,6 +271,8 @@ const Profile = () => {
                   value={userToUpdate.nomeUsuario}
                   onChangeText={text => updateCampoUsuario('nomeUsuario', text)}
                 />}
+
+                <Text className='text-[16px] text-matte_gray mb-[5px]'>Endereço</Text>
                 {authState?.user?.endereco?.cep && <TextInput
                   style={CustomProfile.input}
                   value={userToUpdate.endereco.cep}
@@ -300,47 +303,111 @@ const Profile = () => {
                   value={String(userToUpdate.endereco.numero)}
                   onChangeText={(text) => updateCampoUsuarioEndereco("numero",Number(text.replace(/\D/g, '')))} // Ensure only numbers are set
                 />}
+
+                <Text className='text-[16px] text-matte_gray mb-[5px]'>Email</Text>
                 {authState?.user?.email && <TextInput
                   style={CustomProfile.input}
                   value={userToUpdate.email}
                   onChangeText={text => updateCampoUsuario('email', text)}
                   editable={false}
                   />}
+
+
                   {authState?.user?.nivelHabilidade && 
-                    <FormFieldSelectList
+                    <FormFieldDropdownSelectList
                       title="Nível de habilidade"
                       selectedValue={userToUpdate.nivelHabilidade}
                       options={listNivelHabilidade}
-                      handleChange={
-                        (nivel: NivelHabilidade) => {
-                          updateCampoUsuarioHabilidade(nivel)
-                        }
-                      }
+                      handleChange={(nivel: NivelHabilidade) => {
+                        updateCampoUsuarioHabilidade(nivel)
+                      }}
+                      
                       msg={nivelHabilidadeError}
-                    />  
+                    />
                   }
                
               </>
             ) : (
               <>
                 <Text style={{...CustomProfile.name}}>{authState?.user?.nome}</Text>
-                <Text style={CustomProfile.title}>@{authState?.user?.nomeUsuario}</Text>
+                <Text className='text-[14px] text-secondary_black_sub_title mb-[5px] mt-[5px]'>@{authState?.user?.nomeUsuario}</Text>
               </>
             )}
-            {authState && <Text style={CustomProfile.title}>Data de Criação: {authState.user?.dtCriacao}</Text>}
+           
+            {authState?.user?.nivelHabilidade && (
+              <View className="flex-row items-center">
+                <Text className="text-[14px] text-secondary_black_sub_title mr-2">
+                  Nível {authState.user.nivelHabilidade.nome}
+                </Text>
+                {(() => {
+                  const nivel = authState.user.nivelHabilidade.nome.toLowerCase();
+                  let starConfig = [];
 
-            <View style={CustomProfile.nivelHabilidadeContainer}>
-              <Text style={CustomProfile.nivelHabilidade}>Nível</Text>
-              <Ionicons name="star-half-outline" size={20} color="#ffcc00" style={{ marginTop: -5 }} />
-            </View>
-            {authState?.user?.nivelHabilidade && <View style={CustomProfile.nivelHabilidadeContainer}>
-              <Text style={CustomProfile.nivelHabilidade}>{authState.user.nivelHabilidade.nome}</Text>
-            </View>}
-            
+                  switch (nivel) {
+                    case 'iniciante':
+                      starConfig = [
+                        { type: 'star', active: true },
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                      ];
+                      break;
+                    case 'intermediario':
+                      starConfig = [
+                        { type: 'star', active: true },
+                        { type: 'star-half-outline', active: true },
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                      ];
+                      break;
+                    case 'avancado':
+                      starConfig = [
+                        { type: 'star', active: true },
+                        { type: 'star', active: true },
+                        { type: 'star-half-outline', active: true },
+                        { type: 'star-outline', active: false },
+                      ];
+                      break;
+                    case 'profissional':
+                      starConfig = [
+                        { type: 'star', active: true },
+                        { type: 'star', active: true },
+                        { type: 'star', active: true },
+                        { type: 'star', active: true },
+                      ];
+                      break;
+                    default:
+                      starConfig = [
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                        { type: 'star-outline', active: false },
+                      ];
+                  }
 
-
-
-
+                  return starConfig.map(({ type, active }, index) => {
+                    const color = active ? '#FFD700' : '#ddd'; 
+                    return (
+                      <Ionicons
+                        key={index}
+                        name={
+                          type === 'star'
+                            ? 'star'
+                            : type === 'star-half-outline'
+                            ? 'star-half-outline'
+                            : 'star-outline'
+                        }
+                        size={13} 
+                        color={color}
+                        style={{ marginLeft: index > 0 ? 4 : 0 }}
+                      />
+                    );
+                  });
+                })()}
+              </View>
+            )}
+           
+            {authState && <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>Data de Criação: {authState.user?.dtCriacao.split(' ')[0]}</Text>}
 
           </View>
 
@@ -354,7 +421,7 @@ const Profile = () => {
 
           <View style={CustomProfile.iconSection}>
             <TouchableOpacity
-              style={{ ...CustomProfile.iconButton, backgroundColor: '#C3FF00' }}
+           style={CustomProfile.button}
               onPress={toggleEdit}
             >
               {isEditing ? <Text className='text-lg font-robotobold text-secondary_black'>Cancelar</Text> : <Ionicons name="chevron-down" size={24} color="white" />}
