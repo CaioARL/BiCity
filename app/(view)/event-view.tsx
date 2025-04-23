@@ -8,16 +8,13 @@ import { Text } from 'react-native'
 import ShowAlert from '../../components/ShowAlert'
 import LoadingActivity from '../../components/LoadingActivity'
 import CustomEvents from '../../css/CustomEvents';
-import { Ionicons, Feather } from "@expo/vector-icons";
-import { useAuthProvider } from "../context/AuthProvider";
+import { Ionicons } from "@expo/vector-icons";
 import { ArrowLeft } from 'lucide-react-native'
 
 export default function EventV() {
 
   const { eventoId } = useLocalSearchParams<{eventoId: string}>()
   const [evento, setEvento] = useState<Evento>()
-
-  const { authState } = useAuthProvider()
 
   const [isContentLoading, setIsContentLoading] = useState<boolean>(true)
   const [errorMessage ,setErrorMessage] = useState<string|null>()
@@ -77,18 +74,7 @@ export default function EventV() {
              className="w-full h-full"
               resizeMode="cover"
             />
-            // <Image
-            //   source={{uri: 'https://cdn-front.freepik.com/images/ai/image-generator/gallery/pikaso-dog.webp'}}
-            //   className="w-full h-full"
-            //   resizeMode="cover"
-            // />
           )}
-          
-          {/* <Image
-              source={{uri: 'https://media.istockphoto.com/id/1165648727/pt/v%C3%ADdeo/aerial-view-on-road-in-the-forest.jpg?s=640x640&k=20&c=ATqHuwnw_E-OLo3RwqcRuHsEkLhfwjh-ChaUOgkfxj8='}}
-              className="w-full h-full z-[]"
-              resizeMode="cover"
-            /> */}
 
         {/* Box de informações com gradiente e animação */}
         <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 18, padding: 20, position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
@@ -111,17 +97,17 @@ export default function EventV() {
                   </View>
 
                   <View className='bg-color_light_gray_2 border w-full flex-row items-center justify-between px-10 py-4 mt-[16px]' style={{ borderRadius: 18}}>
-                    <Text className='text-32 font-bold text-white w-[50%]'>Organizado Por: {"\n"}{authState?.user?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+                    <Text className='text-32 font-bold text-white w-[50%]'>Organizado Por: {"\n"}{evento.usuario.nome.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                   
-                    { authState?.user?.s3Url ? 
+                    {evento.usuario.s3Url ? 
                       <Image
-                        src={authState.user.s3Url}
+                        src={evento.usuario.s3Url}
                         className="w-20 h-20 rounded-full border-color_light_gray bg-primary_green"
                         style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, marginRight: 10 }}
                       />
                       :
                       <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-color_light_gray bg-primary_green items-center'>
-                        <Text className='text-[45px] text-black '>{authState?.user?.nome?.[0]}</Text>
+                        <Text className='text-[45px] text-black '>{evento.usuario.nome?.[0]}</Text>
                       </View>
                     }
                   </View>
