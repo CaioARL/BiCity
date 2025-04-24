@@ -8,7 +8,7 @@ export const createEvento = async (evento: RequestCreateEvento, abortSignal: Abo
         {
             nome: evento.nome,
             descricao: evento.descricao,
-            data: evento.data,
+            data: evento.data.data + "T" + evento.data.horario + ".000",
             endereco: {
                 cep: evento.endereco.cep,
                 estado: evento.endereco.estado,
@@ -61,25 +61,25 @@ export const getEventoByRadius = async (requestEventoByRadius : RequestEventoByR
     return response.data
 }
 
-export const updateEvento = async (requestUpdateEvento: RequestUpdateEvento, abortSignal: AbortController) : Promise<Evento> => {
-    const response = await api.put<Evento>(ENDPOINTS.EVENTO_PUT+ requestUpdateEvento.id,
+export const updateEvento = async (evento: RequestUpdateEvento, abortSignal: AbortController) : Promise<Evento> => {
+    const response = await api.put<Evento>(ENDPOINTS.EVENTO_PUT+ evento.id,
         {
-            nome: requestUpdateEvento.nome,
-            descricao: requestUpdateEvento.descricao,
-            data: requestUpdateEvento.data,
+            nome: evento.nome,
+            descricao: evento.descricao,
+            data: evento.data.data + "T" + evento.data.horario + ".000",
             endereco: {
-                cep: requestUpdateEvento.endereco.cep,
-                estado: requestUpdateEvento.endereco.estado,
-                cidade: requestUpdateEvento.endereco.cidade,
-                bairro: requestUpdateEvento.endereco.bairro,
-                rua: requestUpdateEvento.endereco.rua,
-                numero: requestUpdateEvento.endereco.numero,
+                cep: evento.endereco.cep,
+                estado: evento.endereco.estado,
+                cidade: evento.endereco.cidade,
+                bairro: evento.endereco.bairro,
+                rua: evento.endereco.rua,
+                numero: evento.endereco.numero,
             },
-            faixaKm: requestUpdateEvento.faixaKm,
-            gratuito: requestUpdateEvento.gratuito,
-            urlSite: requestUpdateEvento.urlSite,
-            idTipoEvento: requestUpdateEvento.tipoEvento.id,
-            idUsuario: requestUpdateEvento.idUsuario,
+            faixaKm: evento.faixaKm,
+            gratuito: evento.gratuito,
+            urlSite: evento.urlSite,
+            idTipoEvento: evento.tipoEvento.id,
+            idUsuario: evento.idUsuario,
         },
         { 
             signal: abortSignal.signal 

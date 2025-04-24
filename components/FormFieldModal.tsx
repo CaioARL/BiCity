@@ -12,7 +12,7 @@ interface FormFieldProps <T>{
     handleChangeText: (e : string) => void
     validantionCheck: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
     otherStyles?: string
-    keyboardType?: 'email-address' | 'default' | 'numeric'
+    keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad'
     secureTextEntry?: boolean;
     disableEdit?: boolean;
     isLoading?: boolean;
