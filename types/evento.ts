@@ -18,12 +18,15 @@ export interface Evento {
     usuario: Usuario
 }
 
-
+export interface Horario{
+    data: string
+    horario: string
+}
 
 export interface RequestCreateEvento {
     nome: string
     descricao: string
-    data: string
+    data: Horario
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
@@ -36,7 +39,7 @@ export interface RequestUpdateEvento {
     id: number
     nome: string
     descricao: string
-    data: string
+    data: Horario
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean

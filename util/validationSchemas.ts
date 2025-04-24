@@ -78,7 +78,10 @@ export const createEventSchema = z.object(
     {
         nome: z.string().min(5, { message: 'Nome: deve ter pelo ao menos 5 caracteres' }),
         descricao: z.string().min(10, { message: 'Descrição: deve ter pelo ao menos 10 caracteres' }),
-        data: z.string({message: 'Data: deve selecionar uma data'}).min(10, {message: 'Data: deve conter no minimo 10 caracteres 0000-00-00 '}),
+        data: z.object({
+            data: z.string({message: 'Data: deve selecionar uma data'}).min(10, {message: 'Data: deve conter no minimo 10 caracteres 0000-00-00 '}),
+            horario: z.string({message: 'Horario: deve selecionar um horario'}).min(8, {message: 'Horario: deve conter no minimo 5 caracteres 00:00:00'})
+        }),
         endereco: z.object({
             cep: z.string().min(8, {message: 'Cep: deve digitar um cep com 8 digitos '}).max(8, {message: 'Cep: deve digitar um cep com 8 digitos '}),
             estado: z.string({message: 'Estado: deve conter estado'}).min(2, {message: 'Estado: deve conter no mínimo 2 digitos'}),

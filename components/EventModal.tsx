@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, Animated, ScrollView, Image} from 'react-native';
+import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native';
 import { Region } from 'react-native-maps';
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
 import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
-import { Evento, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
+import { Evento, Horario, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
 import * as ImagePicker from 'expo-image-picker';
 import { getCep, getCepByLatAndLong } from '../api/endereco';
 import { createEventSchema } from '../util/validationSchemas';
@@ -15,8 +15,10 @@ import ButtonModal from './ButtonModal';
 import MapModalEdit from './MapModalEdit';
 import MapModalView from './MapModalView';
 import { useAuthProvider } from '../app/context/AuthProvider';
-import FormFieldTime from './FormFieldTime';
 import CustomButton from './CustomButton';
+import { Ionicons } from '@expo/vector-icons';
+import TimePicker from './TimePicker';
+
 
 
 interface EventModalProps {
@@ -59,13 +61,14 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
 
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: evento?.data || '', endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0] || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
 
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
 
+  const [showTimePicker, setShowTimePicker] = useState<boolean>()
   // useEffect(() => {
   //   if (visible) {
   //     Animated.timing(fadeAnim, {
@@ -227,6 +230,15 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
     }))
   }
 
+  const updateCampoData = (campo: string, valor: string) => {
+    setRequestCreateEvento(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        [campo]: valor
+      }
+    }))
+  }
 
   useEffect(() => {
     if(!mapRegion) return
@@ -323,7 +335,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 }}
                 placeholder='Digite o cep'
                 maxLength={8}
-                keyboardType='numeric'
+                keyboardType='number-pad'
                 isLoading={isCepLoading}
                 msg={cepError? cepError : novoEventoError.endereco.cep}
                 
@@ -343,7 +355,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 value={numero}
                 handleChangeText={setNumero}
                 validantionCheck={e => {updateCampoNovoEventoEndereco('numero', parseInt(e.nativeEvent.text))}}
-                keyboardType="numeric"
+                keyboardType="number-pad"
                 msg={novoEventoError.endereco.numero}
               />
 
@@ -425,7 +437,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 handleChangeText={setfaixaKm}
                 validantionCheck={e => (updateCampoNovoEvento('faixaKm', parseInt(e.nativeEvent.text))) }
                 msg={novoEventoError.faixaKm}
-                keyboardType="numeric"
+                keyboardType="number-pad"
               />
 
 
@@ -439,18 +451,20 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
               />
 
 
-
-              <FormFieldTime                
-                  value={requestCreateEvento.data}
-                  handleChangeValue={(e) => updateCampoNovoEvento('data', e)}
-              />
-
+              <TouchableOpacity     
+                  className='border-[1px] my-5 border-[#ddd] rounded-[8px] p-[10px] flex-row items-center justify-between' 
+                  onPress={() => setShowTimePicker(!showTimePicker )}
+              >
+                <Text className='text-[#555] ml-[10px]'>
+                {requestCreateEvento.data.horario || 'Selecione a hora do evento'}
+                </Text>
+                <Ionicons name="time" size={20} color="#555" />
+              </TouchableOpacity>
 
 
               <FormFieldCalendarSelectModal
-                value={requestCreateEvento.data}
-                handleChangeValue={(e) => updateCampoNovoEvento('data', e + requestCreateEvento.data)}
-                
+                value={requestCreateEvento.data.data}
+                handleChangeValue={data => {updateCampoData('data', data)}}
               />
 
 
@@ -458,7 +472,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
               {image ?
                 (<View>
                     <Image className='h-[120px] w-[100%] rounded-[10px] mb-1 border-[1px] border-color__lightGray' src={image}></Image>
-                </View>)
+                </View>)  
                 :
                 (<View className='h-[120px] w-[100%] mb-1 bg-[#f0f0f0] rounded-[10px] items-center justify-center'>
                     <Text>Nenhuma Imagem selecionada</Text>
@@ -497,6 +511,24 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
             {/* </Animated.View> */}
           </View>
         </ScrollView>
+          
+
+          {showTimePicker &&
+            <View  className='absolute flex-row items-center h-full w-full bg-[rgba(0,0,0,0.5)]'>
+                <View className='bg-white h-fit w-full rounded-lg'>
+                    <TimePicker
+                        onClose={(time) => {
+                            setShowTimePicker(false)
+                            updateCampoData('horario', time)
+                        }
+                      }
+                    />
+                  
+                </View>
+            </View>
+          }
+
+
       </View>
     </Modal>
 
