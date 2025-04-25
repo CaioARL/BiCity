@@ -139,6 +139,16 @@ const CustomProfile = StyleSheet.create({
     right: '5%',
     alignSelf: 'center',
   },
+  button2: {
+    backgroundColor: '#C3FF00',
+    padding: 15,
+    width: '40%',
+    marginHorizontal: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
   buttonSalve: {
     position: 'absolute',
     backgroundColor: '#C3FF00',

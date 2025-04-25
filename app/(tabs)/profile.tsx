@@ -220,7 +220,10 @@ const Profile = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <ScrollView scrollEventThrottle={16}  contentContainerStyle={{ paddingBottom: 107 }}>
+      <ScrollView 
+      scrollEventThrottle={16} 
+      contentContainerStyle={{ paddingBottom: 107 }}
+      >
       
         <View style={{...CustomProfile.profileCard, backgroundColor: 'white', shadowColor: '#000'}}>
 
@@ -404,6 +407,13 @@ const Profile = () => {
                     );
                   });
                 })()}
+                {isEditing && 
+                <TouchableOpacity
+                    style={{ ...CustomProfile.button2, backgroundColor: '#C3FF00' }}
+                    onPress={toggleEdit}
+                    >
+                  <Text style={{ fontWeight: 'bold' }}>Salvar</Text>
+                </TouchableOpacity>}
               </View>
             )}
            
@@ -411,24 +421,18 @@ const Profile = () => {
 
           </View>
 
-            {isEditing && (
-              <CustomButton
-                title="Salvar Alterações"
-                handlePress={update}
-                containerStyles='mb-[20px]'
-              />
-            )}
 
           <View style={CustomProfile.iconSection}>
             <TouchableOpacity
-           style={CustomProfile.button}
+              style={{ ...CustomProfile.iconButton, backgroundColor: '#C3FF00' }}
               onPress={toggleEdit}
             >
-              {isEditing ? <Text className='text-lg font-robotobold text-secondary_black'>Cancelar</Text> : <Ionicons name="chevron-down" size={24} color="white" />}
+               <Ionicons name={`chevron-${isEditing ? 'up': 'down'}`} size={24} color="white" />
             </TouchableOpacity>
           </View>
 
-          {!isEditing && <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
+          {!isEditing && 
+          <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
             <Text style={{ fontWeight: 'bold' }}>Sair</Text>
           </TouchableOpacity>}
 
