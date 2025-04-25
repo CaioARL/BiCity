@@ -156,6 +156,7 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
                                     style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
                                 />
                                 <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.usuario.nome}</Text>
+                                <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.usuario.nivelHabilidade.descricao}</Text>
                             </View>
 
                             <View className='flex-col flex-grow-[2px] w-[60%] justify-between items-start text-left my-4'>
