@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, LayoutChangeEvent } from 'react-native';
+import { View, Keyboard, LayoutChangeEvent} from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useGlobalSearchParams } from 'expo-router';
+import { set } from 'zod';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number }>({ height: 20, width: 100 });
   const tabPositionX = useSharedValue(0);
+  const [isVisible, setIsVisible] = useState(true)
+  const { tabBarVisible } = useGlobalSearchParams<{tabBarVisible?: string}>()
 
   const onTabLayout = (e: LayoutChangeEvent) => {
     setDimensions({
@@ -15,6 +19,17 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       width: e.nativeEvent.layout.width,
     });
   };
+
+
+  useEffect(()=>{
+    const showListener = Keyboard.addListener('keyboardDidShow', () => setIsVisible(false))
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => tabBarVisible !== "no"  && setIsVisible(true))
+
+    return () => {
+      showListener.remove()
+      hideListener.remove()
+    };
+  })
 
   useEffect(() => {
     const buttonWidth = dimensions.width / state.routes.length;
@@ -27,7 +42,16 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     };
   });
 
+  useEffect(() => {
+    if(tabBarVisible === "yes")
+      setIsVisible(true)
 
+    if(tabBarVisible === "no")
+      setIsVisible(false)
+  }
+  ,[tabBarVisible])
+
+  if (!isVisible) return null
 
   const buttonWidth = dimensions.width / state.routes.length;
 

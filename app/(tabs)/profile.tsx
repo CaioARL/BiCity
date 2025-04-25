@@ -19,6 +19,15 @@ import ShowAlert from '../../components/ShowAlert';
 const Profile = () => {
   const { onLogout, authState, fetchUser } = useAuthProvider()
 
+  const [scrollY, setScrolly] = useState<number>(0)
+  
+  useEffect(()=>{
+    scrollY > 50 ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+  },[scrollY])
+
   const [image, setImage] = useState<string | null>()
   // const profileImg = useImage(  authState?.user?.s3Url , {
   //     maxWidth: 800,
@@ -223,6 +232,7 @@ const Profile = () => {
       <ScrollView 
       scrollEventThrottle={16} 
       contentContainerStyle={{ paddingBottom: 107 }}
+      onScroll={e=>setScrolly(e.nativeEvent.contentOffset.y)}
       >
       
         <View style={{...CustomProfile.profileCard, backgroundColor: 'white', shadowColor: '#000'}}>
