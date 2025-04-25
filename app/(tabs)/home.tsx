@@ -394,8 +394,7 @@ export default function Home() {
             initialRegion={initialRegion}
             showsUserLocation={true} 
             zoomEnabled={true}
-            googleMapId={"700c4bf5b104e27b"}
-
+            googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
             onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
             onLongPress={e=> {
               console.log('Long Press', e.nativeEvent.coordinate)
@@ -503,7 +502,7 @@ export default function Home() {
               {isMoved && 
             (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
               <ButtonModal
-                title='Achar Eventos Próximos'
+                title='Buscar nesta localização'
                 handlePress={getEventsOnViewLocation}
                 textStyles='text-[#000] text-center'
                 customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
