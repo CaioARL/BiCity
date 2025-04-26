@@ -439,7 +439,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 value={descricao}
                 handleChangeText={setDescricao}
                 validantionCheck={e => updateCampoNovoEvento('descricao', e.nativeEvent.text)}
-                placeholder='Descrição do Evento...'
+                placeholder='Descrição do evento...'
                 multiline={true}
                 msg={novoEventoError.descricao}
               />
@@ -465,7 +465,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
               
               <FormFieldModal
                 title="Tamanho do Percurso"
-                placeholder="Tamanho do Percurso (km)"
+                placeholder="Tamanho do percurso (km)"
                 value={faixaKm}
                 handleChangeText={setfaixaKm}
                 validantionCheck={e => (updateCampoNovoEvento('faixaKm', parseInt(e.nativeEvent.text))) }
@@ -485,13 +485,13 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
 
               <TouchableOpacity     
-                  className='border-[1px] my-5 border-[#ddd] rounded-[8px] p-[10px] flex-row items-center justify-between' 
+                  className='border-[1px] my-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 
                   onPress={() => setShowTimePicker(!showTimePicker )}
               >
-                <Text className='text-[#555] ml-[10px]'>
+                <Text className='text-matte_gray'>
                 {requestCreateEvento.data.horario || 'Selecione a hora do evento'}
                 </Text>
-                <Ionicons name="time" size={20} color="#555" />
+                <Ionicons name="time-outline" size={24} color="#666" />
               </TouchableOpacity>
 
 
@@ -529,12 +529,13 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                   title='Cancelar'
                   handlePress={() => closeModal(null, null)}
                   customStyles='bg-[#FF0000]'
+                  textStyles="text-black "
                 />
 
                 <ButtonModal
                   title={evento? 'Salvar Evento' : 'Criar Evento'}
                   handlePress={validateEventAndClose}
-                  // disabled={}
+                  textStyles="text-black "
                 />
                   
               </View>
@@ -548,18 +549,13 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
           
 
           {showTimePicker &&
-            <View  className='absolute flex-row items-center h-full w-full bg-[rgba(0,0,0,0.5)]'>
-                <View className='bg-white h-fit w-full rounded-lg'>
-                    <TimePicker
-                        onClose={(time) => {
-                            setShowTimePicker(false)
-                            updateCampoData('horario', time)
-                        }
-                      }
-                    />
-                  
-                </View>
-            </View>
+            <TimePicker
+                visible={showTimePicker}
+                onClose={(time) => {
+                    setShowTimePicker(false)
+                    updateCampoData('horario', time)
+                }}
+            />
           }
 
 

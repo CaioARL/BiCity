@@ -230,7 +230,7 @@ export default function SignIn() {
             </Text>
             <Text
               onPress={() => router.push('/forgot-password')}
-              className={'text-secondary_black_sub_title text-blue-500 font-bold'}
+              className={'text-blue-500 font-bold'}
             >
               Redefina
             </Text>
