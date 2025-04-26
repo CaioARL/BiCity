@@ -273,7 +273,7 @@ const Profile = () => {
           <View style={CustomProfile.bottomSection}>
             {isEditing ? (
               <>
-                <Text className='text-[16px] text-matte_gray mb-[5px]'>Nome</Text>
+                <Text className='text-[16px] text-black mb-[5px]'>Nome</Text>
                 {authState?.user?.nome && <TextInput
                   style={CustomProfile.input}
                   value={userToUpdate.nome}
@@ -328,13 +328,12 @@ const Profile = () => {
 
                   {authState?.user?.nivelHabilidade && 
                     <FormFieldDropdownSelectList
-                      title="Nível de habilidade"
+                      title="Nível de Habilidade"
                       selectedValue={userToUpdate.nivelHabilidade}
                       options={listNivelHabilidade}
                       handleChange={(nivel: NivelHabilidade) => {
                         updateCampoUsuarioHabilidade(nivel)
                       }}
-                      
                       msg={nivelHabilidadeError}
                     />
                   }
@@ -419,10 +418,11 @@ const Profile = () => {
                 })()}
                 {isEditing && 
                 <TouchableOpacity
-                    style={{ ...CustomProfile.button2, backgroundColor: '#C3FF00' }}
+                    style={CustomProfile.button2}
+                    className='bg-primary_green p-[15px] rounded-[5px] '
                     onPress={toggleEdit}
                     >
-                  <Text style={{ fontWeight: 'bold' }}>Salvar</Text>
+                  <Text className='text-black text-[14px] font-bold'>Salvar</Text>
                 </TouchableOpacity>}
               </View>
             )}
@@ -442,8 +442,8 @@ const Profile = () => {
           </View>
 
           {!isEditing && 
-          <TouchableOpacity style={CustomProfile.button} onPress={handleLogout}>
-            <Text style={{ fontWeight: 'bold' }}>Sair</Text>
+          <TouchableOpacity style={CustomProfile.button}  className='bg-primary_green p-[15px] rounded-[5px]' onPress={handleLogout}>
+            <Text className='text-black text-[14px] font-bold'>Sair</Text>
           </TouchableOpacity>}
 
           {errorMessage && (
@@ -466,6 +466,5 @@ const Profile = () => {
 };
 
 export default Profile;
-
 
 

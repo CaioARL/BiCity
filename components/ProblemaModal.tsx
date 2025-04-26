@@ -188,7 +188,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                   title="Reportar !"
                   handlePress={() => closeModal(problema, image)}
                   customStyles="bg-[#ffcc00]"
-                  textStyles="text-black"
+                  textStyles="text-black "
                 />
               </View>
             </ScrollView>
