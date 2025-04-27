@@ -12,21 +12,15 @@ export default function Index() {
   useEffect(() => {
     const loading = async () => {
       if (authState?.authenticated) {
-        router.replace('/home') // Redirect to the main app if user is logged in
+        authState?.user?.role === 'PF' ?
+        router.replace('/home')
+        :
+        router.replace('/events')
       } else {
-        router.replace('/sign-in') // Redirect to the sign-in page
+        router.replace('/sign-in')
       } 
     }
     loading()
-    // const timeout = setTimeout(() => {
-    //   if (authState?.authenticated) {
-    //     router.replace('/mapView'); // Redirect to the main app if user is logged in
-    //   } else {
-    //     router.replace('/sign-in'); // Redirect to the sign-in page
-    //   }
-    // }, 3000);
-
-    // return () => clearTimeout(timeout);
   }, [isLoading])
 
   return (

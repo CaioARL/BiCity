@@ -260,7 +260,7 @@ export default function EventDetail() {
                     />
                   )}
 
-            <TouchableOpacity className='absolute bottom-[20%] elevation-[5px] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
+            <TouchableOpacity className='absolute bottom-[20%] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
               onPress={()=>setIsCreatingEvento(true)}>
               <Ionicons name="add-circle-outline" size={24} color="#333" />
             </TouchableOpacity>

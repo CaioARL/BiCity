@@ -5,7 +5,6 @@ import ButtonModal from './ButtonModal'
 import { Ionicons } from '@expo/vector-icons'
 import { getAvaliacoesByInfraestrutura } from '../api/avaliacao'
 import ShowAlert from './ShowAlert'
-import { set } from 'zod'
 
 interface AvaliacaoViewProps {
     requestPage: RequestPageAvaliacao
@@ -150,13 +149,19 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
                     return (
                         <View key={item.id} className="flex-row border-b-hairline border-color__lightGray der-gray-200 rounded-[10px]">
                             <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[20px]">
-                                <Image
-                                    source={{ uri: item.usuario.s3Url }}
-                                    className="w-20 h-20 rounded-full border-color_light_gray"
-                                    style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
-                                />
+                                {item.usuario.s3Url ?
+                                    (<Image
+                                        source={{ uri: item.usuario.s3Url }}
+                                        className="w-20 h-20 rounded-full border-color_light_gray"
+                                        style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                                    />)
+                                :
+                                <View className='w-20 h-20 rounded-full border-color_light_gray border-[1px] bg-color_light_gray justify-center items-center'>
+                                    <Ionicons name="person" size={30} color="#555" />
+                                </View>
+                                }
                                 <Text className='text-[12px] text-matte_gray '>{item.usuario.nome}</Text>
-                                <Text className='text-[11px] text-matte_gray mb-[5px]'>{item.usuario.nivelHabilidade.descricao}</Text>
+                                <Text className='text-[11px] text-matte_gray mb-[5px]'>{item.usuario.nivelHabilidade?.descricao}</Text>
                             </View>
 
                             <View className='flex-col flex-grow-[2px] w-[60%] justify-between items-start text-left my-4'>

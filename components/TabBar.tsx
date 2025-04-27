@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Keyboard, LayoutChangeEvent} from 'react-native';
+import { Keyboard, LayoutChangeEvent} from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useGlobalSearchParams } from 'expo-router';
-import { set } from 'zod';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number }>({ height: 20, width: 100 });

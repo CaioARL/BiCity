@@ -1,6 +1,6 @@
 import "../global.css";
 import React, { useEffect } from 'react';
-import { router, SplashScreen, Stack } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import AuthProvider from "./context/AuthProvider";
 

@@ -36,8 +36,7 @@ api.interceptors.response.use(
     },
     (error: AxiosError) => {
         if(error.response?.status === 403) router.replace('/sign-in')
-        console.error("Response error: ", error)
-        console.error("Response error: ", error.toJSON())
+        console.error("Response error: ", error?.response?.data)
 
         return Promise.reject(error)
     }
