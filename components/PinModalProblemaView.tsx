@@ -27,8 +27,7 @@ export default function PinProblemaView( { problema , onClose} : PinProblemaView
                     className="w-20 h-20 rounded-full border-color_light_gray"
                     style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
                 />
-                <Text className='text-[12px] text-matte_gray '>{problema.nome}</Text>
-              
+                <Text className='text-[12px] text-matte_gray '>Nome do Usuario</Text>
             </View>
 
             <View className='flex-col flex-grow-[2px] w-[60%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
@@ -58,7 +57,7 @@ export default function PinProblemaView( { problema , onClose} : PinProblemaView
             <TouchableOpacity className='flex-row items-center'>
                 <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/desativo.png')} />
             
-                <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Sim, ainda ativo</Text>
+                <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Não, já foi resolvido</Text>
             </TouchableOpacity>
         </View>
 
