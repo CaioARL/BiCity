@@ -9,6 +9,7 @@ export interface RequestCreateProblema {
 }
 
 
+// Gabu Eu add como teste  o  nome: string;
 export interface Problema {
     id: number
     descricao: string
@@ -19,6 +20,7 @@ export interface Problema {
     reportCount: number
     s3Url: string
     tipoProblema: TipoProblema
+    nome: string;
 }
 
 
