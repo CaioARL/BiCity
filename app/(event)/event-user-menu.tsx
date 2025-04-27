@@ -35,9 +35,6 @@ export default function EventDetail() {
   const [eventoImage, setEventoImage] = useState<string | null>(null)
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
-  
-  const backgroundImageLogo = require('../../assets/img/logo.png');
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png');
 
   useEffect(()=>{
     if(!requestUpdateEvento) return
@@ -159,18 +156,18 @@ export default function EventDetail() {
     setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   }
 
+  const handleLocationEventMap = (item: Evento) => {
+    console.log('Você foi direcionar para o evento no mapa:', item.nome);
+  };
+
   return (
     <SafeAreaView className="bg-white h-full w-full">
-      <ImageBackground
-        source={backgroundImage}
-        style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
-      />
-
+     
       <TouchableOpacity
         style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
           paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
           className='bg-primary_green'
-          // onPress={prevStep}
+           onPress={() => router.back()}
         >
         <ArrowLeft size={24} color="#555" />
       </TouchableOpacity>
@@ -180,6 +177,9 @@ export default function EventDetail() {
         {eventos && (
                     <FlatList
                       className="min-h-[100%] my-10"
+                      contentContainerStyle={{ 
+                        paddingBottom: 50,
+                      }}
                       ListHeaderComponent={
                         <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
                       }
@@ -241,6 +241,16 @@ export default function EventDetail() {
                                   </View>
                                   
                                 </View>
+                              </View>
+
+                              <View style={CustomEvents.containerButton}>
+                                <TouchableOpacity 
+                                  style={CustomEvents.customButton} 
+                                  onPress={() => handleLocationEventMap(item)}
+                                  >
+                                  <Ionicons name="location-outline" size={20} color="white" />
+                                  <Text style={CustomEvents.customButtonText}>Localizada</Text>
+                                </TouchableOpacity>
                               </View>
                               
                             </ImageBackground>

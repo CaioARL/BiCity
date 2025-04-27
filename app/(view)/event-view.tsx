@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -47,13 +47,21 @@ export default function EventV() {
     }
   }, [isContentLoading, evento]);
 
+  const handleLocationEventMap = (item: Evento) => {
+    console.log('Você foi direcionar para o evento no mapa:', item.nome);
+  };
+
+  const handleToshareEvent = (item: Evento) => {
+    console.log('Você compartilhou o evento:', item.nome);
+  };
+
   return (
     <SafeAreaView className="bg-white h-full w-full">
        <TouchableOpacity
         style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
           paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
           className='bg-primary_green'
-          // onPress={prevStep}
+          onPress={() => router.back()}
         >
         <ArrowLeft size={24} color="#555"/>
         </TouchableOpacity>
@@ -76,6 +84,18 @@ export default function EventV() {
             />
           )}
 
+          
+        <Animated.View  style={{flexDirection: 'row', position: 'absolute', top: 270, right: 10, alignItems: 'center', transform: [{ translateY: slideAnim }]}}>
+          <TouchableOpacity 
+            className='bg-primary_green border-[8px] flex-row p-[10px] ml-auto w-[40%] items-center justify-center gap-7' 
+            style={{ borderRadius: 50}}
+            onPress={() => evento && handleToshareEvent(evento)}
+            >
+            <Text className="text-matte_gray font-bold align-items-center">Compartilhe</Text>
+            <Ionicons name="navigate-outline" size={20} color="#555" style={{ paddingLeft: 8 }} />
+          </TouchableOpacity>
+        </Animated.View>
+
         {/* Box de informações com gradiente e animação */}
         <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 18, padding: 20, position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
           className=" h-[402px] rounded-xl">
@@ -86,7 +106,7 @@ export default function EventV() {
                  <View style={CustomEvents.containerButtonEventView}>
                     <TouchableOpacity 
                       style={CustomEvents.customButtonEventView} 
-                      // onPress={() => handleSave(item)}
+                        onPress={() => handleLocationEventMap(evento)}
                       >
                       <Ionicons name="location-outline" size={20} color="white" />
                     </TouchableOpacity>
@@ -137,12 +157,15 @@ export default function EventV() {
                  
               
                   {evento.urlSite && (
-                    <Text className="text-white text-[12px] mt-3">
+                  <View className="flex-row items-center justify-center mt-3">
+                    <Text className="text-text-matte_gray text-[12px]">
                       Site:{' '}
                       <Text onPress={() => Linking.openURL(evento.urlSite)}>
                         {evento.urlSite}
                       </Text>
                     </Text>
+                    <Ionicons name="ticket-outline" size={12} color="#555" style={{ marginLeft: 5 }} />
+                  </View>
                   )}
                   <Text className="text-color_light_gray_2 text-[12px] text-center mt-3 bg-primary_green w-full p-5" style={{ borderRadius: 50}}>
                     Tipo de Evento: {evento.tipoEvento.nome}
