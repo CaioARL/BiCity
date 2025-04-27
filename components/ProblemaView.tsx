@@ -1,0 +1,141 @@
+import React, { useEffect } from 'react'
+import { Problema, RequestProblemaReport } from '../types'
+import { Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from 'react'
+import { useAuthProvider } from 'app/context/AuthProvider';
+import { reportProblema } from 'api/problema';
+
+interface ProblemaViewProps {
+    problema: Problema
+    onClose: () => void
+}
+
+export default function ProblemaView( { problema , onClose} : ProblemaViewProps) {
+    const [requestProblemaReport,setRequestProblemaReport] = useState<RequestProblemaReport | null >(null)
+    const [erroMessage, setErrorMessage] = useState('')
+    const [successMessage, setSuccessMessage] = useState('')
+    const [loading, setLoading] = useState(false)
+    
+    const { authState } = useAuthProvider()
+
+    useEffect(() => {
+    if (!requestProblemaReport) return
+        setLoading(true) 
+        reportProblema(requestProblemaReport, null)
+        .then(() => {
+            setSuccessMessage("Problema reportado com sucesso")
+            setLoading(false)
+        }).catch((error) => {
+            error.response.status === 400 ? (
+                setErrorMessage("Você já reportou esse problema")
+            ) 
+            : (
+                setErrorMessage("Erro ao reportar problema")
+            )
+            setLoading(false)
+        }).finally(() => {
+            setRequestProblemaReport(null)
+            setLoading(false)
+        })
+    }, [requestProblemaReport])
+
+  return (
+    <View className="flex-col justify-center items-center w-full h-full bg-black/50 absolute top-0 left-0 z-10" style={{ zIndex: 10 }}>
+        <TouchableOpacity className="w-full h-full" onPress={onClose} />
+ 
+     <View className="p-[30px] bg-white rounded-lg shadow-md h-[60%] w-[94%] justify-start">
+        <View className='flex-row justify-end items-center'>
+            <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={24} color="#555" />
+            </TouchableOpacity>
+        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+        {/* <Text className='flex-col text-lg font-bold text-center mb-10'>Problema da Ciclovia</Text> */}
+        <Text className="text-base text-matte_gray mb-[5px] font-bold capitalize">{problema.tipoProblema.descricao}</Text>
+       
+        <View key={problema.id} className="flex-row">
+            {/* <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[10px]">
+                <Image
+                    source={{ uri: problema.s3Url }}
+                    className="w-20 h-20 rounded-full border-color_light_gray"
+                    style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                />
+                <Text className='text-[12px] text-matte_gray '>Nome do Usuario</Text>
+            </View> */}
+
+            <View className='flex-col flex-grow-[2px] w-[60%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
+            <Text className='text-[12px] text-matte_gray mb-[5px]'>{problema.descricao}</Text>
+            
+                <View className="w-full flex-row justify-end">
+                    <Text className='text-[12px] text-matte_gray'>
+                    {problema.dtCriacao}
+                    </Text>
+                </View>
+            </View>
+        </View>
+
+      {problema.s3Url ? 
+        (<View className='flex-col flex-grow-[2px] w-full h-fit p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
+            {problema.s3Url && <Image className="w-full h-[125px] rounded-[10px]" src={problema.s3Url}/>}
+           
+        </View>)
+        :
+        (<View className='flex-row flex-grow-[2px] w-full h-fit p-[10px] justify-center text-left my-4'>
+            <Ionicons name="image-outline" size={24} color="#555" style={{ marginLeft: 5 }} />
+        </View>)
+        } 
+
+        <View className="mt-4 mb-2 flex-row justify-between items-center">
+            {erroMessage || successMessage ? (
+                <Text className={`text-[12px] ${erroMessage? 'color-color_red_error' : 'color-color_green_success'} font-semibold`}>{erroMessage || successMessage}</Text>
+            ) 
+            :
+            (<>
+                <TouchableOpacity 
+                className='flex-row items-center'
+                disabled={loading}
+                onPress={()=> authState?.user ? setRequestProblemaReport({problemaId: problema.id, usuarioId: authState.user.id, exists: true}) : setErrorMessage('Você precisa estar logado para reportar um problema')}
+                >
+                    <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/ativo.png')} />
+                    <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Sim, ainda ativo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                className='flex-row items-center'
+                disabled={loading}
+                onPress={()=> authState?.user ? setRequestProblemaReport({problemaId: problema.id, usuarioId: authState.user.id, exists: false}) : setErrorMessage('Você precisa estar logado para reportar um problema')}
+                >
+                    <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/desativo.png')} />
+                    <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Não, já foi resolvido</Text>
+                </TouchableOpacity>
+            </>)
+            }
+        </View>
+
+
+        {/* <View className="mt-4 mb-2 flex-row justify-between">
+            <ButtonModal
+                title="Fechar"
+                handlePress={onClose}
+                textStyles="text-color-err"
+            />
+            
+            <ButtonModal
+                title="Excluir ?"
+                handlePress={onClose}
+                // handlePress={limparFiltro}
+                // disabled={!filtroAtivo}
+                textStyles="text-black"
+            />
+            <Ionicons name="trash-outline" size={12} color="#555" style={{ marginLeft: 5 }} />
+          
+        </View> */}
+        </ScrollView>
+    </View>
+    <TouchableOpacity className="w-full h-full" onPress={onClose} />
+
+    </View>
+    
+  )
+}
