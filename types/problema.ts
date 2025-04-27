@@ -36,4 +36,8 @@ export interface RequestCreateProblemaImage {
     image: FormData
 }
 
-
+export interface RequestProblemaReport {
+    problemaId: number
+    usuarioId: number
+    exists: boolean
+}

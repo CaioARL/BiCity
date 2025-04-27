@@ -1,6 +1,6 @@
 import api from ".";
 import ENDPOINTS from "./endpoints";
-import { Problema, RequestCreateProblema, RequestCreateProblemaImage, RequestProblemaByRadius } from "../types";
+import { Problema, RequestCreateProblema, RequestCreateProblemaImage, RequestProblemaByRadius, RequestProblemaReport } from "../types";
 
 
 export const getProblemaByRadius = async (request: RequestProblemaByRadius, abortSignal: AbortController | null): Promise<Problema[]> => {
@@ -29,5 +29,13 @@ export const createProblemaImage = async (problemaImage: RequestCreateProblemaIm
 
 export const checkCreateViabilityProblema = async (latitude: number, longitude: number, abortSignal: AbortController | null)  => {
     const response = await api.get<boolean>(ENDPOINTS.PROBLEMA_CHECK, { params: { latitude, longitude }, signal: abortSignal?.signal })
+    return response.data
+}
+
+export const reportProblema = async ( report : RequestProblemaReport  ,  abortSignal: AbortController | null)  => {
+    const response = await api.post<string>(ENDPOINTS.PROBLEMA_POST + report.problemaId + ENDPOINTS.PROBLEMA_REPORT, {}, {
+        params: { usuarioId: report.usuarioId, exists: report.exists },
+        signal: abortSignal?.signal
+        })
     return response.data
 }

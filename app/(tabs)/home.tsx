@@ -10,7 +10,7 @@ import { getInfraestrutura } from '../../api/infraestrutura'
 import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
-import PinProblemaView from '../../components/PinModalProblemaView'
+import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
 import { isPointNearLine } from '../../util/map-util'
 import OpsModal from '../../components/OpsModalMap'
@@ -474,7 +474,7 @@ export default function Home() {
               </View>)}
 
             {pinProblemaSelector &&
-              <PinProblemaView
+              <ProblemaView
                 problema={pinProblemaSelector}
                 onClose={() => setPinProblemaSelector(null)}
               />}

@@ -16,7 +16,8 @@ const ENDPOINTS = {
     PROBLEMA_POST: '/problema/',    
     PROBLEMA_GET: '/problema/',
     PROBLEMA_CHECK: '/problema/check',    
-    
+    PROBLEMA_REPORT: '/report',
+
     TIPO_PROBLEMA_GET: '/tipo/problema/',
 
     AVALIACAO_INFRAESTRUTURA: '/avaliacao/infraestrutura/',
