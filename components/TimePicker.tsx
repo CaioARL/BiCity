@@ -4,10 +4,9 @@ import ButtonModal from './ButtonModal'
 
 interface TimePickerProps {
   onClose: (time: string) => void;
-  visible: boolean;
 }
 
-const TimePicker: React.FC<TimePickerProps> = ({ onClose, visible }) => {
+const TimePicker = ({ onClose } : TimePickerProps) => {
   const [selectedHour, setSelectedHour] = useState('12');
   const [selectedMinute, setSelectedMinute] = useState('00');
   const hoursScrollViewRef = useRef<ScrollView>(null);
@@ -74,17 +73,12 @@ const TimePicker: React.FC<TimePickerProps> = ({ onClose, visible }) => {
   };
 
   return (
-    <Modal
-    visible={visible}
-    transparent={true}
-    animationType="fade" 
-    onRequestClose={() => onClose(`${selectedHour}:${selectedMinute}`)}
-  >
-    <View className="flex-1 justify-center items-center bg-[rgba(0,0,0,0.5)]">
-      <View className="bg-white rounded-lg w-[90%] p-5 relative">
+    
+    <View className="flex-1 h-full w-full absolute justify-center items-center bg-[rgba(0,0,0,0.5)]">
+      <View className="bg-white rounded-lg w-[90%] p-5">
         {/* Botão de Fechar */}
         <TouchableOpacity
-          className="absolute top-4 right-2 z-10 w-8 h-8 items-center justify-center"
+          className="right-2 z-10 w-8 h-8 items-center justify-center"
           onPress={() => onClose('')}
         >
           <Text className="text-gray-500 font-[12] text-xl">✕</Text>
@@ -187,13 +181,12 @@ const TimePicker: React.FC<TimePickerProps> = ({ onClose, visible }) => {
   
         <ButtonModal
           title="Selecionar horário"
-          handlePress={() => onClose(`${selectedHour}:${selectedMinute}`)}
+          handlePress={() => onClose(`${selectedHour}:${selectedMinute}:00`)}
           customStyles="bg-[#ffcc00] w-full"
           textStyles="text-black "
         />
     </View>
     </View>
-  </Modal>
   );
 };
 

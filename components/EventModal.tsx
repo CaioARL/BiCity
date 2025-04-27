@@ -489,7 +489,7 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                   onPress={() => setShowTimePicker(!showTimePicker )}
               >
                 <Text className='text-matte_gray'>
-                {requestCreateEvento.data.horario || 'Selecione a hora do evento'}
+                {requestCreateEvento.data.horario.replace(':00', '') || 'Selecione a hora do evento'}
                 </Text>
                 <Ionicons name="time-outline" size={24} color="#666" />
               </TouchableOpacity>
@@ -550,7 +550,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
           {showTimePicker &&
             <TimePicker
-                visible={showTimePicker}
                 onClose={(time) => {
                     setShowTimePicker(false)
                     updateCampoData('horario', time)
