@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView} from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -358,18 +358,18 @@ export default function Home() {
     else if (!currentLocation)
       return (
         <SafeAreaView>
-          <View className='flex-row h-full w-full justify-center items-center'>
+          <View className='flex-col h-full w-full justify-center items-center'>
               <Text>
-                Por favor, permita o acesso à localização para que possamos fornecer a melhor experiência. Siga as instruções abaixo para ativar a permissão de localização no seu dispositivo:
-
-                1. Abra as **Configurações** do seu smartphone.
-                2. Navegue até **Aplicativos** ou **Gerenciador de Aplicativos**.
-                3. Localize e selecione o aplicativo **Bicity**.
-                4. Toque em **Permissões**.
-                5. Certifique-se de que a permissão de **Localização** está ativada.
-
-                Após ativar a permissão, tente novamente.
+                {currentLocationError && currentLocationError.message}
               </Text>
+              <TouchableOpacity 
+              className='bg-primary_green rounded-[10px] px-4 py-2 mt-4'
+              onPress={()=>getCurrentLocation()}
+              >
+                <Text>
+                  Tentar Novamente
+                </Text>
+              </TouchableOpacity>
           </View>
         </SafeAreaView>
       )
@@ -460,19 +460,6 @@ export default function Home() {
     
             </MapView>
             
-
-            {currentLocationError &&
-              (<View className='items-center justify-center h-fit w-[90%] left-[5%] bg-primary_green absolute z-40 top-[50%] rounded-[10px]' >
-              <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
-                {currentLocationError.key === 'SERVICE' &&
-                <ButtonModal
-                  title='Tentar Novamente'
-                  handlePress={getCurrentLocation}
-                  customColor=''
-                  customStyles='w-[200px] h-[50px] px-4 py-2 bg-primary_green_light'
-                />}
-              </View>)}
-
             {pinProblemaSelector &&
               <ProblemaView
                 problema={pinProblemaSelector}
