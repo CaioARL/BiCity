@@ -5,12 +5,14 @@ import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useGlobalSearchParams } from 'expo-router';
+import { useAuthProvider } from 'app/context/AuthProvider';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number }>({ height: 20, width: 100 });
   const tabPositionX = useSharedValue(0);
   const [isVisible, setIsVisible] = useState(true)
   const { tabBarVisible } = useGlobalSearchParams<{tabBarVisible?: string}>()
+  const { authState } = useAuthProvider()
 
   const onTabLayout = (e: LayoutChangeEvent) => {
     setDimensions({
@@ -63,12 +65,13 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           width: buttonWidth - 25,
         }]}
       />
+
       {state.routes.map((route, index) => {
+        if(authState?.user?.role === 'PJ' && route.name === 'home') return null
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
-
         const isFocused = state.index === index;
-
+        
         const onPress = () => {
           tabPositionX.value = withSpring(buttonWidth * index, { damping: 100, stiffness: 150 });
 
