@@ -132,14 +132,14 @@ export default function AuthProvider({children}: any) {
         try {
           getUserById(authState.id)
             .then((response) => {
-              setAuthState({ ...authState, user: response });
+              setAuthState({ ...authState, user: response })
               resolve(response);
             })
             .catch((error) => {
-              reject('Error on fetching user data: ' + error);
-            });
+              reject('Error on fetching user data: ' + error)
+            })
         } catch (error) {
-          reject('Error on fetching user data: ' + error);
+          reject('Error on fetching user data: ' + error)
         }
       });
     }
