@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
@@ -420,7 +420,7 @@ export default function Home() {
                     <Marker 
                         key={problema.id} 
                         coordinate={problema} 
-                        title={problema.descricao}
+                        titleVisibility='hidden'
                         image={
                           problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1.png')) 
                           :
@@ -443,7 +443,6 @@ export default function Home() {
                         }
                         onPress={()=>setPinProblemaSelector(problema)}
                       >
-                      
                       </Marker>
                   ))}
 
