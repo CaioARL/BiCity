@@ -45,15 +45,19 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
         <TouchableOpacity className="w-full h-full" onPress={onClose} />
  
      <View className="p-[30px] bg-white rounded-lg shadow-md h-[60%] w-[94%] justify-start">
-        <View className='flex-row justify-end items-center'>
+        <View className='flex-row justify-between items-center mb-[8px]'>
+   
+            <View style={{width: 24}} />
+            <Text className='text-lg font-bold'>Problema da Ciclovia</Text>
+        
+        
             <TouchableOpacity onPress={onClose}>
                 <Ionicons name="close" size={24} color="#555" />
             </TouchableOpacity>
         </View>
+
         <ScrollView showsVerticalScrollIndicator={false}>
-        {/* <Text className='flex-col text-lg font-bold text-center mb-10'>Problema da Ciclovia</Text> */}
-        <Text className="text-base text-matte_gray mb-[5px] font-bold capitalize">{problema.tipoProblema.descricao}</Text>
-       
+        
         <View key={problema.id} className="flex-row items-start">
             <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[10px]">
                 <Image
@@ -82,6 +86,8 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
             </View>
 
             <View className='flex-col flex-grow-[2px] w-[60%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
+            <Text className="text-[12px] text-matte_gray mb-[5px] font-bold capitalize">{problema.tipoProblema.descricao}</Text>
+
             <Text className='text-[12px] text-matte_gray mb-[5px]'>{problema.descricao}</Text>
             
                 <View className="w-full flex-row justify-end">
@@ -92,13 +98,15 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
             </View>
         </View>
 
+
       {problema.s3Url ? 
-        (<View className='flex-col flex-grow-[2px] w-full h-fit p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
+        (<View className='flex-col flex-grow-[2px] w-full h-[55%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
             {problema.s3Url && <Image className="w-full h-[125px] rounded-[10px]" src={problema.s3Url}/>}
            
         </View>)
         :
-        (<View className='flex-row flex-grow-[2px] w-full h-fit p-[10px] justify-center text-left my-4'>
+        (<View className='flex-row w-full h-[55%] p-[10px] justify-center items-center my-4 rounded-[10px]'
+            style={{borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10}}>
             <Ionicons name="image-outline" size={24} color="#555" style={{ marginLeft: 5 }} />
         </View>)
         } 
@@ -107,7 +115,7 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
             {erroMessage || successMessage ? (
                 <Text className={`text-[12px] ${erroMessage? 'color-color_red_error' : 'color-color_green_success'} font-semibold`}>{erroMessage || successMessage}</Text>
             ) 
-            :
+            : 
             (<>
                 <TouchableOpacity 
                 className='flex-row items-center'
