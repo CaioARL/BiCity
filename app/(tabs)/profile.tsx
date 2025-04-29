@@ -6,13 +6,14 @@ import CustomProfile from '../../css/CustomProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthProvider } from '../context/AuthProvider';
 import { router } from 'expo-router';
-import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario } from '../../types';
+import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario, RequestUpdateUsuarioError } from '../../types';
 import { updateImageUser, updateUser } from '../../api/usuario';
 import LoadingActivity from '../../components/LoadingActivity';
 import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList';
 import { getNivelHabilidade } from '../../api/nivel-habilidade';
-import CustomButton from '../../components/CustomButton';
 import ShowAlert from '../../components/ShowAlert';
+import { updateUsuario } from 'util/validationSchemas';
+import SimpleTextInput from 'components/SimpleTextInput';
 
 
 
@@ -36,8 +37,36 @@ const Profile = () => {
   const [nivelHabilidadeError, setNivelHabilidadeError] = useState('');
 
 
+  const [requestUpdateUsuario, setRequestUpdateUsuario] = useState<RequestUpdateUsuario | null>(null)
+  const [updateUsuarioError, setUpdateUsuarioError] = useState<RequestUpdateUsuarioError>({ nome: '', nomeUsuario: '', cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: '', email: '', nivelHabilidade: '',}) 
+  const [usuario, setUsuario] = useState<RequestUpdateUsuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0 }, email: '', nivelHabilidade: { id: 0, nome: '', descricao: ''} })
 
-  const [userToUpdate, setUserToUpdate] = useState<RequestUpdateUsuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0 }, email: '', nivelHabilidade: { id: 0, nome: '', descricao: ''} })
+  const validateAndUpdateUsuario = () => {
+    toggleEdit()
+    setUpdateUsuarioError({nome: '', nomeUsuario: '', cep: '',estado: '',cidade: '',bairro: '',rua: '',numero: '',email: '',nivelHabilidade: '',})
+    
+    const validationResult = updateUsuario.safeParse(usuario) 
+    if(!validationResult.success){
+      validationResult.error.issues.forEach((issue) => {
+        setUpdateUsuarioError((prev) => ({
+          ...prev,
+          [issue.path[0]]: issue.message,
+        }))
+        if(issue.path[0] === 'endereco'){
+          setUpdateUsuarioError((prev) => ({
+            ...prev,
+              [issue.path[1]]: issue.message,
+          }))
+        }
+      })
+      setErrorMessage('Preencha todos os campos corretamente')
+      return
+    }
+
+    if(authState?.user === usuario ) return setErrorMessage('Nada mudou')
+
+    setRequestUpdateUsuario(usuario)
+  }
 
   useEffect(()=>{
     scrollY > 50 ? 
@@ -46,15 +75,29 @@ const Profile = () => {
       router.setParams({tabBarVisible: 'yes'})
   },[scrollY])
 
-
   useEffect(() => {
     if (authState?.user) {
       if (authState.user) {
-          setUserToUpdate(authState.user)
+          setUsuario(authState.user)
       }
     }  
   }, [authState])
 
+  useEffect(()=>{
+    if(!requestUpdateUsuario) return
+    setIsLoading(true)
+    updateUser(requestUpdateUsuario, null)
+    .then(()=>{
+      setSuccessMessage("Atualizado")
+    })
+    .catch(()=>{
+      setErrorMessage("Algo deu errado")
+    })
+    .finally(()=>{
+      setIsLoading(false)
+    })
+    setRequestUpdateUsuario(null)
+  },[requestUpdateUsuario])
 
   useEffect(() => {
     if(!updateImage ) return
@@ -79,10 +122,6 @@ const Profile = () => {
         })
         setUpdateImage(null)
   } , [updateImage])
-
-
-  
-
 
   const pickImage = async () => {
     try {
@@ -127,8 +166,6 @@ const Profile = () => {
     setShowMoreInfo(!showMoreInfo);
   };
 
-
-
   const handleLogout = () => {
     if (onLogout) {
       onLogout()
@@ -144,7 +181,7 @@ const Profile = () => {
 
   
   const updateCampoUsuarioHabilidade = (nivel : NivelHabilidade) => {
-    setUserToUpdate(prev => ({
+    setUsuario(prev => ({
       ...prev,
       nivelHabilidade: nivel
     }))
@@ -152,7 +189,7 @@ const Profile = () => {
 
 
   const updateCampoUsuarioEndereco = (campo: string, valor: string | number) => {
-    setUserToUpdate(prev => ({
+    setUsuario(prev => ({
       ...prev,
       endereco: {
         ...prev.endereco,
@@ -161,7 +198,7 @@ const Profile = () => {
     }))
   }
   const updateCampoUsuario = (campo: string, valor: string | number) => {
-    setUserToUpdate(prev => ({
+    setUsuario(prev => ({
       ...prev,
         [campo]: valor
       
@@ -185,15 +222,9 @@ const Profile = () => {
             <View style={CustomProfile.imageContainer}>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
 
-               {/* <Image source={image} style={CustomProfile.profileImage}  resizeMode="cover"  />
-              <TouchableOpacity style={CustomProfile.editButton} onPress={pickImage}>
-                <Ionicons name="pencil" size={16} color="#1f2937" />
-              </TouchableOpacity>
-              <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
               <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
-
            
-            {authState?.user?.s3Url ? 
+                {authState?.user?.s3Url ?
                 (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
                 :
                 (<Text className='text-[245px]'>
@@ -213,54 +244,55 @@ const Profile = () => {
             {isEditing ? (
               <>
                 <Text className='text-[16px] text-black mb-[5px]'>Nome</Text>
-                {authState?.user?.nome && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.nome}
-                  onChangeText={text => updateCampoUsuario('nome', text)} 
+                {authState?.user?.nome && <SimpleTextInput
+                  errorMessage={updateUsuarioError.nome}
+                  value={usuario.nome}
+                  handleChange={text => updateCampoUsuario('nome', text)} 
                 />}
-                {authState?.user?.nomeUsuario && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.nomeUsuario}
-                  onChangeText={text => updateCampoUsuario('nomeUsuario', text)}
+
+                {authState?.user?.nomeUsuario && <SimpleTextInput
+                  errorMessage={updateUsuarioError.nomeUsuario}
+                  value={usuario.nomeUsuario}
+                  handleChange={text => updateCampoUsuario('nomeUsuario', text)}
                 />}
 
                 <Text className='text-[16px] text-matte_gray mb-[5px]'>Endereço</Text>
-                {authState?.user?.endereco?.cep && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.endereco.cep}
-                  onChangeText={text => updateCampoUsuarioEndereco('cep', parseInt(text))}
+                {authState?.user?.endereco?.cep && <SimpleTextInput
+                  errorMessage={updateUsuarioError.cep}
+                  value={usuario.endereco.cep}
+                  handleChange={text => updateCampoUsuarioEndereco('cep', parseInt(text))}
                 />}
-                {authState?.user?.endereco?.rua &&<TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.endereco.rua}
-                  onChangeText={text => updateCampoUsuarioEndereco('rua', text)}
+                {authState?.user?.endereco?.rua &&<SimpleTextInput
+                  errorMessage={updateUsuarioError.rua}
+                  value={usuario.endereco.rua}
+                  handleChange={text => updateCampoUsuarioEndereco('rua', text)}
                 />}
-                {authState?.user?.endereco?.cidade && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.endereco.cidade}
-                  onChangeText={text => updateCampoUsuarioEndereco('cidade', text)}
+                {authState?.user?.endereco?.cidade && <SimpleTextInput
+                  errorMessage={updateUsuarioError.cidade}
+                  value={usuario.endereco.cidade}
+                  handleChange={text => updateCampoUsuarioEndereco('cidade', text)}
                 />}
-                {authState?.user?.endereco?.bairro && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.endereco.bairro}
-                  onChangeText={text => updateCampoUsuarioEndereco('bairro', text)}
+                {authState?.user?.endereco?.bairro && <SimpleTextInput
+                  errorMessage={updateUsuarioError.bairro}
+                  value={usuario.endereco.bairro}
+                  handleChange={text => updateCampoUsuarioEndereco('bairro', text)}
                 />}
-                {authState?.user?.endereco?.estado && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.endereco.estado}
-                  onChangeText={text => updateCampoUsuarioEndereco('estado', text)}
+                {authState?.user?.endereco?.estado && <SimpleTextInput
+                  errorMessage={updateUsuarioError.estado}
+                  value={usuario.endereco.estado}
+                  handleChange={text => updateCampoUsuarioEndereco('estado', text)}
                 />}
-                {authState?.user?.endereco?.numero && <TextInput
-                  style={CustomProfile.input}
-                  value={String(userToUpdate.endereco.numero)}
-                  onChangeText={(text) => updateCampoUsuarioEndereco("numero",Number(text.replace(/\D/g, '')))} // Ensure only numbers are set
+                {authState?.user?.endereco?.numero && <SimpleTextInput
+                  errorMessage={updateUsuarioError.numero}
+                  value={String(usuario.endereco.numero)}
+                  handleChange={(text) => updateCampoUsuarioEndereco("numero",Number(text.replace(/\D/g, '')))} // Ensure only numbers are set
                 />}
 
                 <Text className='text-[16px] text-matte_gray mb-[5px]'>Email</Text>
-                {authState?.user?.email && <TextInput
-                  style={CustomProfile.input}
-                  value={userToUpdate.email}
-                  onChangeText={text => updateCampoUsuario('email', text)}
+                {authState?.user?.email && <SimpleTextInput
+                  errorMessage={updateUsuarioError.email}
+                  value={usuario.email}
+                  handleChange={text => updateCampoUsuario('email', text)}
                   editable={false}
                   />}
 
@@ -268,12 +300,12 @@ const Profile = () => {
                   {authState?.user?.nivelHabilidade && 
                     <FormFieldDropdownSelectList
                       title="Nível de Habilidade"
-                      selectedValue={userToUpdate.nivelHabilidade}
+                      selectedValue={usuario.nivelHabilidade}
                       options={listNivelHabilidade}
                       handleChange={(nivel: NivelHabilidade) => {
                         updateCampoUsuarioHabilidade(nivel)
                       }}
-                      msg={nivelHabilidadeError}
+                      msg={nivelHabilidadeError || updateUsuarioError.nivelHabilidade}
                     />
                   }
                
@@ -300,13 +332,14 @@ const Profile = () => {
               </View>}
 
                 {isEditing ? (
-                  <TouchableOpacity
-                  style={CustomProfile.button2}
-                  className='bg-primary_green p-[15px] rounded-[5px] '
-                  onPress={toggleEdit}
-                  >
-                  <Text className='text-black text-[14px] font-bold'>Salvar</Text>
-                </TouchableOpacity>)
+                    <TouchableOpacity
+                    style={CustomProfile.button2}
+                    className='bg-primary_green p-[15px] rounded-[5px] '
+                    onPress={validateAndUpdateUsuario}
+                    >
+                    <Text className='text-black text-[14px] font-bold'>Salvar</Text>
+                    </TouchableOpacity>
+                )
                 :
                 (
                   <TouchableOpacity 
@@ -340,7 +373,7 @@ const Profile = () => {
             message={errorMessage}
             onClose={() => setErrorMessage(null)}
           />)}
-        {successMessage && (
+          {successMessage && (
           <ShowAlert
             type='success'
             message={successMessage}

@@ -60,6 +60,25 @@ export const signInStep4 = z.object({
 
 
 
+export const updateUsuario = z.object({
+    nome: z.string().min(3, {message: 'Nome deve ter pelo ao menos 3 caracteres' }).max(20, {message: 'Nome deve ter no maximo 20 caracteres' }).regex(new RegExp('^[a-zA-Z ]*$'), {message: 'Nome deve conter apenas letras'}),
+    nomeUsuario: z.string().min(4, {message: 'Nome de usuario deve ter pelo ao menos 4 caracteres' }).max(20, {message: 'Nome de usuario deve ter no maximo 20 caracteres' }).regex(new RegExp('^[a-zA-Z0-9]*$'), {message: 'Nome de usuario deve conter apenas letras e numeros'}),
+    endereco: z.object({
+        cep: z.string().min(8, {message: 'Cep: deve digitar um cep com 8 digitos '}).max(8, {message: 'Cep: deve digitar um cep com 8 digitos '}),
+        estado: z.string({message: 'Estado: deve conter estado'}).min(2, {message: 'Estado: deve conter no mínimo 2 digitos'}),
+        cidade: z.string({message: 'Cidade: deve conter cidade'}).min(4 , {message: 'Cidade: deve conter no mínimo 4 digitos'}),
+        bairro: z.string({message: 'Bairro: deve conter bairro'}).min(2, {message: 'Bairro: deve conter no mínimo 2 digitos'}),
+        rua: z.string({message: 'Rua: deve conter rua'}).min(4, {message: 'Rua: deve conter no mínimo 4 digitos'}),
+        numero: z.number(  { message: 'Numero: deve conter numero de endereço' } ).min(1)
+    }),
+    email: z.string().email({message: 'Exemplo de email valido: email@email.com'}),
+    nivelHabilidade: z.object({
+        id: z.number({message: 'Nivel de habilidade deve selecionar um nivel de habilidade'}),
+        nome: z.string().min(1,{message: 'Nivel de habilidade deve selecionar um nivel de habilidade'}),
+        descricao: z.string({message: 'Nivel de habilidade deve selecionar um nivel de habilidade'})
+    }),
+})    
+
 // -------- Object Schemas 
 
 export const userSignUpSchema  = z.object(

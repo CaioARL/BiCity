@@ -149,6 +149,19 @@ export interface RequestUpdateUsuario {
     nivelHabilidade: NivelHabilidade
 }
 
+export interface RequestUpdateUsuarioError{
+    nome: string
+    nomeUsuario: string
+    cep: string
+    estado: string
+    cidade: string
+    bairro: string
+    rua: string
+    numero: string
+    email: string
+    nivelHabilidade: string
+}
+
 export interface CpfValidationResponse {
     isValid: boolean
     message: string

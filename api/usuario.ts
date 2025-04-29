@@ -60,8 +60,8 @@ export const getUserById = async (id: number ) => {
     return response.data
 }
 
-export const updateUser = async (id: number, user: RequestUpdateUsuario, abortSignal: AbortController | null ) => {
-    const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT+ id , {
+export const updateUser = async (user: RequestUpdateUsuario, abortSignal: AbortController | null ) => {
+    const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT+ user.id , {
                 nome: user.nome, 
                 nomeUsuario: user.nomeUsuario,
                 endereco: {
