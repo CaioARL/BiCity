@@ -43,7 +43,7 @@ export default function EventDetail() {
     abortControllerRef.current = new AbortController
     updateEvento(requestUpdateEvento, abortControllerRef.current)
     .then((response)=>{
-      setSuccessMessage('Evento: ' + response.nome + ' atualizado com sucesso')
+      setSuccessMessage('Evento: atualizado com sucesso')
       if(eventoImage){
         const formData = new FormData()
         formData.append('file', {
@@ -52,7 +52,7 @@ export default function EventDetail() {
           type: 'image/jpeg',
         } as any)
         setRequestEventoImage({
-          id: response.id,
+          id: requestUpdateEvento.id,
           image: formData
         })
       }else{
