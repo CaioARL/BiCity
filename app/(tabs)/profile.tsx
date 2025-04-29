@@ -17,25 +17,13 @@ import ShowAlert from '../../components/ShowAlert';
 
 
 const Profile = () => {
-  const { onLogout, authState, fetchUser } = useAuthProvider()
+  const { onLogout, authState } = useAuthProvider()
 
   const [scrollY, setScrolly] = useState<number>(0)
-  
-  useEffect(()=>{
-    scrollY > 50 ? 
-      router.setParams({tabBarVisible: 'no'})
-    :
-      router.setParams({tabBarVisible: 'yes'})
-  },[scrollY])
 
-  const [image, setImage] = useState<string | null>()
-  // const profileImg = useImage(  authState?.user?.s3Url , {
-  //     maxWidth: 800,
-  //     onError(error, retry) {
-  //       console.log(authState?.user?.s3Url)
-  //       console.error('Loading failed:', error.message);
-  //     }}
-  // )
+  const [updateImage, setUpdateImage] = useState<string | null>(null)
+
+  const [isLoading, setIsLoading] = useState(false)
 
 
   const [errorMessage, setErrorMessage] = useState<string|null>(null)
@@ -49,98 +37,51 @@ const Profile = () => {
 
 
 
-  const [userToUpdate, setUserToUpdate] = useState<RequestUpdateUsuario>({
-    nome: '',
-    nomeUsuario: '',
-    endereco: {
-      cep: '',
-      estado: '',
-      cidade: '',
-      bairro: '',
-      rua: '',
-      numero: 0
-    },
-    email: '',
-    nivelHabilidade: {
-      id: 0,
-      nome: '',
-      descricao: ''
-    }
-  })
+  const [userToUpdate, setUserToUpdate] = useState<RequestUpdateUsuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0 }, email: '', nivelHabilidade: { id: 0, nome: '', descricao: ''} })
 
-  const [isLoading, setIsLoading] = useState(false)
-  
-  
-  
-  const [lastScrollY, setLastScrollY] = useState(0)
-
-
-  const abortControllerRef = useRef(new AbortController())
+  useEffect(()=>{
+    scrollY > 50 ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+  },[scrollY])
 
 
   useEffect(() => {
     if (authState?.user) {
       if (authState.user) {
           setUserToUpdate(authState.user)
-          if (authState.user.s3Url) {
-            setImage(authState.user.s3Url)
-          }
       }
     }  
   }, [authState])
 
 
+  useEffect(() => {
+    if(!updateImage ) return
+    if(!authState?.id ) return
+      const formData = new FormData()
+      formData.append('file', {
+        uri: updateImage,
+        name: 'profile.jpeg',
+        type: 'image/jpeg',
+      } as any)
+      setIsLoading(true)
 
+      updateImageUser(authState.id, formData, null)
+        .then(() => {
+          setSuccessMessage('Imagem atualizada com sucesso!')
+        })
+        .catch((error) => {
+          setErrorMessage('Erro ao atualizar imagem: ' + error.message)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+        setUpdateImage(null)
+  } , [updateImage])
 
-  const update = () => {
-    if (!userToUpdate) return
-    if (!authState) return
-    if (!authState.id) return
-    if (!fetchUser) return
-
-    console.log('userToUpdate', userToUpdate);
-    
-
-    setIsLoading(true)
-    abortControllerRef?.current.abort()
-    abortControllerRef.current = new AbortController()
-    updateUser(authState.id, userToUpdate, abortControllerRef.current)
-      .then((response) => {
-        fetchUser()
-        setSuccessMessage('Usuário atualizado com sucesso!')
-      })
-      .catch((error) => {
-        setErrorMessage('Erro ao atualizar usuário: ' + error.message)
-      })
-      .finally(() => {
-        setIsLoading(false)
-        setIsEditing(false)
-      })
-      
-      if (image) {
-        const formData = new FormData()
-        formData.append('file', {
-          uri: image,
-          name: authState.id+'profile.jpeg',
-          type: 'image/jpeg',
-        } as any)
-        setIsLoading(true)
-
-        updateImageUser(authState.id, formData, null)
-          .then((response) => {
-            setImage(null)
-            setSuccessMessage('Imagem atualizada com sucesso!')
-          })
-          .catch((error) => {
-            setErrorMessage('Erro ao atualizar imagem: ' + error.message)
-          })
-          .finally(() => {
-            setIsLoading(false)
-          })
-      }
 
   
-  }
 
 
   const pickImage = async () => {
@@ -158,28 +99,28 @@ const Profile = () => {
       })
   
       if (!result.canceled && result.assets[0].uri) {
-        setImage(result.assets[0].uri)
+        setUpdateImage(result.assets[0].uri)
         
       }
     } catch (error) {
       console.error("Error picking image:", error)
     }
-  };
+  }
 
   const toggleEdit = () => {
     if(!isEditing) {
       getNivelHabilidade()
          .then((response) => {
-           const niveles: ListNivelHabilidade[] = response.map(nivel => ({
+           const nivels: ListNivelHabilidade[] = response.map(nivel => ({
              nome: nivel.nome,
              id: nivel.id,
              value: nivel,
            }));
-           setListNivelHabilidade(niveles);
+           setListNivelHabilidade(nivels)
          })
          .catch((response) => {
-           setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message);
-         });
+           setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message)
+         })
     }
 
     setIsEditing(!isEditing);
@@ -192,12 +133,12 @@ const Profile = () => {
     if (onLogout) {
       onLogout()
         .then((response) => {
-          setSuccessMessage(response);
+          setSuccessMessage(response)
         })
         .catch((error) => {
-          setErrorMessage(error);
+          setErrorMessage(error)
         });
-      router.replace('sign-in');
+      router.replace('sign-in')
     }
   };
 
@@ -251,16 +192,14 @@ const Profile = () => {
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} /> */}
               <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
 
-            {image ? 
-                (<Image style={CustomProfile.profileImage} src={image} />)
-            :
-            authState?.user?.s3Url ? 
+           
+            {authState?.user?.s3Url ? 
                 (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
                 :
                 (<Text className='text-[245px]'>
                   {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
-                </Text>)
-            }
+                </Text>)}
+            
 
                 {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor : '#C3FF00'}} onPress={pickImage} >
                  <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: '#1f2937' }} />
@@ -346,86 +285,40 @@ const Profile = () => {
               </>
             )}
            
-            {authState?.user?.nivelHabilidade && (
-              <View className="flex-row items-center">
+            
+              <View className="flex-row items-center justify-around">
+              {authState?.user?.nivelHabilidade &&
+                <View className='flex-row my-1 gap-x-1'>
                 <Text className="text-[14px] text-secondary_black_sub_title mr-2">
                   Nível {authState.user.nivelHabilidade.nome}
                 </Text>
-                {(() => {
-                  const nivel = authState.user.nivelHabilidade.nome.toLowerCase();
-                  let starConfig = [];
+                
+                   {Array.from({ length: 5 }).map((_, i) => (
+                        <Ionicons key={i} name="star" size={13} color={i < (authState?.user?.nivelHabilidade.id || 3) ? '#FFD700' : '#ddd'} />
+                    ))}
 
-                  switch (nivel) {
-                    case 'iniciante':
-                      starConfig = [
-                        { type: 'star', active: true },
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                      ];
-                      break;
-                    case 'intermediario':
-                      starConfig = [
-                        { type: 'star', active: true },
-                        { type: 'star-half-outline', active: true },
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                      ];
-                      break;
-                    case 'avancado':
-                      starConfig = [
-                        { type: 'star', active: true },
-                        { type: 'star', active: true },
-                        { type: 'star-half-outline', active: true },
-                        { type: 'star-outline', active: false },
-                      ];
-                      break;
-                    case 'profissional':
-                      starConfig = [
-                        { type: 'star', active: true },
-                        { type: 'star', active: true },
-                        { type: 'star', active: true },
-                        { type: 'star', active: true },
-                      ];
-                      break;
-                    default:
-                      starConfig = [
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                        { type: 'star-outline', active: false },
-                      ];
-                  }
+              </View>}
 
-                  return starConfig.map(({ type, active }, index) => {
-                    const color = active ? '#FFD700' : '#ddd'; 
-                    return (
-                      <Ionicons
-                        key={index}
-                        name={
-                          type === 'star'
-                            ? 'star'
-                            : type === 'star-half-outline'
-                            ? 'star-half-outline'
-                            : 'star-outline'
-                        }
-                        size={13} 
-                        color={color}
-                        style={{ marginLeft: index > 0 ? 4 : 0 }}
-                      />
-                    );
-                  });
-                })()}
-                {isEditing && 
-                <TouchableOpacity
-                    style={CustomProfile.button2}
-                    className='bg-primary_green p-[15px] rounded-[5px] '
-                    onPress={toggleEdit}
-                    >
+                {isEditing ? (
+                  <TouchableOpacity
+                  style={CustomProfile.button2}
+                  className='bg-primary_green p-[15px] rounded-[5px] '
+                  onPress={toggleEdit}
+                  >
                   <Text className='text-black text-[14px] font-bold'>Salvar</Text>
-                </TouchableOpacity>}
+                </TouchableOpacity>)
+                :
+                (
+                  <TouchableOpacity 
+                  style={CustomProfile.button2}  
+                  className='bg-primary_green p-[15px] rounded-[5px]' 
+                  onPress={handleLogout}
+                  >
+                      <Text className='text-black text-[14px] font-bold'>Sair</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-            )}
+            
            
             {authState && <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>Data de Criação: {authState.user?.dtCriacao.split(' ')[0]}</Text>}
 
@@ -440,11 +333,6 @@ const Profile = () => {
                <Ionicons name={`chevron-${isEditing ? 'up': 'down'}`} size={24} color="white" />
             </TouchableOpacity>
           </View>
-
-          {!isEditing && 
-          <TouchableOpacity style={CustomProfile.button}  className='bg-primary_green p-[15px] rounded-[5px]' onPress={handleLogout}>
-            <Text className='text-black text-[14px] font-bold'>Sair</Text>
-          </TouchableOpacity>}
 
           {errorMessage && (
           <ShowAlert

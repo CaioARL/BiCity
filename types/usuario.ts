@@ -134,6 +134,7 @@ export interface UsuarioLoginRequest {
 }
 
 export interface RequestUpdateUsuario {
+    id: number
     nome: string
     nomeUsuario: string
     endereco: {
