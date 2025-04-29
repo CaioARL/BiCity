@@ -85,9 +85,9 @@ export default function EventV() {
           )}
 
           
-        <Animated.View  style={{flexDirection: 'row', position: 'absolute', top: 270, right: 10, alignItems: 'center', transform: [{ translateY: slideAnim }]}}>
+        <Animated.View  style={{flexDirection: 'row', position: 'absolute', top: 270, right: 10, alignItems: 'center', width: '100%',  transform: [{ translateY: slideAnim }] }}>
           <TouchableOpacity 
-            className='bg-primary_green border-[8px] flex-row p-[10px] ml-auto w-[40%] items-center justify-center gap-7' 
+            className='bg-primary_green flex-row p-[10px] ml-auto w-[40%] items-center justify-center' 
             style={{ borderRadius: 50}}
             onPress={() => evento && handleToshareEvent(evento)}
             >
