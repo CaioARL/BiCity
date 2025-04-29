@@ -123,7 +123,7 @@ export default function SignIn() {
           onLogin(response)
             .then(() => {
               showAlert('success', `Bem-vindo(a) ${response.nome}!`);
-              setTimeout(() => router.replace('home'), 2000);
+              setTimeout(() => router.replace('events'), 2000);
             })
             .catch((error) => {
               showAlert('error', 'Erro ao registrar sessão: ' + error);

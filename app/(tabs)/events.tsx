@@ -43,6 +43,8 @@ export default function Events() {
   const currentPageRef = useRef<number>(0)
   const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
   const abortControllerRef = useRef<AbortController>()
+  const [scrollY, setScrolly] = useState<number>(0)
+  
 
 
   //modals - filtro e criar evento
@@ -51,7 +53,6 @@ export default function Events() {
 
 
 
-  const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   
@@ -63,6 +64,12 @@ export default function Events() {
 
 
 
+  useEffect(()=>{
+    scrollY > 50 ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+  },[scrollY])
 
 
 
@@ -161,13 +168,10 @@ export default function Events() {
     console.log('Evento salvo:', item.nome);
   };
 
-  const handleAddEvent = () => {
-    setModalVisible(true);
-  };
-  
+
   return (
   <SafeAreaView>
-      <View className='container' style={{ backgroundColor: 'white' }}>
+      <View className='container h-full' style={{ backgroundColor: 'white' }}>
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
@@ -270,8 +274,8 @@ export default function Events() {
 
            {eventos && (
             <FlatList
-              style={{ minHeight: "100%" }}
-              contentContainerStyle={{ paddingBottom: "300%" }}
+              onScroll={e=>setScrolly(e.nativeEvent.contentOffset.y)}
+              contentContainerStyle={{ paddingBottom: '100%'}}
               onEndReached={loadMorePage}
               onEndReachedThreshold={0.1}
               refreshing={isContentLoading}

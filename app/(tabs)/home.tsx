@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
@@ -17,6 +17,9 @@ import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
+import { router } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons';
+
 
 interface Region {
   latitude: number
@@ -38,7 +41,10 @@ export default function Home() {
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
+  const mapRef = useRef<MapView>(null)
+
   const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
+  const isGestureRef = useRef<boolean>(false) 
 
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
@@ -150,6 +156,23 @@ export default function Home() {
   // , 120000)
 
   }, [])
+
+  const handleMyLocationPress = () => {
+    if(!mapRef.current) return
+    if(!currentLocation) return
+    mapRef.current.animateToRegion({
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta:0.0043, longitudeDelta:0.0034
+    })
+  }
+    
+  useEffect(()=>{
+    isMoved ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+  },[isMoved])
 
   useEffect( () => {
     if (!requestEventos) {return}
@@ -377,18 +400,21 @@ export default function Home() {
       return (   
         <SafeAreaView >
           <MapView style={{width: '100%', height:'100%'}} 
+              ref={mapRef}
               onRegionChange={setCurrentViewLocation}
               mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
               initialRegion={initialRegion}
-              showsUserLocation={true} 
+              showsUserLocation={true}
+              showsMyLocationButton={false} 
               zoomEnabled={true}
               googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
               onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
-              onLongPress={e=> {
-                console.log('Long Press', e.nativeEvent.coordinate)
-                pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
+              onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
+              onTouchEnd={()=>{isGestureRef.current = true}}
+              onRegionChangeComplete={()=>{
+                setIsMoved(isGestureRef.current)
+                isGestureRef.current = false
               }}
-              onRegionChangeComplete={ (e, {isGesture}  ) => {setIsMoved(isGesture)}}
             >
               
 
@@ -406,7 +432,6 @@ export default function Home() {
                     <Marker 
                         key={evento.id} 
                         coordinate={evento.endereco} 
-                        title={evento.nome}
                         image={evento.gratuito
                           ? require('../../assets/pins/pin_free_evento.png')
                           : require('../../assets/pins/pin_paid_evento.png')
@@ -530,8 +555,15 @@ export default function Home() {
                 />
               }
 
+              <TouchableOpacity
+                className='absolute top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                onPress={handleMyLocationPress}
+              >
+                <Ionicons name="locate" size={24} color="black" />
+              </TouchableOpacity>
+
       </SafeAreaView>
     )
   }
 
-  
+ 

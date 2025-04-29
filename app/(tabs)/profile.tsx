@@ -69,11 +69,11 @@ const Profile = () => {
   }
 
   useEffect(()=>{
-    scrollY > 50 ? 
+    isEditing ? 
       router.setParams({tabBarVisible: 'no'})
     :
       router.setParams({tabBarVisible: 'yes'})
-  },[scrollY])
+  },[isEditing])
 
   useEffect(() => {
     if (authState?.user) {
