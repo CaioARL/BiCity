@@ -359,7 +359,7 @@ export default function SignUp() {
                   value={createUsuarioForms.firstName}
                   placeholder="Digite seu primeiro nome"
                   handleChangeText={input => updateCampoCreateUsuario('firstName', input)}
-                  handleEndEditing={() => updateCampoErrorForms('firstName', '')}
+                  onFocus={() => updateCampoErrorForms('firstName', '')}
                   msg={errorCreateUsuarioForms.firstName}
                   />
                 <FormField
@@ -367,7 +367,7 @@ export default function SignUp() {
                   value={createUsuarioForms.secondName}
                   placeholder="Digite seu último nome"
                   handleChangeText={input => updateCampoCreateUsuario('secondName', input)}
-                  handleEndEditing={() => updateCampoErrorForms('secondName', '')}
+                  onFocus={() => updateCampoErrorForms('secondName', '')}
                   msg={errorCreateUsuarioForms.secondName}
                   />
                 <FormField
@@ -375,7 +375,7 @@ export default function SignUp() {
                   value={createUsuarioForms.nomeUsuario}
                   placeholder="Digite seu username"
                   handleChangeText={input => updateCampoCreateUsuario('nomeUsuario', input)}
-                  handleEndEditing={() => updateCampoErrorForms('nomeUsuario', '')}
+                  onFocus={() => updateCampoErrorForms('nomeUsuario', '')}
                   isLoading={isRequesting}
                   msg={errorCreateUsuarioForms.nomeUsuario}
                 />
@@ -417,14 +417,14 @@ export default function SignUp() {
                   placeholder="Digite sua Cidade"
                   msg={errorCreateUsuarioForms.cidade}
                   handleChangeText={input => updateCampoCreateUsuario('cidade', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('cidade', '')}
+                  onFocus={()=>updateCampoErrorForms('cidade', '')}
                 />
                 <FormField
                   title="Estado"
                   value={createUsuarioForms.estado}
                   placeholder="Digite seu Estado"
                   handleChangeText={input => updateCampoCreateUsuario('estado', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('estado', '')}
+                  onFocus={()=>updateCampoErrorForms('estado', '')}
                   msg={errorCreateUsuarioForms.estado}
                 />
                 <FormField
@@ -433,7 +433,7 @@ export default function SignUp() {
                   msg={errorCreateUsuarioForms.rua}
                   placeholder="Digite sua rua"
                   handleChangeText={ input => updateCampoCreateUsuario('rua', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('rua', '')}
+                  onFocus={()=>updateCampoErrorForms('rua', '')}
 
                 />
                 <FormField
@@ -442,7 +442,7 @@ export default function SignUp() {
                   placeholder="Digite seu número"
                   keyboardType='number-pad'
                   handleChangeText={ input => updateCampoCreateUsuario('numero', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('numero', '')}
+                  onFocus={()=>updateCampoErrorForms('numero', '')}
                   msg={errorCreateUsuarioForms.numero}
                 />
                 <FormField
@@ -451,7 +451,7 @@ export default function SignUp() {
                   placeholder="Digite seu bairro"
                   msg={errorCreateUsuarioForms.bairro}
                   handleChangeText={ input => updateCampoCreateUsuario('bairro', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('bairro', '')}
+                  onFocus={()=>updateCampoErrorForms('bairro', '')}
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
               </View>
@@ -467,7 +467,7 @@ export default function SignUp() {
                         value={createUsuarioForms.cpf}
                         placeholder="Digite seu CPF"
                         handleChangeText={input => updateCampoCreateUsuario('cpf', input )}
-                        handleEndEditing={()=>updateCampoErrorForms('cpf', '')}
+                        onFocus={()=>updateCampoErrorForms('cpf', '')}
                         msg={errorCreateUsuarioForms.cpf}
                         isLoading={isRequesting}
                         keyboardType="number-pad"
@@ -490,7 +490,7 @@ export default function SignUp() {
                       value={createUsuarioForms.cnpj}
                       placeholder="Digite seu CNPJ"
                       handleChangeText={input => updateCampoCreateUsuario('cnpj', input)}
-                      handleEndEditing={()=>updateCampoErrorForms('cnpj', '')}
+                      onFocus={()=>updateCampoErrorForms('cnpj', '')}
                       msg={errorCreateUsuarioForms.cnpj}
                       isLoading={isRequesting}
                       keyboardType="number-pad"
@@ -514,7 +514,7 @@ export default function SignUp() {
                   value={createUsuarioForms.senha}
                   placeholder="Digite sua senha"
                   handleChangeText={input => updateCampoCreateUsuario('senha', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('senha', '')}
+                  onFocus={()=>updateCampoErrorForms('senha', '')}
                   msg={errorCreateUsuarioForms.senha}
                   secureTextEntry={true}
                 />
@@ -523,7 +523,7 @@ export default function SignUp() {
                   value={createUsuarioForms.confirmaSenha}
                   placeholder="Confirme sua senha"
                   handleChangeText={input => updateCampoCreateUsuario('confirmaSenha', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('confirmaSenha', '')}
+                  onFocus={()=>updateCampoErrorForms('confirmaSenha', '')}
                   msg={errorCreateUsuarioForms.confirmaSenha}
                   secureTextEntry={true}
                   maxLength={20}
@@ -540,7 +540,7 @@ export default function SignUp() {
                   value={createUsuarioForms.email}
                   placeholder="Digite seu email"
                   handleChangeText={input => updateCampoCreateUsuario('email', input)}
-                  handleEndEditing={()=>updateCampoErrorForms('email', '')}
+                  onFocus={()=>updateCampoErrorForms('email', '')}
                   msg={errorCreateUsuarioForms.email}
                   isLoading={isEmailCodeLoading || isRequesting}
                   keyboardType="email-address"

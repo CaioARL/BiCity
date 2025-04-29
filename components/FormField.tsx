@@ -17,10 +17,11 @@ interface FormFieldProps {
   disableEdit?: boolean;
   isLoading?: boolean;
   maxLength?: number;
+  onFocus?: () => void
 }
 
 export default function FormField({
-  title, value, placeholder, handleChangeText, otherStyles,
+  title, value, placeholder, handleChangeText, otherStyles, onFocus,
   keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength, handleEndEditing
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +50,7 @@ export default function FormField({
           onEndEditing={handleEndEditing}
           editable={!disableEdit}
           maxLength={maxLength}
+          onFocus={onFocus}
         />
         {secureTextEntry && (
           <Text
