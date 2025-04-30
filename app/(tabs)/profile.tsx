@@ -333,14 +333,14 @@ export default function Profile(){
             )}
            
             
-              <View className="flex-row items-center justify-around">
+              <View className="flex-row items-center justify-between mr-[10px]">
               {authState?.user?.nivelHabilidade &&
                 <View className='flex-row my-1 gap-x-1'>
                 <Text className="text-[14px] text-secondary_black_sub_title mr-2">
                   Nível {authState.user.nivelHabilidade.nome}
                 </Text>
                 
-                   {Array.from({ length: 5 }).map((_, i) => (
+                   {Array.from({ length: 4 }).map((_, i) => (
                         <Ionicons key={i} name="star" size={13} color={i < (authState?.user?.nivelHabilidade.id || 3) ? '#FFD700' : '#ddd'} />
                     ))}
 
