@@ -242,16 +242,6 @@ export default function EventDetail() {
                                   
                                 </View>
                               </View>
-
-                              <View style={CustomEvents.containerButton}>
-                                <TouchableOpacity 
-                                  style={CustomEvents.customButton} 
-                                  onPress={() => handleLocationEventMap(item)}
-                                  >
-                                  <Ionicons name="location-outline" size={20} color="white" />
-                                  <Text style={CustomEvents.customButtonText}>Localizada</Text>
-                                </TouchableOpacity>
-                              </View>
                               
                             </ImageBackground>
                           </TouchableOpacity>

@@ -164,8 +164,8 @@ export default function Events() {
     );
   };
 
-  const handleSave = (item: Evento) => {
-    console.log('Evento salvo:', item.nome);
+  const handleLocalizarEvento = (id: number) => {
+    router.navigate({pathname:'home', params:{ eventoId: id.toString() }})
   };
 
 
@@ -359,13 +359,14 @@ export default function Events() {
                         </View> */}
 
                       <View style={CustomEvents.containerButton}>
-                        <TouchableOpacity 
+                        {authState?.user?.role !== "PJ" &&
+                          <TouchableOpacity 
                           style={CustomEvents.customButton} 
-                          onPress={() => handleSave(item)}
+                          onPress={() => handleLocalizarEvento(item.id)}
                           >
                           <Ionicons name="location-outline" size={20} color="white" />
-                          <Text style={CustomEvents.customButtonText}>Localizada</Text>
-                        </TouchableOpacity>
+                          <Text style={CustomEvents.customButtonText}>Ir para o Local</Text>
+                        </TouchableOpacity>}
                         {/* <TouchableOpacity 
                           style={CustomEvents.customButton} 
                           onPress={() => handleFavorite(item)}
