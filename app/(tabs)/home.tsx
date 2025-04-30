@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity, Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoByRadius } from '../../api/evento'
@@ -24,6 +24,8 @@ import {
   animateToUserLocation,
   getOutOfBoundsMessage
 } from '../../util/restrict-map';
+import EventCardCarousel from 'components/EventCardCarousel'
+
 
 interface Region {
   latitude: number
@@ -72,6 +74,7 @@ export default function Home() {
 
   const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
 
+  const [hilightedEvento, setHilightedEvento] = useState<{evento :Evento, interno: boolean} | null>(null)
 
   const abortControllerRef = useRef<AbortController>()
   const [initalLoading, setInitalLoading] = useState<boolean>(true)
@@ -95,7 +98,8 @@ export default function Home() {
   const emptyGeoJson: InfraestruturaGeoJson = {
     type: "FeatureCollection",
     features: [],
-  };
+  }
+
   
 
   
@@ -318,6 +322,15 @@ export default function Home() {
       })
     }, [requestProblemaImage])
 
+    useEffect(() => {
+      if(!hilightedEvento) return
+      if(hilightedEvento.interno) return
+      if(!hilightedEvento.evento.endereco) return
+      const region : Region = { ...hilightedEvento.evento.endereco ,latitudeDelta:0.0043, longitudeDelta:0.0034 } 
+      isGestureRef.current=true
+      mapRef.current?.animateToRegion(region)
+    }, [hilightedEvento])
+
     /*
     * Função chamada quando o usuário clicar o mapa
     * Se o usuário clicar em cima de uma linha da infraestrutura,vai mostrar modal com avaliações da infraestrutura
@@ -423,14 +436,18 @@ export default function Home() {
               googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
               onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
               onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
-              onTouchEnd={()=>{isGestureRef.current = true}}
               onRegionChangeComplete={(region) => {
-                setIsMoved(isGestureRef.current);
-                isGestureRef.current = false;
-                if (!isRegionWithinBounds(region)) {
-                  animateToUserLocation(mapRef, currentLocation);
-                  setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.');
+                  setIsMoved(isGestureRef.current);
+                  isGestureRef.current = false;
+                  if (!isRegionWithinBounds(region)) {
+                    animateToUserLocation(mapRef, currentLocation);
+                    setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.');
+                  }
                 }
+              }
+              onTouchEnd={()=>{
+                isGestureRef.current = true
+                setHilightedEvento(null) 
               }}
             >
               
@@ -447,13 +464,15 @@ export default function Home() {
                       />  
           
                     <Marker 
+                        tracksViewChanges={false}
                         key={evento.id} 
                         coordinate={evento.endereco} 
                         image={evento.gratuito
                           ? require('../../assets/pins/pin_free_evento.png')
                           : require('../../assets/pins/pin_paid_evento.png')
                         }
-
+                        onPress={()=> {
+                          setHilightedEvento({evento: evento, interno :true})}}
                       />
                     </View>
                   ))}
@@ -461,6 +480,7 @@ export default function Home() {
                   {problemas.map((problema) => (        
                     <Marker 
                         key={problema.id} 
+                        tracksViewChanges={false}
                         coordinate={problema} 
                         titleVisibility='hidden'
                         image={
@@ -501,6 +521,15 @@ export default function Home() {
     
             </MapView>
             
+            {eventos && hilightedEvento && isMoved &&
+              <EventCardCarousel
+                data={eventos}
+                visible={hilightedEvento !== null}
+                hilightedEvento={hilightedEvento.evento}
+                handleChangeEvento={setHilightedEvento}
+              />
+            }
+
             {pinProblemaSelector &&
               <ProblemaView
                 problema={pinProblemaSelector}
