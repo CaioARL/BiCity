@@ -16,6 +16,7 @@ export default function EventV() {
 
   const { eventoId, isFromLocation } = useLocalSearchParams<{eventoId: string, isFromLocation: string}>()
   const { authState } = useAuthProvider()
+  
   const [evento, setEvento] = useState<Evento>()
 
   const [isContentLoading, setIsContentLoading] = useState<boolean>(true)
