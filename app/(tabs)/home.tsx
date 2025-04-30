@@ -236,11 +236,12 @@ export default function Home() {
 
     useEffect(()=>{
       if(!eventoId) return
+      var attempts = 0
+      setIsContentLoading(true)
       const interval = setInterval(async () => {
-          if (mapRef.current?.state.isReady) {
-            getEventoById(eventoId, null)
+        if (mapRef.current?.state.isReady) {
+          getEventoById(eventoId, null)
             .then((response)=>{
-              // console.log(mapRef.current?.state.isReady)
               isGestureRef.current = true
               mapRef.current?.animateToRegion({
                 latitude: response.endereco.latitude,
@@ -255,7 +256,12 @@ export default function Home() {
               setIsContentLoading(false)
             })
             clearInterval(interval)
+          } else if (attempts >= 15){
+            setIsContentLoading(false)
+            setErrorMessage("Falha ao encontrar evento, verifique sua localização")
+            clearInterval(interval)
           }
+          attempts++
         }, 3000)
     },[eventoId])
 
