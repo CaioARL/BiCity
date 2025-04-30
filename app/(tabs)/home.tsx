@@ -19,7 +19,11 @@ import AvaliacaoView from '../../components/AvaliacaoView'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
-
+import { 
+  isRegionWithinBounds, 
+  animateToUserLocation,
+  getOutOfBoundsMessage
+} from '../../util/restrict-map';
 
 interface Region {
   latitude: number
@@ -92,6 +96,8 @@ export default function Home() {
     type: "FeatureCollection",
     features: [],
   };
+  
+
   
 
     const getCurrentLocation = async (): Promise<void>  => {
@@ -418,9 +424,13 @@ export default function Home() {
               onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
               onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
               onTouchEnd={()=>{isGestureRef.current = true}}
-              onRegionChangeComplete={()=>{
-                setIsMoved(isGestureRef.current)
-                isGestureRef.current = false
+              onRegionChangeComplete={(region) => {
+                setIsMoved(isGestureRef.current);
+                isGestureRef.current = false;
+                if (!isRegionWithinBounds(region)) {
+                  animateToUserLocation(mapRef, currentLocation);
+                  setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.');
+                }
               }}
             >
               
