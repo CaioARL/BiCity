@@ -13,7 +13,7 @@ import { ArrowLeft } from 'lucide-react-native'
 
 export default function EventV() {
 
-  const { eventoId } = useLocalSearchParams<{eventoId: string}>()
+  const { eventoId, isFromLocation } = useLocalSearchParams<{eventoId: string, isFromLocation: string}>()
   const [evento, setEvento] = useState<Evento>()
 
   const [isContentLoading, setIsContentLoading] = useState<boolean>(true)
@@ -47,13 +47,15 @@ export default function EventV() {
     }
   }, [isContentLoading, evento]);
 
-  const handleLocationEventMap = (item: Evento) => {
-    console.log('Você foi direcionar para o evento no mapa:', item.nome);
-  };
+  const handleLocationEventMap = (evento: Evento) => {
+    if( isFromLocation === "true") return router.back()
+    router.dismissTo({pathname:'home', params:{ eventoId: evento.id.toString() }})
+    // console.log('Você foi direcionar para o evento no mapa:', evento.nome);
+  }
 
   const handleToshareEvent = (item: Evento) => {
     console.log('Você compartilhou o evento:', item.nome);
-  };
+  }
 
   return (
     <SafeAreaView className="bg-white h-full w-full">
@@ -106,7 +108,9 @@ export default function EventV() {
                  <View style={CustomEvents.containerButtonEventView}>
                     <TouchableOpacity 
                       style={CustomEvents.customButtonEventView} 
-                        onPress={() => handleLocationEventMap(evento)}
+                        onPress={() => {
+                          handleLocationEventMap(evento)
+                        }}
                       >
                       <Ionicons name="location-outline" size={20} color="white" />
                     </TouchableOpacity>

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
-import { getEventoByRadius } from '../../api/evento'
+import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
 import { getInfraestrutura } from '../../api/infraestrutura'
@@ -17,7 +17,7 @@ import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import { 
   isRegionWithinBounds, 
@@ -89,6 +89,8 @@ export default function Home() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const { eventoId } = useLocalSearchParams<{eventoId: string}>()
+
   const locationErrors = {
     PERMISSION : {key: 'PERMISSION', message: 'Permissão de localização negada, cheque as permissões do aplicativo'},
     SERVICE : {key: 'SERVICE', message: 'Serviço de localização desativado'},
@@ -99,8 +101,6 @@ export default function Home() {
     type: "FeatureCollection",
     features: [],
   }
-
-  
 
   
 
@@ -234,7 +234,47 @@ export default function Home() {
     }, [requestInfraestrutura])
 
 
-    const getEventsOnViewLocation = () => {
+    useEffect(()=>{
+      if(!eventoId) return
+      getEventoById(eventoId, null)
+      .then((response)=>{
+        if(!mapRef.current) return setErrorMessage("MAPA NOT LOADED ERROR")
+        // console.log(mapRef.current?.state.isReady)
+        isGestureRef.current = true
+        mapRef.current.animateToRegion({
+          latitude: response.endereco.latitude,
+          longitude: response.endereco.longitude,
+          latitudeDelta:0.0043, longitudeDelta:0.0034})
+        getEventsOnViewLocation(response.endereco)
+      })
+      .catch((error)=>{
+        setErrorMessage('Erro ao carregar Evento' + error.message)
+      })
+      .finally(()=>{
+        setIsContentLoading(false)
+      })
+    },[eventoId])
+
+    const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
+      abortControllerRef.current?.abort()
+      setRequestInfraestrutura({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 750
+        })
+        setRequestProblemas({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 7000
+        })
+        setRequestEventos({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 7000
+        })
+    }
+
+    const searchOnViewLocation = () => {
       abortControllerRef.current?.abort()
       if(!currentViewLocation){return}
       setIsContentLoading(true)
@@ -540,7 +580,7 @@ export default function Home() {
               (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
                 <ButtonModal
                   title='Buscar nesta localização'
-                  handlePress={getEventsOnViewLocation}
+                  handlePress={searchOnViewLocation}
                   textStyles='text-[#000] text-center'
                   customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
                 />

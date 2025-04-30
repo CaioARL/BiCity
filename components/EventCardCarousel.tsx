@@ -75,7 +75,7 @@ export default function EventCardCarousel({ data, visible, hilightedEvento, hand
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item, index }) => (
           <TouchableOpacity
-            onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id }})}
+            onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id, isFromLocation: "true" }})}
             style={[
               styles.card,
               {
