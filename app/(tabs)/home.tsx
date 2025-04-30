@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, TouchableOpacity} from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity, Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -382,14 +382,21 @@ export default function Home() {
       return (
         <SafeAreaView>
           <View className='flex-col h-full w-full justify-center items-center'>
-              <Text>
+ 
+              <Image
+                source={require('../../assets/notificacoesErro/localização.webp')}
+                style={{ width: 150, height: 170 }}
+                resizeMode="cover"
+              />
+
+              <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>
                 {currentLocationError && currentLocationError.message}
               </Text>
               <TouchableOpacity 
-              className='bg-primary_green rounded-[10px] px-4 py-2 mt-4'
+              className='bg-primary_green mt-4 p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center'
               onPress={()=>getCurrentLocation()}
               >
-                <Text>
+                <Text className='text-[14px] text-black mb-[5px]'>
                   Tentar Novamente
                 </Text>
               </TouchableOpacity>
