@@ -236,23 +236,27 @@ export default function Home() {
 
     useEffect(()=>{
       if(!eventoId) return
-      getEventoById(eventoId, null)
-      .then((response)=>{
-        if(!mapRef.current) return setErrorMessage("MAPA NOT LOADED ERROR")
-        // console.log(mapRef.current?.state.isReady)
-        isGestureRef.current = true
-        mapRef.current.animateToRegion({
-          latitude: response.endereco.latitude,
-          longitude: response.endereco.longitude,
-          latitudeDelta:0.0043, longitudeDelta:0.0034})
-        getEventsOnViewLocation(response.endereco)
-      })
-      .catch((error)=>{
-        setErrorMessage('Erro ao carregar Evento' + error.message)
-      })
-      .finally(()=>{
-        setIsContentLoading(false)
-      })
+      const interval = setInterval(async () => {
+          if (mapRef.current?.state.isReady) {
+            getEventoById(eventoId, null)
+            .then((response)=>{
+              // console.log(mapRef.current?.state.isReady)
+              isGestureRef.current = true
+              mapRef.current?.animateToRegion({
+                latitude: response.endereco.latitude,
+                longitude: response.endereco.longitude,
+                latitudeDelta:0.0043, longitudeDelta:0.0034})
+              getEventsOnViewLocation(response.endereco)
+            })
+            .catch((error)=>{
+              setErrorMessage('Erro ao carregar Evento' + error.message)
+            })
+            .finally(()=>{
+              setIsContentLoading(false)
+            })
+            clearInterval(interval)
+          }
+        }, 3000)
     },[eventoId])
 
     const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
