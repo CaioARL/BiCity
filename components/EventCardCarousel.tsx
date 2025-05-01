@@ -96,8 +96,7 @@ export default function EventCardCarousel({ data, visible, hilightedEvento, hand
 
             
              <ImageBackground  
-                // source={{uri: item.s3Url}} 
-                source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn6jmHQCx9SW9c_Uo4YuwRUVvCuggN8Nom3w&s' }} 
+                source={{uri: item.s3Url}} 
                 className="h-full w-full rounded-t-lg"
                 imageStyle={{ borderRadius: 10 }}
 >

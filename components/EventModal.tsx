@@ -282,10 +282,9 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
     abortControllerRef.current = new AbortController()
     getCepByLatAndLong(mapRegion.latitude, mapRegion.longitude , abortControllerRef.current)
     .then( response => {
-
       setIsCepLoading(true)
       abortControllerRef.current = new AbortController()
-      getCep(response.cep, abortControllerRef.current).then((response) => {
+      getCep(response.cep.replace('-',''), abortControllerRef.current).then((response) => {
         updateCampoNovoEventoEndereco('rua', response.street)
         setRua(response.street)
         updateCampoNovoEventoEndereco('bairro', response.neighborhood)

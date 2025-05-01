@@ -108,11 +108,12 @@ export default function EventDetail() {
     setIsContentLoading(true)
     createEventoImage(requestCreateEventoImage, abortControllerRef.current)
     .then((response) => {
-      setSuccessMessage("Imagem enviada com sucesso" + response)
-      
+      // setSuccessMessage("Imagem enviada com sucesso" + response)
+      setSuccessMessage("Imagem enviada com sucesso")
     })
     .catch((response) => {
-      setErrorMessage("Error ao enviar imagem: " + response.message)
+      setErrorMessage("Error ao enviar imagem. Check o formato e o tamanho.")
+      // setErrorMessage("Error ao enviar imagem: " + response.message)
     }).finally(() => {
       setIsContentLoading(false)
       setRequestEventoImage(null)
