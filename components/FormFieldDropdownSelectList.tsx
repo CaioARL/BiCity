@@ -11,6 +11,7 @@ interface FormFieldDropdownSelectList<T> {
     selectedValue: T | null
     options: { nome: string, id : number, value: T }[]
     handleChange: (value: T) => void
+    onFocus?: () => void
     dropDownSize?: DimensionValue
     msg?: string
     isValid?: boolean
@@ -22,7 +23,7 @@ interface FormFieldDropdownSelectList<T> {
 
 
 
-export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, msg, isValid, otherStyles, disableEdit, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
+export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, onFocus, msg, isValid, otherStyles, disableEdit, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
 
 
   const [eventTypeOptionsVisible, setEventTypeOptionsVisible] = useState<boolean> (false)
@@ -35,8 +36,8 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
         <Text className='text-[16px] text-matte_gray mb-[5px]'>{title}</Text>
         <TouchableOpacity 
               className='flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px]'
-              
-              onPress={() => setEventTypeOptionsVisible(prev => !prev)}
+              onPress={() => {setEventTypeOptionsVisible(prev => !prev)}}
+              onPressIn={onFocus}
               disabled={disableEdit}
               >
   
@@ -53,7 +54,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
                     <Ionicons name="chevron-down" size={20} color="#555" />
                   )}
         </TouchableOpacity>
-        {msg && (<Text className='text-sm text-color_red_error'>{msg}</Text>)}
+        {msg && (<Text className='text-color_red_error'>{msg}</Text>)}
         
   
           {/* Dropdown Menu */}

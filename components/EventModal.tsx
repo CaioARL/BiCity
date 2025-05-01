@@ -43,7 +43,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
   const [isCepLoading, setIsCepLoading] = useState<boolean>()
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
-  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
+  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: {data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
 
   const [showImagePopup, setShowImagePopup] = useState(false)
 
@@ -129,33 +129,34 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
 
   const validateEventAndClose = () => {
+    setNovoEventoError({ nome: '', descricao: '', data: { data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
     const result = createEventSchema.safeParse(requestCreateEvento)
-    console.log(result)
     if(!result.success){
-      result.error.issues.map(issue => {
-        setNovoEventoError({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
-        setNovoEventoError(prev => ({
+      result.error.issues.forEach((issue) => {
+        if(issue.path[0] === 'data'){
+          setNovoEventoError(prev => ({
             ...prev,
-            [issue.path[0]]: issue.message
-        }))
-        result.error.issues.forEach((issue) => {
+            data: {
+              ...prev.data,
+              [issue.path[1]] : issue.message
+             }
+          }))
+        } else if(issue.path[0] === 'endereco'){
+          setNovoEventoError((prev) => ({
+            ...prev,
+            endereco:{
+              ...prev.endereco,
+              [issue.path[1]]: issue.message,
+            }
+          }))
+        } else {
           setNovoEventoError((prev) => ({
             ...prev,
             [issue.path[0]]: issue.message,
           }))
-          if(issue.path[0] === 'endereco'){
-            setNovoEventoError((prev) => ({
-              ...prev,
-              endereco:{
-                ...prev.endereco,
-                [issue.path[1]]: issue.message,
-              }
-            }))
-          }
-        })
+        }
       })
     }else{
-      
       closeModal(requestCreateEvento, image)
     }
   }
@@ -275,6 +276,25 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
     }))
   }
 
+  const updateCampoNovoEventoError = ( campo: string, valor: string) => {
+    setNovoEventoError(prev => (
+      {...prev,
+        [campo]: valor
+      }
+    ))
+  }
+
+  const updateCampoNovoEventoErrorData = (campo: string, valor: string) =>{
+    setNovoEventoError(prev=> (
+      {...prev,
+        data: {
+          ...prev.data,
+          [campo]: valor
+        }
+      }
+    ))
+  }
+
   const updateCampoNovoEventoErrorEndereco = (campo: string, valor: string) => {
     setNovoEventoError(prev=> (
       {...prev,
@@ -342,6 +362,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 maxLength={8}
                 keyboardType='number-pad'
                 isLoading={isCepLoading}
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('cep','')}
                 msg={novoEventoError.endereco.cep}     
               />
               
@@ -350,6 +371,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.rua}
                 handleChangeText={text => {updateCampoNovoEventoEndereco('rua', text)}}
                 keyboardType='default'
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('rua','')}
                 msg={novoEventoError.endereco.rua}
               />
 
@@ -358,6 +380,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.numero === 0? '' : requestCreateEvento.endereco.numero.toString()}
                 handleChangeText={text => {updateCampoNovoEventoEndereco('numero', parseInt(text || '0', 10))}}
                 keyboardType="number-pad"
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('numero','')}
                 msg={novoEventoError.endereco.numero}
               />
 
@@ -366,6 +389,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.bairro}
                 handleChangeText={text => {updateCampoNovoEventoEndereco('bairro', text)}}
                 keyboardType='default'
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('bairro','')}
                 msg={novoEventoError.endereco.bairro}
               />
               
@@ -374,6 +398,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.cidade}
                 handleChangeText={text => {updateCampoNovoEventoEndereco('cidade', text)}}
                 keyboardType='default'
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('cidade','')}
                 msg={novoEventoError.endereco.cidade}
               />
 
@@ -381,6 +406,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.estado}
                 handleChangeText={ text=> updateCampoNovoEventoEndereco('estado', text)}
                 placeholder='Estado'
+                onFocus={()=>updateCampoNovoEventoErrorEndereco('estado','')}
                 msg={novoEventoError.endereco.estado}
                   
               />
@@ -390,6 +416,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.nome}
                 handleChangeText={ text=> updateCampoNovoEvento('nome', text)}
                 placeholder='Digite o nome do evento'
+                onFocus={()=>updateCampoNovoEventoError('nome','')}
                 msg={novoEventoError.nome}
               />
               
@@ -399,6 +426,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 handleChangeText={text => updateCampoNovoEvento('descricao', text)}
                 placeholder='Descrição do evento...'
                 multiline={true}
+                onFocus={()=>updateCampoNovoEventoError('descricao','')}
                 msg={novoEventoError.descricao}
               />
 
@@ -408,6 +436,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 keyboardType='url'
                 handleChangeText={ text=> updateCampoNovoEvento('urlSite', text)}
                 placeholder='Digite o site do evento'
+                onFocus={()=>updateCampoNovoEventoError('urlSite','')}
                 msg={novoEventoError.urlSite}
               />
             
@@ -415,7 +444,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 title='Tipos de Eventos'
                 selectedValue={requestCreateEvento.tipoEvento}
                 options={listTipoEvento}
-                handleChange={(value) => updateCampoNovoEventoTipoEvento(value)}     
+                handleChange={(value) => updateCampoNovoEventoTipoEvento(value)}
+                onFocus={()=>updateCampoNovoEventoError('tipoEvento','')}
+                msg={novoEventoError.tipoEvento}     
               />
 
               <FormFieldModal
@@ -423,6 +454,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 placeholder="Tamanho do percurso (km)"
                 value={requestCreateEvento.faixaKm === 0? '' : requestCreateEvento.faixaKm.toString()}
                 handleChangeText={text => {updateCampoNovoEvento('faixaKm', parseInt(text || '0', 10))}}
+                onFocus={()=>updateCampoNovoEventoError('faixaKm','')}
                 msg={novoEventoError.faixaKm}
                 keyboardType="number-pad"
               />
@@ -436,18 +468,23 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
               />
 
               <TouchableOpacity     
-                  className='border-[1px] my-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 
+                  className='border-[1px] mt-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 
                   onPress={() => setShowTimePicker(!showTimePicker )}
+                  onPressIn={()=>{updateCampoNovoEventoErrorData('horario','')}}
               >
                 <Text className='text-matte_gray'>
                 {requestCreateEvento.data.horario.replace(':00', '') || 'Selecione a hora do evento'}
                 </Text>
                 <Ionicons name="time-outline" size={24} color="#666" />
               </TouchableOpacity>
+              {novoEventoError.data.horario && (<Text className='text-color_red_error'>*{novoEventoError.data.horario}</Text>)}
+              
 
               <FormFieldCalendarSelectModal
                 value={requestCreateEvento.data.data}
                 handleChangeValue={data => {updateCampoData('data', data)}}
+                onFocus={()=>updateCampoNovoEventoErrorData('data', '')}
+                msg={novoEventoError.data.data}
               />
 
               <TouchableOpacity onPress={showImageOptions} activeOpacity={0.7}>

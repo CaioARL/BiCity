@@ -113,7 +113,7 @@ export const createEventSchema = z.object(
         gratuito: z.boolean({message: 'Gratuito: deve selecionar se é gratuito ou não'}),
         urlSite: z.string().url({message: 'Url do site: deve ser uma url valida'}),
         tipoEvento: z.object({
-            id: z.number({message: ' Tipo de evento: deve selecionar um tipo de evento'}),
+            id: z.number().min(1,{message: ' Tipo de evento: deve selecionar um tipo de evento'}),
             nome: z.string( { message: '' } ),
             nivelHabilidade: z.object({
                 id: z.number( { message: '' } ),

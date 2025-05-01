@@ -11,6 +11,7 @@ interface FormFieldProps <T>{
     placeholder?: string
     handleChangeText: (e : string) => void
     validantionCheck?: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
+    onFocus?: () => void
     otherStyles?: string
     keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad' | 'url' | 'ascii-capable'
     secureTextEntry?: boolean;
@@ -22,7 +23,7 @@ interface FormFieldProps <T>{
 
 
 
-export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
+export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck, onFocus , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
   const [showPassword, setShowPassword] = useState(false)
 
 
@@ -33,6 +34,7 @@ export default function FormFieldModal({ title, value, placeholder, handleChange
         <TextInput
           className={`flex-1 w-full  }  ${multiline && 'h-[120px] align-top'}`}
           value={value}
+          onFocus={onFocus}
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}

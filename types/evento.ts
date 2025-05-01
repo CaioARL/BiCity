@@ -55,7 +55,10 @@ export interface RequestUpdateEvento {
 export interface RequestCreateEventoError {
     nome: string
     descricao: string
-    data: string
+    data: {
+        data: string
+        horario: string
+    }
     endereco: {
         cep: string
         estado: string
