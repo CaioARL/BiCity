@@ -26,7 +26,7 @@ export default function FormFieldCalendarSelectModal({ value, handleChangeValue,
             onPress={() => setShowCalendar(!showCalendar )}
         >
             <Text className='text-[#555] ml-[10px]'>
-            {value || 'Selecione a data do evento'}
+            {value.split('-').reverse().join('/') || 'Selecione a data do evento'}
             </Text>
             <Ionicons name="calendar-outline" size={20} color="#555" />
         </TouchableOpacity>

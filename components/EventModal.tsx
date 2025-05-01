@@ -1,26 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native';
-import { Region } from 'react-native-maps';
-import { ListTipoEvento, TipoEvento } from '../types/tipo-evento';
-import { getTipoEvento } from '../api/tipo-evento';
-import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
-import { Evento, Horario, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types';
-import * as ImagePicker from 'expo-image-picker';
-import { getCep, getCepByLatAndLong } from '../api/endereco';
-import { createEventSchema } from '../util/validationSchemas';
-import FormFieldModal from './FormFieldModal';
-import FormSelectFieldModal from './FormSelectFieldModal';
-import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
-import ButtonModal from './ButtonModal';
-import MapModalEdit from './MapModalEdit';
-import MapModalView from './MapModalView';
-import { useAuthProvider } from '../app/context/AuthProvider';
-import CustomButton from './CustomButton';
+import React, { useEffect, useRef, useState } from 'react'
+import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native'
+import { Region } from 'react-native-maps'
+import { ListTipoEvento, TipoEvento } from '../types/tipo-evento'
+import { getTipoEvento } from '../api/tipo-evento'
+import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
+import { Evento, Horario, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types'
+import * as ImagePicker from 'expo-image-picker'
+import { getCep, getCepByLatAndLong } from '../api/endereco'
+import { createEventSchema } from '../util/validationSchemas'
+import FormFieldModal from './FormFieldModal'
+import FormSelectFieldModal from './FormSelectFieldModal'
+import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal'
+import ButtonModal from './ButtonModal'
+import MapModalEdit from './MapModalEdit'
+import MapModalView from './MapModalView'
+import { useAuthProvider } from '../app/context/AuthProvider'
 import ImageSelectionPopup from '../components/ImgPickerModal'
-import { Ionicons } from '@expo/vector-icons';
-import TimePicker from './TimePicker';
-
-
+import { Ionicons } from '@expo/vector-icons'
+import TimePicker from './TimePicker'
 
 interface EventModalProps {
   visible: boolean
@@ -28,8 +25,7 @@ interface EventModalProps {
   closeModal: ( requestCreateEvento: RequestCreateEvento | null, requestCreateEventoImage: string | null ) => void
 }
 
-const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
-
+export default function EventModal({ visible, closeModal, evento }: EventModalProps) {
 
   const { authState } = useAuthProvider()
 
@@ -37,31 +33,14 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
   const abortControllerRef = useRef(new AbortController())
 
-  const [cep, setCep] = useState( evento?.endereco.cep ||'')
-  const [cepError, setCepError] = useState('')
-  const [isCepLoading, setIsCepLoading] = useState(false)
-
-  const [estado, setEstado] = useState( evento?.endereco.estado ||'')
-  const [cidade, setCidade] = useState( evento?.endereco.cidade ||'')
-  const [bairro, setBairro] = useState( evento?.endereco.bairro ||'')
-  const [rua, setRua] = useState( evento?.endereco.rua ||'')
-  const [numero, setNumero] = useState( evento?.endereco.numero.toString() ||'')
-
-  const [nome, setNome] = useState( evento?.nome ||'')
-  const [descricao, setDescricao] = useState( evento?.descricao ||'')
-  const [faixaKm, setfaixaKm] = useState( evento?.faixaKm.toString() ||'')
-
-  const [site, setSite]= useState( evento?.urlSite ||'')
   const [image, setImage] = useState<string | null>( evento?.s3Url || null)
-
-
-
+  
   const [mapRegion, setMapRegion] = useState<Region | null>()
   const [mapPlotError, setMapPlotError] = useState('')
 
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
-
+  const [isCepLoading, setIsCepLoading] = useState<boolean>()
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
   const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: '', endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
@@ -117,17 +96,13 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController()
     setIsCepLoading(true)
-    setCepError('')
+    updateCampoNovoEventoErrorEndereco(cep,'')
     setMapPlotError('')
       getCep(cep, abortControllerRef.current).then((response) => {
         updateCampoNovoEventoEndereco('rua', response.street)
-        setRua(response.street)
         updateCampoNovoEventoEndereco('bairro', response.neighborhood)
-        setBairro(response.neighborhood)
         updateCampoNovoEventoEndereco('cidade', response.city)
-        setCidade(response.city)
         updateCampoNovoEventoEndereco('estado', response.state)
-        setEstado(response.state)
         if (response.location.coordinates.latitude && response.location.coordinates.longitude) {
           //change map view here -- still need to figure out how
           setMapViewRegion(
@@ -138,13 +113,12 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
               longitudeDelta: 0.0421,
             }
           )
-          setCepError('')
         } else {
           setMapPlotError('Latitude e Longitude não foram encontrados.')
         }
       })
       .catch((error) =>{
-        setCepError('Cep não encontrado. Tente novamente. Code Error: ' + error.message )
+        updateCampoNovoEventoErrorEndereco('cep','Cep não encontrado. Tente novamente. Code Error: ' + error.message )
       })
       .finally(() => {
         setIsCepLoading(false)
@@ -184,31 +158,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
       
       closeModal(requestCreateEvento, image)
     }
-  }
-
-
-  const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
-    setRequestCreateEvento(prev => ({
-      ...prev,
-      [campo]: valor
-    }))
-  }
-
-  const updateCampoNovoEventoEndereco = (campo: string, valor: number | string) => {
-    setRequestCreateEvento(prev => ({
-      ...prev,
-      endereco: {
-        ...prev.endereco,
-        [campo]: valor
-      }
-    }))
-  }
-
-  const updateCampoNovoEventoTipoEvento = (valor: TipoEvento) => {
-    setRequestCreateEvento(prev => ({
-      ...prev,
-      tipoEvento: valor
-    }))
   }
 
   const pickImageFromGallery = async () => {
@@ -265,19 +214,8 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
       setShowImagePopup(true)
     }
 
-    const updateCampoData = (campo: string, valor: string) => {
-      setRequestCreateEvento(prev => ({
-        ...prev,
-        data: {
-          ...prev.data,
-          [campo]: valor
-        }
-      }))
-    }
-
   useEffect(() => {
     if(!mapRegion) return
-
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController()
     getCepByLatAndLong(mapRegion.latitude, mapRegion.longitude , abortControllerRef.current)
@@ -286,32 +224,67 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
       abortControllerRef.current = new AbortController()
       getCep(response.cep.replace('-',''), abortControllerRef.current).then((response) => {
         updateCampoNovoEventoEndereco('rua', response.street)
-        setRua(response.street)
         updateCampoNovoEventoEndereco('bairro', response.neighborhood)
-        setBairro(response.neighborhood)
         updateCampoNovoEventoEndereco('cidade', response.city)
-        setCidade(response.city)
         updateCampoNovoEventoEndereco('estado', response.state)
-        setEstado(response.state)
-        updateCampoNovoEventoEndereco('cep', response.cep)
-        setCep(response.cep)
-
+        updateCampoNovoEventoEndereco('cep', response.cep.replace('-',''))
       })
       .catch((error) =>{
-        setCepError('Cep não encontrado. Tente novamente. Code Error: ' + error.message )
+        updateCampoNovoEventoErrorEndereco('cep','Cep não encontrado. Tente novamente. Code Error: ' + error.message )
       })
       .finally(() => {
         setIsCepLoading(false)
       }) 
-      
-
     })
     .catch(error => {
         setMapPlotError("Cep não foi encontrado." + error)
     })
   }, [mapRegion])
 
+  const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
+    setRequestCreateEvento(prev => ({
+      ...prev,
+      [campo]: valor
+    }))
+  }
 
+  const updateCampoNovoEventoEndereco = (campo: string, valor: number | string) => {
+    setRequestCreateEvento(prev => ({
+      ...prev,
+      endereco: {
+        ...prev.endereco,
+        [campo]: valor
+      }
+    }))
+  }
+
+  const updateCampoNovoEventoTipoEvento = (valor: TipoEvento) => {
+    setRequestCreateEvento(prev => ({
+      ...prev,
+      tipoEvento: valor
+    }))
+  }
+
+  const updateCampoData = (campo: string, valor: string) => {
+    setRequestCreateEvento(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        [campo]: valor
+      }
+    }))
+  }
+
+  const updateCampoNovoEventoErrorEndereco = (campo: string, valor: string) => {
+    setNovoEventoError(prev=> (
+      {...prev,
+        endereco: {
+          ...prev.endereco,
+          [campo]: valor
+        }
+      }
+    ))
+  }
 
   return (
     <>
@@ -356,12 +329,12 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                
               <FormFieldModal
                 title='Cep'
-                value={cep}
+                value={requestCreateEvento.endereco.cep}
                 otherStyles='mt-[2px]'
-                handleChangeText={setCep}
+                handleChangeText={text => updateCampoNovoEventoEndereco('cep', text )}
                 validantionCheck={ e=> {
-                  if (cep.length === 8) {
-                    checkCep(cep);
+                  if (requestCreateEvento.endereco.cep.length === 8) {
+                    checkCep(requestCreateEvento.endereco.cep);
                     updateCampoNovoEventoEndereco('cep', e.nativeEvent.text)
                   }
                 }}
@@ -369,74 +342,61 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 maxLength={8}
                 keyboardType='number-pad'
                 isLoading={isCepLoading}
-                msg={cepError? cepError : novoEventoError.endereco.cep}     
+                msg={novoEventoError.endereco.cep}     
               />
               
               <FormFieldModal
                 placeholder="Rua"
-                value={rua}
-                handleChangeText={setRua}
-                validantionCheck={e => {updateCampoNovoEventoEndereco('rua', e.nativeEvent.text)}}
+                value={requestCreateEvento.endereco.rua}
+                handleChangeText={text => {updateCampoNovoEventoEndereco('rua', text)}}
                 keyboardType='default'
                 msg={novoEventoError.endereco.rua}
               />
 
               <FormFieldModal
                 placeholder="Número"
-                value={numero}
-                handleChangeText={setNumero}
-                validantionCheck={e => {updateCampoNovoEventoEndereco('numero', parseInt(e.nativeEvent.text))}}
+                value={requestCreateEvento.endereco.numero === 0? '' : requestCreateEvento.endereco.numero.toString()}
+                handleChangeText={text => {updateCampoNovoEventoEndereco('numero', parseInt(text || '0', 10))}}
                 keyboardType="number-pad"
                 msg={novoEventoError.endereco.numero}
               />
 
-              {/* bairro */}
               <FormFieldModal
                 placeholder="Bairro"
-                value={bairro}
-                handleChangeText={setBairro}
-                validantionCheck={e => {updateCampoNovoEventoEndereco('bairro', e.nativeEvent.text)}}
+                value={requestCreateEvento.endereco.bairro}
+                handleChangeText={text => {updateCampoNovoEventoEndereco('bairro', text)}}
                 keyboardType='default'
                 msg={novoEventoError.endereco.bairro}
               />
               
-              
               <FormFieldModal
                 placeholder="Cidade"
-                value={cidade}
-                handleChangeText={setCidade}
-                validantionCheck={e => {updateCampoNovoEventoEndereco('cidade', e.nativeEvent.text)}}
+                value={requestCreateEvento.endereco.cidade}
+                handleChangeText={text => {updateCampoNovoEventoEndereco('cidade', text)}}
                 keyboardType='default'
                 msg={novoEventoError.endereco.cidade}
               />
 
               <FormFieldModal
-                value={estado}
-                handleChangeText={setEstado}
-                validantionCheck={ e=> updateCampoNovoEventoEndereco('estado', e.nativeEvent.text)}
+                value={requestCreateEvento.endereco.estado}
+                handleChangeText={ text=> updateCampoNovoEventoEndereco('estado', text)}
                 placeholder='Estado'
                 msg={novoEventoError.endereco.estado}
                   
               />
-              
-                
+                       
               <FormFieldModal
                 title='Nome'
-                value={nome}
-                handleChangeText={setNome}
-                validantionCheck={ e=> updateCampoNovoEvento('nome', e.nativeEvent.text)}
+                value={requestCreateEvento.nome}
+                handleChangeText={ text=> updateCampoNovoEvento('nome', text)}
                 placeholder='Digite o nome do evento'
                 msg={novoEventoError.nome}
               />
               
-
-
-              
               <FormFieldModal
                 title='Descrição'
-                value={descricao}
-                handleChangeText={setDescricao}
-                validantionCheck={e => updateCampoNovoEvento('descricao', e.nativeEvent.text)}
+                value={requestCreateEvento.descricao}
+                handleChangeText={text => updateCampoNovoEvento('descricao', text)}
                 placeholder='Descrição do evento...'
                 multiline={true}
                 msg={novoEventoError.descricao}
@@ -444,14 +404,13 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
 
               <FormFieldModal
                 title='Site'
-                value={site}
-                handleChangeText={setSite}
-                validantionCheck={ e=> updateCampoNovoEvento('urlSite', e.nativeEvent.text)}
+                value={requestCreateEvento.urlSite}
+                keyboardType='url'
+                handleChangeText={ text=> updateCampoNovoEvento('urlSite', text)}
                 placeholder='Digite o site do evento'
                 msg={novoEventoError.urlSite}
               />
             
-
               <FormFieldDropdownSelectList
                 title='Tipos de Eventos'
                 selectedValue={requestCreateEvento.tipoEvento}
@@ -459,19 +418,14 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 handleChange={(value) => updateCampoNovoEventoTipoEvento(value)}     
               />
 
-            
-              
               <FormFieldModal
                 title="Tamanho do Percurso"
                 placeholder="Tamanho do percurso (km)"
-                value={faixaKm}
-                handleChangeText={setfaixaKm}
-                validantionCheck={e => (updateCampoNovoEvento('faixaKm', parseInt(e.nativeEvent.text))) }
+                value={requestCreateEvento.faixaKm === 0? '' : requestCreateEvento.faixaKm.toString()}
+                handleChangeText={text => {updateCampoNovoEvento('faixaKm', parseInt(text || '0', 10))}}
                 msg={novoEventoError.faixaKm}
                 keyboardType="number-pad"
               />
-
-
 
               <FormSelectFieldModal
                 handleChangeValue={(value) => updateCampoNovoEvento('gratuito', value)}
@@ -480,7 +434,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 option_1='Gratuito'
                 option_2='Pago'
               />
-
 
               <TouchableOpacity     
                   className='border-[1px] my-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 
@@ -492,13 +445,10 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 <Ionicons name="time-outline" size={24} color="#666" />
               </TouchableOpacity>
 
-
               <FormFieldCalendarSelectModal
                 value={requestCreateEvento.data.data}
                 handleChangeValue={data => {updateCampoData('data', data)}}
               />
-
-
 
               <TouchableOpacity onPress={showImageOptions} activeOpacity={0.7}>
                     {image ? (
@@ -519,8 +469,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                     )}
               </TouchableOpacity>
 
-
-
               <View className='flex-row justify-between mt-[20px]'>
             
                 <ButtonModal
@@ -538,14 +486,10 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                   
               </View>
 
-
-
-              
             {/* </Animated.View> */}
           </View>
         </ScrollView>
           
-
           {showTimePicker &&
             <TimePicker
                 onClose={(time) => {
@@ -554,7 +498,6 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
                 }}
             />
           }
-
 
       </View>
     </Modal>
@@ -566,9 +509,5 @@ const EventModal = ({ visible, closeModal, evento }: EventModalProps) => {
       onPickFromGallery={pickImageFromGallery}
     />
     </>
-  );
-};
-
-
-
-export default EventModal;
+  )
+}

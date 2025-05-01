@@ -10,9 +10,9 @@ interface FormFieldProps <T>{
     isValid?: boolean
     placeholder?: string
     handleChangeText: (e : string) => void
-    validantionCheck: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
+    validantionCheck?: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
     otherStyles?: string
-    keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad'
+    keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad' | 'url' | 'ascii-capable'
     secureTextEntry?: boolean;
     disableEdit?: boolean;
     isLoading?: boolean;
