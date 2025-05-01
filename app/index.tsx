@@ -12,9 +12,6 @@ export default function Index() {
   useEffect(() => {
     const loading = async () => {
       if (authState?.authenticated) {
-        authState?.user?.role === 'PF' ?
-        router.replace('/home')
-        :
         router.replace('/events')
       } else {
         router.replace('/sign-in')
