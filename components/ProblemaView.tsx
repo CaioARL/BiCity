@@ -100,12 +100,12 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
 
 
       {problema.s3Url ? 
-        (<View className='flex-col flex-grow-[2px] w-full h-[55%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
+        (<View className='flex-col flex-grow-[2px] w-full h-fit p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
             {problema.s3Url && <Image className="w-full h-[125px] rounded-[10px]" src={problema.s3Url}/>}
            
         </View>)
         :
-        (<View className='flex-row w-full h-[55%] p-[10px] justify-center items-center my-4 rounded-[10px]'
+        (<View className='flex-row w-full h-fit p-[10px] justify-center items-center my-4 rounded-[10px]'
             style={{borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10}}>
             <Ionicons name="image-outline" size={24} color="#555" style={{ marginLeft: 5 }} />
         </View>)
