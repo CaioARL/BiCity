@@ -46,7 +46,6 @@ export default function Home() {
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
-  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const mapRef = useRef<MapView>(null)
 
   const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
@@ -90,7 +89,8 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const { eventoId } = useLocalSearchParams<{eventoId: string}>()
-
+  
+  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const locationErrors = {
     PERMISSION : {key: 'PERMISSION', message: 'Permissão de localização negada, cheque as permissões do aplicativo'},
     SERVICE : {key: 'SERVICE', message: 'Serviço de localização desativado'},
@@ -105,7 +105,7 @@ export default function Home() {
   
 
     const getCurrentLocation = async (): Promise<void>  => {
-      !initalLoading && setInitalLoading(true)
+      setInitalLoading(true)
       await Location.hasServicesEnabledAsync()
       .then((response) => {
         if (!response){
@@ -145,12 +145,12 @@ export default function Home() {
         raio: 7000
       })
       setInitialRegion({latitude: response.coords.latitude, longitude: response.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
-      initalLoading && setInitalLoading(false)
     })
     .catch((error) => {
       setCurrentLocationError(locationErrors.ERROR)
       setErrorMessage("Error ao obter localização: "+ error)
     }).finally(() => {
+      setInitalLoading(false)
     })
 
 
