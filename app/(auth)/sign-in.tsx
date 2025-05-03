@@ -8,7 +8,7 @@ import { useAuthProvider } from '../context/AuthProvider';
 import { UsuarioLoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
+import ShowAlert from 'components/ShowAlert';
 
 type AlertType = 'success' | 'error' | 'loading';
 
@@ -25,40 +25,10 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = useState('');
   const [isValidUsername, setIsValidUsername] = useState<boolean | undefined>(undefined);
   const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
-  
-  // Alert state and animation
-  const [alertConfig, setAlertConfig] = useState({
-    visible: false,
-    type: 'success' as AlertType,
-    message: '',
-  });
-  const [animation] = useState(new Animated.Value(0));
 
-  const showAlert = (type: AlertType, message: string) => {
-    setAlertConfig({ visible: true, type, message });
-  };
+  const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
-  const hideAlert = () => {
-    setAlertConfig(prev => ({ ...prev, visible: false }));
-  };
 
-  useEffect(() => {
-    if (alertConfig.visible) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.delay(2000),
-        Animated.timing(animation, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => hideAlert());
-    }
-  }, [alertConfig.visible]);
 
   // Validação dos campos
   const checkUsername = (text: string) => {
@@ -95,7 +65,7 @@ export default function SignIn() {
     }
 
     if (!isValid) {
-      showAlert('error', 'Preencha todos os campos corretamente');
+      setUserAlert({type: 'error', message: 'Preencha todos os campos corretamente'})
     }
 
     return isValid;
@@ -107,7 +77,7 @@ export default function SignIn() {
     abortControlRef.current?.abort();
     abortControlRef.current = new AbortController();
     setIsLoading(true);
-    showAlert('loading', 'Realizando login...');
+    setUserAlert({type: 'loading', message: 'Realizando login...'});
 
     const user: UsuarioLoginRequest = {
       nomeUsuario: form.username,
@@ -122,16 +92,16 @@ export default function SignIn() {
         if (onLogin) {
           onLogin(response)
             .then(() => {
-              showAlert('success', `Bem-vindo(a) ${response.nome}!`);
+              setUserAlert({type: 'success', message: `Bem-vindo(a) ${response.nome}!`});
               setTimeout(() => router.replace('events'), 2000);
             })
             .catch((error) => {
-              showAlert('error', 'Erro ao registrar sessão: ' + error);
+              setUserAlert({type: 'error', message: 'Erro ao registrar sessão: ' + error});
             });
         }
       })
       .catch((error) => {
-        showAlert('error', 'Erro login ou senha: ' + error);
+        setUserAlert({type:'error', message: 'Erro login ou senha: ' + error});
         setUsernameError('Nome de usuário ou senha incorretos');
         setPasswordError('Nome de usuário ou senha incorretos');
         setIsValidUsername(false);
@@ -141,26 +111,10 @@ export default function SignIn() {
   };
 
   useEffect(() => {
-    if (errorLoading) showAlert('error', 'Erro ao carregar: ' + errorLoading);
+    if (errorLoading) setUserAlert({type: 'error', message: 'Erro ao carregar: ' + errorLoading});
   }, [errorLoading]);
 
-  const getAlertColor = () => {
-    switch (alertConfig.type) {
-      case 'success': return '#22c55e';
-      case 'error': return '#ef4444';
-      case 'loading': return '#3b82f6';
-      default: return '#3b82f6';
-    }
-  };
 
-  const getIcon = () => {
-    switch (alertConfig.type) {
-      case 'success': return <CheckCircle size={24} color="white" />;
-      case 'error': return <XCircle size={24} color="white" />;
-      case 'loading': return <AlertCircle size={24} color="white" />;
-      default: return null;
-    }
-  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -240,49 +194,15 @@ export default function SignIn() {
 
       <Terms visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
 
-      {alertConfig.visible && (
-        <Modal transparent visible={alertConfig.visible}>
-          <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
-            <Animated.View
-              style={[
-                styles.alert,
-                {
-                  backgroundColor: getAlertColor(),
-                  transform: [{
-                    translateY: animation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-100, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              <View className="flex-row items-center flex-1">
-                {getIcon()}
-                <Text className="text-white ml-3 text-base flex-1">{alertConfig.message}</Text>
-              </View>
-              <TouchableOpacity onPress={hideAlert} className="p-1">
-                <Text className="text-white text-2xl font-bold">×</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
-      )}
+      {userAlert && 
+        <ShowAlert
+          message={userAlert.message}
+          type={userAlert.type}
+          onClose={()=> setUserAlert(null)}
+        />
+      }
+    
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  alert: {
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-});
