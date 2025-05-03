@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
+import { DefaultErrorResponse } from "types";
 
 const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -34,9 +35,10 @@ api.interceptors.response.use(
     (response) => {
         return response;
     },
-    (error: AxiosError) => {
+    (error: AxiosError<DefaultErrorResponse>) => {
         if(error.response?.status === 403) router.replace('/sign-in')
         console.error("Response error: ", error?.response?.data)
+        console.log(error?.response?.data)
 
         return Promise.reject(error)
     }

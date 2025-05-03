@@ -125,13 +125,6 @@ export interface EnderecoUsuario {
       cep: string
 }
 
-export interface UsuarioLoginRequest {
-    nomeUsuario: string
-    email: string
-    cpf: string
-    cnpj: string
-    senha: string
-}
 
 export interface RequestUpdateUsuario {
     id: number

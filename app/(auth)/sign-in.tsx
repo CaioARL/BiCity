@@ -5,13 +5,11 @@ import FormField from '../../components/FormField'; // Usando o mesmo FormField 
 import CustomButton from '../../components/CustomButton';
 import { router } from 'expo-router';
 import { useAuthProvider } from '../context/AuthProvider';
-import { UsuarioLoginRequest } from '../../types';
+import { DefaultErrorResponse, LoginRequest } from '../../types';
 import { loginUser } from '../../api/usuario';
 import Terms from './terms';
 import ShowAlert from 'components/ShowAlert';
-
-type AlertType = 'success' | 'error' | 'loading';
-
+import { AxiosError } from 'axios';
 
 export default function SignIn() {
   const backgroundImageLogo = require('../../assets/img/logo.png');
@@ -79,7 +77,7 @@ export default function SignIn() {
     setIsLoading(true);
     setUserAlert({type: 'loading', message: 'Realizando login...'});
 
-    const user: UsuarioLoginRequest = {
+    const user: LoginRequest = {
       nomeUsuario: form.username,
       email: '',
       cpf: '',
@@ -100,8 +98,8 @@ export default function SignIn() {
             });
         }
       })
-      .catch((error) => {
-        setUserAlert({type:'error', message: 'Erro login ou senha: ' + error});
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({type:'error', message: error.response?.data.message || error.message});
         setUsernameError('Nome de usuário ou senha incorretos');
         setPasswordError('Nome de usuário ou senha incorretos');
         setIsValidUsername(false);
