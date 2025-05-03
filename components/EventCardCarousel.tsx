@@ -81,7 +81,7 @@ export default function EventCardCarousel({
     const statusColors: {[key: string]: string} = {
       'PENDENTE': '#FFD166',
       'EM_ANALISE': '#4ECDC4',
-      'RESOLVIDO': '#2EC4B6',
+      'Ativo': '#2EC4B6',
       'ARQUIVADO': '#011627',
     }
     return statusColors[status] || '#333333'
@@ -164,12 +164,13 @@ export default function EventCardCarousel({
   
                   <View className="pt-6 pb-[22px] px-6 flex-col justify-around items-center">
   
-                    <View className='w-full mt-1 mb-[14px]'>
-                      <Text className="text-[20px] text-color__text__light font-bold text-center mb-4">{item.nome}</Text>
-                      <Text className="text-color__text__light text-[12px]">{item.descricao}</Text>
+                    <View className='w-full mt-1 mb-[8px] h-[70px]'>
+                      <Text className="text-[18px] text-color__text__light font-bold text-center mb-4 capitalize">{item.nome}</Text>
+                      <Text className="text-color__text__light text-[12px]" numberOfLines={2} 
+                        ellipsizeMode="tail">{item.descricao}</Text>
                     </View>
                     
-                    <View className='w-full flex-row items-center justify-between mb-2' style={{ borderRadius: 18}}>
+                    <View className='w-full flex-row items-center justify-between mb-1' style={{ borderRadius: 18}}>
                       <Text className='text-[14px] font-bold text-white w-[50%]'>Organizado Por: {"\n"}{item.usuario.nome.replace(/\b\w/, (c: string) => c.toUpperCase())}</Text>
                                       
                       {item.usuario.s3Url ? 
@@ -203,7 +204,8 @@ export default function EventCardCarousel({
                       </View>
                     </View>
                 
-                    <Text className="text-color_light_gray_2 text-[12px] text-center mt-6 bg-primary_green w-full p-5" style={{ borderRadius: 50}}>
+                    <Text className="text-color_light_gray_2 text-[12px] text-center mt-6 bg-primary_green w-full p-5" style={{ borderRadius: 50}} numberOfLines={1} 
+                        ellipsizeMode="tail">
                       Tipo de Evento: {item.tipoEvento.nome}
                     </Text>
                   </View>
@@ -237,8 +239,8 @@ export default function EventCardCarousel({
               
               <View className="pt-6 pb-[22px] px-6 flex-col">
                   <View className='w-full mt-1 mb-[14px]'>
-                    <Text className="text-[20px] text-matte_grayt font-bold text-center mb-4">{problema.tipoProblema.descricao}</Text>
-                    <Text className='text-[12px] text-matte_gray mb-[5px]'>{problema.descricao || "Sem descrição"}</Text>
+                    <Text className="text-[15px] text-matte_grayt font-bold text-center mb-4 capitalize">{problema.tipoProblema.descricao}</Text>
+                    <Text className='text-[12px] text-matte_gray mb-[5px]' numberOfLines={3} ellipsizeMode="tail">{problema.descricao || "Sem descrição"}</Text>
                             
                     <View className="w-full flex-row justify-end">
                         <Text className='text-[12px] text-matte_gray'>
@@ -246,7 +248,7 @@ export default function EventCardCarousel({
                         </Text>
                     </View>
                   </View>
-
+{/* 
                 <View key={problema.id} className='w-full flex-row h-[120px] items-stretch mb-2' style={{ borderRadius: 18}}>
             
                   <Image
@@ -284,7 +286,7 @@ export default function EventCardCarousel({
                     </View>)
                   } 
                              
-                </View>
+                </View> */}
 
                 
                 <View className="mt-auto flex-row ">
@@ -294,9 +296,9 @@ export default function EventCardCarousel({
                     </Text>
                     <View 
                       className="px-3 py-1 rounded-full"
-                      // style={{ backgroundColor: getStatusColor(problema.reportCount || 'PENDENTE') }}
+                      style={{ backgroundColor: getStatusColor(problema.ativo ? 'Ativo' : 'Arquivado') }}
                     >
-                      <Text className="text-white font-medium">{problema.reportCount || 'PENDENTE'}</Text>
+                      <Text className="text-white font-medium">{problema.ativo ? 'Ativo' : 'Arquivado'}</Text>
                     </View>
                   </View>
                 </View>

@@ -571,20 +571,23 @@ export default function Home() {
     
             </MapView>
             
-            {eventos && hilightedEvento && isMoved &&
+            {eventos && hilightedEvento && isMoved && (
               <EventCardCarousel
                 data={eventos}
+                problemas={problemas}
                 visible={hilightedEvento !== null}
                 hilightedEvento={hilightedEvento.evento}
                 handleChangeEvento={setHilightedEvento}
+                handleProblemSelect={setPinProblemaSelector}
               />
-            }
-
+            )}
+            
             {pinProblemaSelector &&
               <ProblemaView
                 problema={pinProblemaSelector}
                 onClose={() => setPinProblemaSelector(null)}
               />}
+
                   
                 {isMoved && 
               (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
