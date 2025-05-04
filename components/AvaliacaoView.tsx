@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Text, View, FlatList, Image, TouchableOpacity } from 'react-native'
-import { Avaliacao, RequestPageAvaliacao } from '../types'
+import { Avaliacao, DefaultErrorResponse, RequestPageAvaliacao } from '../types'
 import ButtonModal from './ButtonModal'
 import { Ionicons } from '@expo/vector-icons'
-import { getAvaliacoesByInfraestrutura } from '../api/avaliacao'
+import { getAvaliacaoDetails, getAvaliacoesByInfraestrutura } from '../api/avaliacao'
 import ShowAlert from './ShowAlert'
+import { AxiosError } from 'axios'
 
 interface AvaliacaoViewProps {
     requestPage: RequestPageAvaliacao
@@ -12,7 +13,6 @@ interface AvaliacaoViewProps {
 }
 
 interface Ratings {
-    ratings: number[]
     total: number
     average: number
     counts: number[]
@@ -23,9 +23,10 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
     const totalRegistros = useRef<number>(0)
     const totalPaginas = useRef<number>(0)
     const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(requestPage)
+    const [requestDetailsAvaliacao, setRequestDetailsAvaliacao] = useState<number>(requestPage.idInfraestruturaCicloviaria)
     const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>()
-    const [ratings, setRatings] = useState<Ratings>({ ratings: [], total: 0, average: 0, counts: [] })
+    const [ratings, setRatings] = useState<Ratings>({ total: 0, average: 0, counts: [] })
     const [filtroAtivo, setFiltroAtivo] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string | null>()
     const [loadPageButton, setLoadPageButton] = useState<boolean>(false)
@@ -58,18 +59,27 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
         setFiltroAtivo(false)
     }
 
-    useEffect(() => {
-        const todasAvaliacoes = avaliacoes
-        if (!todasAvaliacoes) return
-        setRatings({
-            ratings: todasAvaliacoes.map((item) => item.nota),
-            total: todasAvaliacoes.length,
-            average: todasAvaliacoes.reduce((a, b) => a + b.nota, 0) / todasAvaliacoes.length || 0,
-            counts: [1, 2, 3, 4, 5].map(star =>
-                todasAvaliacoes.filter(r => r.nota === star).length
-            )
+    useEffect(()=> {
+        if(!requestDetailsAvaliacao) return
+        getAvaliacaoDetails(requestDetailsAvaliacao, null)
+        .then(response => {
+            const notas = [
+                response.total_avaliacoes_por_nota['Nota 1'] |0,
+                response.total_avaliacoes_por_nota['Nota 2'] |0,
+                response.total_avaliacoes_por_nota['Nota 3'] |0,
+                response.total_avaliacoes_por_nota['Nota 4'] |0,
+                response.total_avaliacoes_por_nota['Nota 5'] |0,
+            ]
+            setRatings({
+                average: ( notas.reduce((a,b, index) => a + b * (index+1)) / response.total_avaliacoes ),
+                total: response.total_avaliacoes,
+                counts: notas
+            })
         })
-    }, [avaliacoes])
+        .catch((error: AxiosError<DefaultErrorResponse>) => {
+            setErrorMessage("Erro buscando avaliações: " + (error.response?.data.message || error.message))
+        })
+    },[requestDetailsAvaliacao])
 
     useEffect(()=>{
           if(!requestPageAvaliacao) return
@@ -78,8 +88,8 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
           .then((response)=>{        
               setAvaliacoes(response.avaliacoes)
           })
-          .catch((reponse)=>{
-            setErrorMessage("Erro buscando avaliações: " + reponse.message)
+          .catch((error: AxiosError<DefaultErrorResponse>)=>{
+            setErrorMessage("Erro buscando avaliações: " + (error.response?.data.message || error.message))
           })
           .finally(()=>{
             setRequestPageAvaliacao(null)
@@ -88,7 +98,7 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
         },[requestPageAvaliacao])
 
     return (
-        <View className="p-[30px] obsolute bg-white rounded-lg shadow-md h-[80%] w-[94%] top-[3%] left-[3%] absolute justify-center">
+        <View className="p-[30px] obsolute z-10 bg-white rounded-lg shadow-md h-[80%] w-[94%] top-[3%] left-[3%] absolute justify-center">
             <FlatList
                 className='relative'
                 ListHeaderComponent={

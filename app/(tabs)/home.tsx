@@ -655,7 +655,7 @@ export default function Home() {
               }
 
               <TouchableOpacity
-                className='absolute top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                className='absolute z-0 top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
                 onPress={handleMyLocationPress}
               >
                 <Ionicons name="locate" size={24} color="black" />

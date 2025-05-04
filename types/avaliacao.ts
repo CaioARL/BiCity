@@ -10,6 +10,17 @@ export interface Avaliacao {
     dtCriacao: string
 }
 
+export interface DetailsAvaliacao {
+    total_avaliacoes: number
+    total_avaliacoes_por_nota: {
+        'Nota 1': number
+        'Nota 2': number
+        'Nota 3': number
+        'Nota 4': number
+        'Nota 5': number
+    }
+}
+
 export interface RequestCreateAvaliacao {
     idUsuario: number
     idInfraestruturaCicloviaria: number
