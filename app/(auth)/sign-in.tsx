@@ -31,7 +31,7 @@ export default function SignIn() {
     const typeResult = checkInputType(login.credencial)
     setRequesLoginError({ cnpj: '', cpf: '', email: '', nomeUsuario: '', senha : '' })
     if(!typeResult){
-      updateCampoError('nomeUsuario', 'muito curto.')
+      updateCampoError('nomeUsuario', 'O valor inserido não corresponde a um CNPJ, CPF, nome de usuário ou email válido. Por favor, verifique e tente novamente.')
       setUserAlert({type: 'error', message: 'Preencha todos os campos corretamente'})
       return
     }

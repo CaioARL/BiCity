@@ -3,7 +3,7 @@ import { ScrollView, View, Text, TouchableOpacity, ImageBackground, BackHandler 
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
-import { signInStep1, signInStep2, signInStep3, signInStep4 } from '../../util/validationSchemas'
+import { signUpStep1, signUpStep2, signUpStep3, signUpStep4 } from '../../util/validationSchemas'
 import { getViaCep } from '../../api/endereco'
 import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilidade'
 import FormFieldSelectList from '../../components/FormFieldSelectList'
@@ -83,7 +83,7 @@ export default function SignUp() {
     setErrorCreateUsuarioForms({ bairro: '', cep: '', cidade: '', cnpj: '', cpf: '', email: '', estado: '', nivelHabilidade: '', firstName: '' , secondName: '', nomeUsuario: '', numero: '', rua: '',  senha: '', confirmaSenha: ''})
     if (step === 1) {
 
-      const validationResult = signInStep1.safeParse(createUsuarioForms)
+      const validationResult = signUpStep1.safeParse(createUsuarioForms)
       if (!validationResult.success) {
         validationResult.error.issues.forEach((issue) => {
           setErrorCreateUsuarioForms((prevState) => ({
@@ -113,7 +113,7 @@ export default function SignUp() {
 
     } else if (step === 2) {
 
-      const validationResult = signInStep2.safeParse(createUsuarioForms)
+      const validationResult = signUpStep2.safeParse(createUsuarioForms)
       if (!validationResult.success) {
         validationResult.error.issues.forEach((issue) => {
           setErrorCreateUsuarioForms((prevState) => ({
@@ -129,7 +129,7 @@ export default function SignUp() {
 
     } else if (step === 3) {
       
-      const validationResult = signInStep3.safeParse(createUsuarioForms)
+      const validationResult = signUpStep3.safeParse(createUsuarioForms)
       if (!validationResult.success) {
         validationResult.error.issues.forEach((issue) => {
           setErrorCreateUsuarioForms((prevState) => ({
@@ -199,7 +199,7 @@ export default function SignUp() {
 
     } else if (step === 4) {
 
-      const validationResult = signInStep4.safeParse(createUsuarioForms)
+      const validationResult = signUpStep4.safeParse(createUsuarioForms)
       if (!validationResult.success) {
         validationResult.error.issues.forEach((issue) => {
           setErrorCreateUsuarioForms((prevState) => ({
