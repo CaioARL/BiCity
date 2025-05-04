@@ -1,5 +1,5 @@
 
-export interface LoginRequest {
+export interface RequestLogin {
     nomeUsuario: string | null
     email: string | null
     cpf: string | null
@@ -7,7 +7,7 @@ export interface LoginRequest {
     senha: string | null
 }
 
-export interface LoginErrorRequest {
+export interface RequestLoginError {
     nomeUsuario: string 
     email: string 
     cpf: string 

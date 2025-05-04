@@ -1,5 +1,5 @@
 import api from ".";
-import { CnpjValidationResponse, CpfValidationResponse, CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, LoginRequest, ValidateUsuarioRequest } from "../types";
+import { CnpjValidationResponse, CpfValidationResponse, CreateUsuarioRequest, CriarUsuarioResponse, RequestUpdateUsuario, Usuario, RequestLogin, ValidateUsuarioRequest } from "../types";
 import ENDPOINTS from "./endpoints";
 
 export const createUser = async (data: CreateUsuarioRequest, abortSignal: AbortController | null): Promise<CriarUsuarioResponse> => {
@@ -47,7 +47,7 @@ export const validateUser = async (validateUsuario : ValidateUsuarioRequest  , a
     return response.data
 }
 
-export const loginUser = async (usuarioLogin: LoginRequest, abortSignal: AbortController) => {
+export const loginUser = async (usuarioLogin: RequestLogin, abortSignal: AbortController) => {
     const response = await api.post<Usuario>(ENDPOINTS.USUARIO_LOGIN, usuarioLogin, {
         signal: abortSignal.signal
     })
