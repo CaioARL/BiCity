@@ -5,9 +5,10 @@ import CustomButton from '../../components/CustomButton';
 import TokenInput from '../../components/CustomTokenInput';
 import { valid } from '../../util/validationSchemas';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { sendToken, checkToken, resetPassword } from '../../api/token';
+import { sendToken } from '../../api/token'
 import { router, useNavigation } from 'expo-router';
-import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native'
+import ShowAlert from 'components/ShowAlert'
 
 type AlertType = 'success' | 'error' | 'loading';
 
@@ -43,39 +44,8 @@ export default function ResetPassword() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const backgroundImage = require('../../assets/img/background-fundo-figura.png');
 
-  // Alert state and animation
-  const [alertConfig, setAlertConfig] = useState({
-    visible: false,
-    type: 'success' as AlertType,
-    message: '',
-  });
-  const [animation] = useState(new Animated.Value(0));
+  const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
-  const showAlert = (type: AlertType, message: string) => {
-    setAlertConfig({ visible: true, type, message });
-  };
-
-  const hideAlert = () => {
-    setAlertConfig(prev => ({ ...prev, visible: false }));
-  };
-
-  useEffect(() => {
-    if (alertConfig.visible) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.delay(2000),
-        Animated.timing(animation, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => hideAlert());
-    }
-  }, [alertConfig.visible]);
 
   // Timer para o token
   useEffect(() => {
@@ -85,7 +55,7 @@ export default function ResetPassword() {
         setTimer(prev => prev - 1);
       }, 1000);
     } else if (timer === 0) {
-      showAlert('error', 'Tempo esgotado! Solicite um novo código.');
+      setUserAlert({type: 'error', message: 'Tempo esgotado! Solicite um novo código.'});
       setStep(1);
     }
     return () => clearInterval(interval);
@@ -119,7 +89,7 @@ export default function ResetPassword() {
         { value: email, setError: setEmailError, check: () => checkEmail(email) },
       ];
       if (!validateRequiredFields(fields) || !isValidEmail) {
-        showAlert('error', 'Preencha o email corretamente');
+        setUserAlert({type: 'error', message: 'Preencha o email corretamente'})
         return;
       }
       setIsEmailLoading(true);
@@ -127,12 +97,12 @@ export default function ResetPassword() {
       abortControllerRef.current = new AbortController();
       sendToken(email, abortControllerRef.current as AbortController)
         .then((response) => {
-          showAlert('success', `${response} Verifique seu email.`);
+          setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
           setTimer(300);
           setStep(2);
         })
         .catch((response) => {
-          showAlert('error', 'Erro ao enviar código: ' + response.message);
+          setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + response.message})
         })
         .finally(() => setIsEmailLoading(false));
     } else if (step === 2) {
@@ -140,20 +110,20 @@ export default function ResetPassword() {
         { value: token, setError: setTokenError, check: () => checkToken(token) },
       ];
       if (!validateRequiredFields(fields) || !isValidToken) {
-        showAlert('error', 'Preencha o código corretamente');
+        setUserAlert({type: 'error', message: 'Preencha o código corretamente'})
         return;
       }
       setIsTokenLoading(true);
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
-      checkToken(token, email, abortControllerRef.current as AbortController)
-        .then(() => {
-          setStep(3);
-        })
-        .catch((response) => {
-          showAlert('error', 'Código inválido: ' + response.message);
-        })
-        .finally(() => setIsTokenLoading(false));
+      // checkToken(token, email, abortControllerRef.current as AbortController)
+      //   .then(() => {
+      //     setStep(3);
+      //   })
+      //   .catch((response) => {
+      //     setUserAlert({type: 'error', 'Código inválido: ' + response.message);
+      //   })
+        // .finally(() => setIsTokenLoading(false));
     } else if (step === 3) {
       const fields = [
         { value: newPassword, setError: setNewPasswordError, check: () => checkNewPassword(newPassword) },
@@ -161,19 +131,19 @@ export default function ResetPassword() {
       ];
       if (!validateRequiredFields(fields) || !isValidNewPassword || !isValidConfirmPassword || newPassword !== confirmPassword) {
         if (newPassword !== confirmPassword) setConfirmPasswordError('As senhas não coincidem');
-        showAlert('error', 'Preencha as senhas corretamente');
+        setUserAlert({type: 'error', message: 'Preencha as senhas corretamente'})
         return;
       }
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
-      resetPassword(email, token, newPassword, abortControllerRef.current as AbortController)
-        .then(() => {
-          showAlert('success', 'Senha redefinida com sucesso!');
-          router.replace('/sign-in');
-        })
-        .catch((response) => {
-          showAlert('error', 'Erro ao redefinir senha: ' + response.message);
-        });
+      // resetPassword(email, token, newPassword, abortControllerRef.current as AbortController)
+      //   .then(() => {
+      //     setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
+      //     router.replace('/sign-in');
+      //   })
+      //   .catch((response) => {
+      //     setUserAlert({type: 'error', message: 'Erro ao redefinir senha: ' + response.message });
+      //   });
     }
   };
 
@@ -215,23 +185,6 @@ export default function ResetPassword() {
     setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '');
   };
 
-  const getAlertColor = () => {
-    switch (alertConfig.type) {
-      case 'success': return '#22c55e';
-      case 'error': return '#ef4444';
-      case 'loading': return '#3b82f6';
-      default: return '#3b82f6';
-    }
-  };
-
-  const getIcon = () => {
-    switch (alertConfig.type) {
-      case 'success': return <CheckCircle size={24} color="white" />;
-      case 'error': return <XCircle size={24} color="white" />;
-      case 'loading': return <AlertCircle size={24} color="white" />;
-      default: return null;
-    }
-  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
@@ -310,34 +263,13 @@ export default function ResetPassword() {
         )}
       </ScrollView>
 
-      {alertConfig.visible && (
-        <Modal transparent visible={alertConfig.visible}>
-          <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
-            <Animated.View
-              style={[
-                styles.alert,
-                {
-                  backgroundColor: getAlertColor(),
-                  transform: [{
-                    translateY: animation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-100, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              <View className="flex-row items-center flex-1">
-                {getIcon()}
-                <Text className="text-white ml-3 text-base flex-1">{alertConfig.message}</Text>
-              </View>
-              <TouchableOpacity onPress={hideAlert} className="p-1">
-                <Text className="text-white text-2xl font-bold">×</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
-      )}
+      {userAlert && 
+        <ShowAlert
+          message={userAlert.message}
+          type={userAlert.type}
+          onClose={()=> setUserAlert(null)}
+        />
+      }
     </SafeAreaView>
   );
 }
