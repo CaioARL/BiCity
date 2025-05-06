@@ -1,189 +1,189 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet } from 'react-native';
-import FormField from '../../components/FormField';
-import CustomButton from '../../components/CustomButton';
-import TokenInput from '../../components/CustomTokenInput';
-import { valid } from '../../util/validationSchemas';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from 'react'
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet } from 'react-native'
+import FormField from '../../components/FormField'
+import CustomButton from '../../components/CustomButton'
+import TokenInput from '../../components/CustomTokenInput'
+import { valid } from '../../util/validationSchemas'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { sendToken } from '../../api/token'
-import { router, useNavigation } from 'expo-router';
+import { router, useNavigation } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
 
-type AlertType = 'success' | 'error' | 'loading';
+type AlertType = 'success' | 'error' | 'loading'
 
 export default function ResetPassword() {
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
-    });
-  }, [navigation]);
+    })
+  }, [navigation])
 
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined);
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined)
+  const [isEmailLoading, setIsEmailLoading] = useState(false)
 
-  const [token, setToken] = useState('');
-  const [tokenError, setTokenError] = useState('');
-  const [isValidToken, setIsValidToken] = useState<boolean | undefined>(undefined);
-  const [isTokenLoading, setIsTokenLoading] = useState(false);
-  const [timer, setTimer] = useState(300);
+  const [token, setToken] = useState('')
+  const [tokenError, setTokenError] = useState('')
+  const [isValidToken, setIsValidToken] = useState<boolean | undefined>(undefined)
+  const [isTokenLoading, setIsTokenLoading] = useState(false)
+  const [timer, setTimer] = useState(300)
 
-  const [newPassword, setNewPassword] = useState('');
-  const [newPasswordError, setNewPasswordError] = useState('');
-  const [isValidNewPassword, setIsValidNewPassword] = useState<boolean | undefined>(undefined);
+  const [newPassword, setNewPassword] = useState('')
+  const [newPasswordError, setNewPasswordError] = useState('')
+  const [isValidNewPassword, setIsValidNewPassword] = useState<boolean | undefined>(undefined)
 
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined);
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
+  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined)
 
-  const [step, setStep] = useState(1);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png');
+  const [step, setStep] = useState(1)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const backgroundImage = require('../../assets/img/background-fundo-figura.png')
 
   const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
 
   // Timer para o token
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (step === 2 && timer > 0) {
       interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
+        setTimer(prev => prev - 1)
+      }, 1000)
     } else if (timer === 0) {
-      setUserAlert({type: 'error', message: 'Tempo esgotado! Solicite um novo código.'});
-      setStep(1);
+      setUserAlert({type: 'error', message: 'Tempo esgotado! Solicite um novo código.'})
+      setStep(1)
     }
-    return () => clearInterval(interval);
-  }, [step, timer]);
+    return () => clearInterval(interval)
+  }, [step, timer])
 
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-  };
+    const minutes = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`
+  }
 
   // Validação de campos obrigatórios (baseado no SignUp)
   const validateRequiredFields = (
-    fields: { value: string; setError: (msg: string) => void; check: () => void }[]
+    fields: { value: string, setError: (msg: string) => void, check: () => void }[]
   ) => {
-    let allFilledAndValid = true;
+    let allFilledAndValid = true
     fields.forEach(({ value, setError, check }) => {
       if (!value.trim()) {
-        setError('Campo obrigatório');
-        allFilledAndValid = false;
+        setError('Campo obrigatório')
+        allFilledAndValid = false
       } else {
-        check();
+        check()
       }
-    });
-    return allFilledAndValid;
-  };
+    })
+    return allFilledAndValid
+  }
 
   const nextStep = () => {
     if (step === 1) {
       const fields = [
         { value: email, setError: setEmailError, check: () => checkEmail(email) },
-      ];
+      ]
       if (!validateRequiredFields(fields) || !isValidEmail) {
         setUserAlert({type: 'error', message: 'Preencha o email corretamente'})
-        return;
+        return
       }
-      setIsEmailLoading(true);
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
+      setIsEmailLoading(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
       sendToken(email, abortControllerRef.current as AbortController)
         .then((response) => {
           setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
-          setTimer(300);
-          setStep(2);
+          setTimer(300)
+          setStep(2)
         })
         .catch((response) => {
           setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + response.message})
         })
-        .finally(() => setIsEmailLoading(false));
+        .finally(() => setIsEmailLoading(false))
     } else if (step === 2) {
       const fields = [
         { value: token, setError: setTokenError, check: () => checkToken(token) },
-      ];
+      ]
       if (!validateRequiredFields(fields) || !isValidToken) {
         setUserAlert({type: 'error', message: 'Preencha o código corretamente'})
-        return;
+        return
       }
-      setIsTokenLoading(true);
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
+      setIsTokenLoading(true)
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
       // checkToken(token, email, abortControllerRef.current as AbortController)
       //   .then(() => {
-      //     setStep(3);
+      //     setStep(3)
       //   })
       //   .catch((response) => {
-      //     setUserAlert({type: 'error', 'Código inválido: ' + response.message);
+      //     setUserAlert({type: 'error', 'Código inválido: ' + response.message)
       //   })
-        // .finally(() => setIsTokenLoading(false));
+        // .finally(() => setIsTokenLoading(false))
     } else if (step === 3) {
       const fields = [
         { value: newPassword, setError: setNewPasswordError, check: () => checkNewPassword(newPassword) },
         { value: confirmPassword, setError: setConfirmPasswordError, check: () => checkConfirmPassword(confirmPassword) },
-      ];
+      ]
       if (!validateRequiredFields(fields) || !isValidNewPassword || !isValidConfirmPassword || newPassword !== confirmPassword) {
-        if (newPassword !== confirmPassword) setConfirmPasswordError('As senhas não coincidem');
+        if (newPassword !== confirmPassword) setConfirmPasswordError('As senhas não coincidem')
         setUserAlert({type: 'error', message: 'Preencha as senhas corretamente'})
-        return;
+        return
       }
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
       // resetPassword(email, token, newPassword, abortControllerRef.current as AbortController)
       //   .then(() => {
       //     setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
-      //     router.replace('/sign-in');
+      //     router.replace('/sign-in')
       //   })
       //   .catch((response) => {
-      //     setUserAlert({type: 'error', message: 'Erro ao redefinir senha: ' + response.message });
-      //   });
+      //     setUserAlert({type: 'error', message: 'Erro ao redefinir senha: ' + response.message })
+      //   })
     }
-  };
+  }
 
   const prevStep = () => {
     if (step === 1) {
-      router.replace('/sign-in');
+      router.replace('/sign-in')
     } else {
-      setStep(step - 1);
+      setStep(step - 1)
     }
-  };
+  }
 
   const checkEmail = (text: string) => {
-    setEmail(text);
-    const result = valid.emailSchema.safeParse(text);
-    setIsValidEmail(text.trim() ? result.success : undefined);
-    setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '');
-  };
+    setEmail(text)
+    const result = valid.emailSchema.safeParse(text)
+    setIsValidEmail(text.trim() ? result.success : undefined)
+    setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '')
+  }
 
   const checkToken = (text: string) => {
-    setToken(text);
-    const result = valid.codeUserValidationSchema.safeParse(text);
-    setIsValidToken(text.trim() ? result.success : undefined);
-    setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '');
-  };
+    setToken(text)
+    const result = valid.codeUserValidationSchema.safeParse(text)
+    setIsValidToken(text.trim() ? result.success : undefined)
+    setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '')
+  }
 
   const checkNewPassword = (text: string) => {
-    setNewPassword(text);
-    const result = valid.passwordSchema.safeParse(text);
-    setIsValidNewPassword(text.trim() ? result.success : undefined);
-    setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '');
-    if (confirmPassword) checkConfirmPassword(confirmPassword);
-  };
+    setNewPassword(text)
+    const result = valid.passwordSchema.safeParse(text)
+    setIsValidNewPassword(text.trim() ? result.success : undefined)
+    setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '')
+    if (confirmPassword) checkConfirmPassword(confirmPassword)
+  }
 
   const checkConfirmPassword = (text: string) => {
-    setConfirmPassword(text);
-    const result = valid.passwordSchema.safeParse(text);
-    const passwordsMatch = newPassword === text;
-    setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined);
-    setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '');
-  };
+    setConfirmPassword(text)
+    const result = valid.passwordSchema.safeParse(text)
+    const passwordsMatch = newPassword === text
+    setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined)
+    setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '')
+  }
 
 
   return (
@@ -271,20 +271,5 @@ export default function ResetPassword() {
         />
       }
     </SafeAreaView>
-  );
+  )
 }
-
-const styles = StyleSheet.create({
-  alert: {
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-});
