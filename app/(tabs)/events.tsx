@@ -10,6 +10,7 @@ import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
+import { set } from 'zod';
 
 
 // interface EventItem {
@@ -27,8 +28,12 @@ import { router } from 'expo-router';
 // Versão original
 //type FilterType = "Todos" | "Ativos" | "Realizados" | "Pendentes";
 
-type FilterType = "Ativos" | "Realizados" ;
-
+interface FastFowardFilter {
+  id: number
+  name: string
+  isActive: boolean | null
+  campo: string
+}
 
 export default function Events() {
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', role: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' }, sessao: {id:0, token:''}, s3Url:'' });
@@ -58,7 +63,11 @@ export default function Events() {
   
 
 
-  const [filter, setFilter] = useState<FilterType>("Ativos");
+  const [fastFowardFilter, setFastFowardFilter] = useState<FastFowardFilter[]>(
+    [
+      {id:1, name: 'Gratuito', isActive: null , campo: 'gratuito'},
+    ]
+  )
   
 
 
@@ -136,6 +145,13 @@ export default function Events() {
   }
 
 
+  useEffect(() => {
+    setEventos(null)
+    currentPageRef.current = 0
+    fastFowardFilter.forEach(item => {
+      setRequestPageEvento({...requestPageEvento, [item.campo]: item.isActive})
+    })
+  }, [fastFowardFilter])
 
 
 
@@ -244,15 +260,15 @@ export default function Events() {
           </View>
 
           <View style={CustomEvents.filterContainer}>
-            {["Ativos",  "Realizados"].map((item) => (
+            {fastFowardFilter.map((item) => (
               <TouchableOpacity 
-                key={item} 
-                onPress={() => setFilter(item as FilterType)}
+                key={item.id.toString()} 
+                onPress={() => setFastFowardFilter(prev => prev.map(fastFoward => fastFoward.id === item.id ? { ...fastFoward, isActive: fastFoward.isActive? null : true } : fastFoward))}
               >
                 <Text
                   style={[
                     CustomEvents.filterText,
-                    filter === item && {
+                    item.isActive && {
                       ...CustomEvents.filterText,fontWeight: "bold",
                       color: "#555",
                       backgroundColor: "#C3FF00",
@@ -260,7 +276,7 @@ export default function Events() {
                     }
                   ]}
                 >
-                  {item}
+                  {item.name}
                 </Text>
               </TouchableOpacity>
             ))}
