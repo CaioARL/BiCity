@@ -275,11 +275,7 @@ export default function Events() {
             {fastFowardFilter.map((item) => (
               <TouchableOpacity 
                 key={item.id.toString()} 
-                onPress={() => {
-                  
-                      applyFastFowardFilter(item)
-                    }
-                  }
+                onPress={() => applyFastFowardFilter(item)}
               >
                 <Text
                   style={[

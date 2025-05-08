@@ -3,7 +3,6 @@ import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Anima
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
-import { valid } from '../../util/validationSchemas'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { sendToken } from '../../api/token'
 import { router, useNavigation } from 'expo-router'
@@ -157,32 +156,32 @@ export default function ResetPassword() {
 
   const checkEmail = (text: string) => {
     setEmail(text)
-    const result = valid.emailSchema.safeParse(text)
-    setIsValidEmail(text.trim() ? result.success : undefined)
-    setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '')
+    // const result = valid.emailSchema.safeParse(text)
+    // setIsValidEmail(text.trim() ? result.success : undefined)
+    // setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '')
   }
 
   const checkToken = (text: string) => {
     setToken(text)
-    const result = valid.codeUserValidationSchema.safeParse(text)
-    setIsValidToken(text.trim() ? result.success : undefined)
-    setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '')
+    // const result = valid.codeUserValidationSchema.safeParse(text)
+    // setIsValidToken(text.trim() ? result.success : undefined)
+    // setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '')
   }
 
   const checkNewPassword = (text: string) => {
     setNewPassword(text)
-    const result = valid.passwordSchema.safeParse(text)
-    setIsValidNewPassword(text.trim() ? result.success : undefined)
-    setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '')
-    if (confirmPassword) checkConfirmPassword(confirmPassword)
+    // const result = valid.passwordSchema.safeParse(text)
+    // setIsValidNewPassword(text.trim() ? result.success : undefined)
+    // setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '')
+    // if (confirmPassword) checkConfirmPassword(confirmPassword)
   }
 
   const checkConfirmPassword = (text: string) => {
     setConfirmPassword(text)
-    const result = valid.passwordSchema.safeParse(text)
-    const passwordsMatch = newPassword === text
-    setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined)
-    setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '')
+    // const result = valid.passwordSchema.safeParse(text)
+    // const passwordsMatch = newPassword === text
+    // setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined)
+    // setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '')
   }
 
 
