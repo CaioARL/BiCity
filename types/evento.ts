@@ -14,6 +14,7 @@ export interface Evento {
     gratuito: boolean
     urlSite: string
     s3Url: string
+    aprovado: boolean
     tipoEvento: TipoEvento
     usuario: Usuario
 }
@@ -119,6 +120,7 @@ export interface RequestPageEvento {
     tipoEvento: TipoEvento | null
     nivelHabilidade: NivelHabilidade | null
     gratuito: boolean | null
+    aprovado: boolean | null
 }
 
 export interface PageEvento {

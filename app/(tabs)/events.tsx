@@ -31,8 +31,9 @@ import { set } from 'zod';
 interface FastFowardFilter {
   id: number
   name: string
-  isActive: boolean | null
+  isActive: boolean
   campo: string
+  value: boolean | null | string | number
 }
 
 export default function Events() {
@@ -46,7 +47,7 @@ export default function Events() {
   const totalPagesRef = useRef<number>(2)
   const totalRegistrosRef = useRef<number>()
   const currentPageRef = useRef<number>(0)
-  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
   const abortControllerRef = useRef<AbortController>()
   const [scrollY, setScrolly] = useState<number>(0)
   
@@ -65,7 +66,10 @@ export default function Events() {
 
   const [fastFowardFilter, setFastFowardFilter] = useState<FastFowardFilter[]>(
     [
-      {id:1, name: 'Gratuito', isActive: null , campo: 'gratuito'},
+      {id:1, name: 'Gratuito', isActive: false , campo: 'gratuito', value: true},
+      {id:2, name: 'Pago', isActive: false , campo: 'gratuito', value: false},
+      {id:3, name: 'Aprovado', isActive: false , campo: 'aprovado', value: true},
+      {id:4, name: 'Não Aprovado', isActive: false , campo: 'aprovado', value: false},
     ]
   )
   
@@ -127,14 +131,15 @@ export default function Events() {
   
 
   const refreshContent = () => {
-        setEventos(null)
-        setSearchText('')
-        currentPageRef.current = 0
-        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+    setEventos(null)
+    setSearchText('')
+    currentPageRef.current = 0
+    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
+    setFastFowardFilter(prev => prev.map(item => ({ ...item, isActive: false })))	
   }
-  
-
-
+      
+      
+      
   const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
     setEventos(null)
     currentPageRef.current = 0
@@ -145,13 +150,20 @@ export default function Events() {
   }
 
 
-  useEffect(() => {
+  const applyFastFowardFilter = (filter: FastFowardFilter) => {
+    setFastFowardFilter(prev => 
+      prev
+      .map(fastFoward => fastFoward.campo === filter.campo && fastFoward.id !== filter.id ? { ...fastFoward, isActive: false } : fastFoward )
+      .map(fastFoward => fastFoward.id === filter.id ? { ...fastFoward, isActive: !fastFoward.isActive } : fastFoward )
+    )
     setEventos(null)
     currentPageRef.current = 0
-    fastFowardFilter.forEach(item => {
-      setRequestPageEvento({...requestPageEvento, [item.campo]: item.isActive})
-    })
-  }, [fastFowardFilter])
+    if(filter.isActive){
+      setRequestPageEvento({...requestPageEvento, [filter.campo]: null, page: 1})
+    }else{
+      setRequestPageEvento({...requestPageEvento, [filter.campo]: filter.value, page: 1})
+    }
+  }
 
 
 
@@ -263,7 +275,11 @@ export default function Events() {
             {fastFowardFilter.map((item) => (
               <TouchableOpacity 
                 key={item.id.toString()} 
-                onPress={() => setFastFowardFilter(prev => prev.map(fastFoward => fastFoward.id === item.id ? { ...fastFoward, isActive: fastFoward.isActive? null : true } : fastFoward))}
+                onPress={() => {
+                  
+                      applyFastFowardFilter(item)
+                    }
+                  }
               >
                 <Text
                   style={[
