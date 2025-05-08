@@ -14,7 +14,7 @@ import { ArrowLeft } from 'lucide-react-native'
 
 
 export default function EventDetail() {
-  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
   const { authState } = useAuthProvider()
 
   const [eventos, setEventos] = useState<Evento[] | null>()
@@ -123,11 +123,11 @@ export default function EventDetail() {
   }, [requestCreateEventoImage])
 
   useEffect(() => {
-    if(!requestPageEvento || !authState?.id) return
+    if(!requestPageEvento || !authState?.user) return
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController
     setIsContentLoading(true)
-    getEventoByUsuario(requestPageEvento, authState.id , abortControllerRef.current)
+    getEventoByUsuario(requestPageEvento, authState.user.id , abortControllerRef.current)
     .then((response) =>{
       totalPagesRef.current = response.totalPaginas
       totalRegistrosRef.current = response.totalRegistros
@@ -154,8 +154,8 @@ export default function EventDetail() {
     setEventos(null)
     // setSearchText('')
     currentPageRef.current = 1
-    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
-  }
+    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
+  }   
 
   const handleLocationEventMap = (item: Evento) => {
     console.log('Você foi direcionar para o evento no mapa:', item.nome);

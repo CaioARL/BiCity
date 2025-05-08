@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import {  CriarUsuarioResponse, Usuario  } from '../../types'
-import { getUserById } from '../../api/usuario'
+import { getUser } from '../../api/usuario'
 import * as SecureStore from 'expo-secure-store'
 import api from '../../api/index'
 
@@ -10,7 +10,7 @@ import api from '../../api/index'
         onLogout?: () => Promise<any>
         onRegister?: (usuarioCadastro: CriarUsuarioResponse) => Promise<any>
         fetchUser?: () => Promise<any>
-        authState?: {id: number | null; authenticated: boolean | null; user: Usuario | null}
+        authState?: { authenticated: boolean | null; user: Usuario | null }
         isLoading?: boolean
         errorLoading?: string
         
@@ -27,11 +27,10 @@ import api from '../../api/index'
 export default function AuthProvider({children}: any) {
 
   const [authState, setAuthState] = useState<{
-    id: number | null
     authenticated: boolean | null
     user : Usuario | null
     
-  }>({id: null, authenticated: null, user: null})
+  }>({authenticated: null, user: null})
   const [errorLoading, setErrorLoading] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
@@ -46,12 +45,11 @@ export default function AuthProvider({children}: any) {
 
         try{
           const token = await SecureStore.getItemAsync('hash')
-          const id = await SecureStore.getItemAsync('id')
-          if (token && id) {
+          if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-            await getUserById(parseInt(id))
+            await getUser()
             .then((response) => {
-              setAuthState({id: parseInt(id), authenticated: true, user: response})
+              setAuthState({authenticated: true, user: response})
             })
             .catch((error) => {
               setErrorLoading("Erro ao carregar dados de usuário, verifique sua conexão : "+ error.message)
@@ -61,7 +59,7 @@ export default function AuthProvider({children}: any) {
             })            
             
           } else {
-            setAuthState({id: null, authenticated: false, user: authState.user})
+            setAuthState({authenticated: false, user: authState.user})
             api.defaults.headers.common['Authorization'] = ''
             setIsLoading(false)
           }
@@ -80,10 +78,9 @@ export default function AuthProvider({children}: any) {
     const onLogin = async (usuario: Usuario) => {
       return new Promise ((resolve, reject) => {
         try {
-          setAuthState({id: usuario.id, authenticated: true, user: usuario})
+          setAuthState({authenticated: true, user: usuario})
           api.defaults.headers.common['Authorization'] = `Bearer ${usuario.sessao.token}`
           SecureStore.setItemAsync('hash', usuario.sessao.token)
-          SecureStore.setItemAsync('id', usuario.id.toString())
           resolve('Login success')
         } catch (error) {
           reject('Error on login, ' + error)
@@ -95,9 +92,8 @@ export default function AuthProvider({children}: any) {
     const onLogout = async () => {
       return new Promise ((resolve, reject) => {
         try {
-          setAuthState({id: null, authenticated: false, user: null})
+          setAuthState({authenticated: false, user: null})
           SecureStore.deleteItemAsync('hash')
-          SecureStore.deleteItemAsync('id')
           delete api.defaults.headers.common['Authorization']
           resolve('Logout success')
         } catch (error) {
@@ -112,10 +108,9 @@ export default function AuthProvider({children}: any) {
        //api folder
       return new Promise((resolve, reject) => {
         try {
-          setAuthState({id: usuarioCadastro.id, authenticated: true, user: usuarioCadastro})
+          setAuthState({authenticated: true, user: usuarioCadastro})
           api.defaults.headers.common['Authorization'] = `Bearer ${usuarioCadastro.sessao.token}`
           SecureStore.setItemAsync('hash', usuarioCadastro.sessao.token)
-          SecureStore.setItemAsync('id', usuarioCadastro.id.toString())
           resolve('Register success')
         } catch (error) {
           reject('Error on Register' + error)
@@ -128,9 +123,9 @@ export default function AuthProvider({children}: any) {
 
     const fetchUser = async () => {
       return new Promise((resolve, reject) => {
-       if (authState.id === null) return reject('User ID is null') 
+       if (authState.user === null) return reject('User ID is null') 
         try {
-          getUserById(authState.id)
+          getUser()
             .then((response) => {
               setAuthState({ ...authState, user: response })
               resolve(response);

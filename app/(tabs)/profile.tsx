@@ -100,7 +100,7 @@ export default function Profile(){
 
   useEffect(() => {
     if(!updateImage) return
-    if(!authState?.id) return
+    if(!authState?.user) return
       const formData = new FormData()
       formData.append('file', {
         uri: updateImage,
@@ -110,7 +110,7 @@ export default function Profile(){
       setUpdateImage(null)
       setIsLoading(true)
 
-      updateImageUser(authState.id, formData, null)
+      updateImageUser(authState.user.id, formData, null)
         .then(() => {
           setSuccessMessage('Imagem atualizada com sucesso!')
         })

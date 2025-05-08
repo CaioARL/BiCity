@@ -3,7 +3,7 @@ const ENDPOINTS = {
     USUARIO_RECUPERAR_SENHA: '/login/recover',
     USUARIO_CADASTRO: '/usuario',
     USUARIO_PUT: '/usuario/',
-    USUARIO_GET: '/usuario/',
+    USUARIO_GET: '/usuario',
     USUARIO: '/usuario',
     USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
     USUARIO_VALIDAR_CNPJ: '/usuario/cnpj/validate',

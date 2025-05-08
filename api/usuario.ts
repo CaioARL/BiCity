@@ -54,8 +54,8 @@ export const loginUser = async (usuarioLogin: RequestLogin, abortSignal: AbortCo
     return response.data
 }
 
-export const getUserById = async (id: number ) => {
-    const response = await api.get<Usuario>(ENDPOINTS.USUARIO_GET + id, {
+export const getUser = async () => {
+    const response = await api.get<Usuario>(ENDPOINTS.USUARIO_GET, {
     })
     return response.data
 }
