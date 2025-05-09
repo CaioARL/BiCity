@@ -7,6 +7,7 @@ import { ListTipoProblema, RequestCreateProblema } from '../types'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
 import { getTipoProblema } from '../api/tipo-problema'
 import ImageSelectionPopup from '../components/ImgPickerModal'
+import { createProblemaSchema } from 'util/validationSchemas'
 
 interface ModalProps {
   visible: boolean
@@ -25,7 +26,11 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
     ativo: true,
     latitude: coords.latitude,
     longitude: coords.longitude,
-    idTipoProblema: 1,
+    idTipoProblema: 0,
+  })
+  const [problemError, setProblemaError] = useState<{ descricao: string; idTipoProblema: string }>({
+    descricao: '',
+    idTipoProblema: '',
   })
 
   useEffect(() => {
@@ -43,6 +48,23 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
       }).start()
     }
   }, [visible, fadeAnim])
+
+  const validateRequestProblema = () => {
+    const validationResult = createProblemaSchema.safeParse(problema)
+    if (!validationResult.success) {
+      console.log(validationResult.error.issues)
+      validationResult.error.issues.forEach((issue) => {
+        setProblemaError((prevState) => ({
+          ...prevState,
+          [issue.path[0]]: issue.message,
+        }))
+      })
+      return false
+    }
+
+    closeModal(problema, image)
+
+  }
 
   const pickImageFromGallery = async () => {
     try {
@@ -145,6 +167,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 validantionCheck={(e) => {
                   updateCampoProblema('descricao', e.nativeEvent.text)
                 }}
+                msg={problemError.descricao}
               />
               <FormFieldDropdownSelectList
                 title="Tipo de Problema"
@@ -155,6 +178,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 }}
                 isLoading={false}
                 dropDownSize={'100%'}
+                msg={problemError.idTipoProblema}
               />
 
               <TouchableOpacity onPress={showImageOptions} activeOpacity={0.7}>
@@ -174,7 +198,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                     <Text className="text-xs text-gray-400">Você pode tirar uma foto ou escolher da galeria</Text>
                   </View>
                 )}
-              </TouchableOpacity>
+              </TouchableOpacity>   
               <View className="flex-row justify-between">
                 {problema && (
                   <ButtonModal
@@ -186,7 +210,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 )}
                 <ButtonModal
                   title="Reportar !"
-                  handlePress={() => closeModal(problema, image)}
+                  handlePress={() => validateRequestProblema}
                   customStyles="bg-[#ffcc00]"
                   textStyles="text-black "
                 />
