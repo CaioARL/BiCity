@@ -129,14 +129,16 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
 
                             <View className='items-center justify-center w-[30%]'>
                                 <Text className='font-bold text-[45px]'>
-                                    {ratings.average.toFixed(1).replace('.', ',')}
+                                {ratings && typeof ratings.average === 'number' && !isNaN(ratings.average) ? (ratings.average.toFixed(1).replace('.', ',')) : (
+                                    <Text className='text-xs'>Não há avaliação</Text>
+                                )}
                                 </Text>
                                 <View className='flex-row my-1 gap-x-1'>
                                     {Array.from({ length: 5 }).map((_, i) => (
                                         <Ionicons key={i} name="star" size={13} color={i < Math.round(ratings.average) ? '#FFD700' : '#ddd'} />
                                     ))}
                                 </View>
-                                <Text className='text-[13px] text-matte_gray text-center'>{ratings.total}{'\n'} Avaliações</Text>
+                                <Text className='text-[13px] text-matte_gray text-center'>{ratings.total }{'\n'} Avaliações</Text>
                             </View>
                         </View>
                     </View>
