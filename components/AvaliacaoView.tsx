@@ -176,7 +176,7 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
                             <View className='flex-col flex-grow-[2px] w-[60%] justify-between items-start text-left my-4'>
                                 <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.dtCriacao}</Text>
                                 <View className='max-w-min'>
-                                    <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.comentario}</Text>
+                                    <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.comentario || "Usuário optou por não comentar"}</Text>
                                 </View>
 
                                 <View className='flex-row justify-between items-center'>
