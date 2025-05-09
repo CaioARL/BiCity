@@ -20,10 +20,9 @@ interface Ratings {
 
 export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewProps) {
     const currentPageRef = useRef<number>(1)
-    const totalRegistros = useRef<number>(0)
     const totalPaginas = useRef<number>(0)
     const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(requestPage)
-    const [requestDetailsAvaliacao, setRequestDetailsAvaliacao] = useState<number>(requestPage.idInfraestruturaCicloviaria)
+    const [requestDetailsAvaliacao] = useState<number>(requestPage.idInfraestruturaCicloviaria)
     const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>()
     const [ratings, setRatings] = useState<Ratings>({ total: 0, average: 0, counts: [] })
@@ -196,7 +195,7 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
             />
 
             <View className="px-4 py-2">
-                <Text className="text-gray-500">{"Comentários: " + ratings.total}</Text>
+                <Text className="text-gray-500">{"Avaliações: " + ratings.total}</Text>
                 <View className="mt-4 mb-2 flex-row justify-between">
                     <ButtonModal
                         title="Fechar"

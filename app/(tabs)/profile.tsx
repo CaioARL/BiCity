@@ -113,6 +113,7 @@ export default function Profile(){
       updateImageUser(authState.user.id, formData, null)
         .then(() => {
           setSuccessMessage('Imagem atualizada com sucesso!')
+          fetchUser && fetchUser()
         })
         .catch((error) => {
           setErrorMessage('Erro ao atualizar imagem: ' + error.message)

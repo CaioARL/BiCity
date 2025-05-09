@@ -10,12 +10,13 @@ import FormFieldSelectList from '../../components/FormFieldSelectList'
 import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { createUser, validateCNPJ, validateCNPJAuthenticity, validateCPF, validateUser } from '../../api/usuario'
-import { CreateUsuarioForms, CreateUsuarioRequest, ErrorCreateUsuarioForms } from '../../types'
+import { CreateUsuarioForms, CreateUsuarioRequest, DefaultErrorResponse, ErrorCreateUsuarioForms } from '../../types'
 import { checkToken, sendToken } from '../../api/token'
 import { useAuthProvider } from '../context/AuthProvider'
 import { router } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from '../../components/ShowAlert'
+import { AxiosError } from 'axios'
 
 export default function SignUp() {
   const [createUsuarioRequest, setCreateUsuarioRequest] = useState<CreateUsuarioRequest | null>()
@@ -223,14 +224,14 @@ export default function SignUp() {
                 setSuccessMessage(`${response} Verifique seu email.`)
                 setStep(5)
               })
-              .catch((response) => {
-                setErrorMessage('Erro ao enviar código: ' + response.message)
+              .catch((error : AxiosError<DefaultErrorResponse>) => {
+                setErrorMessage('Erro ao enviar código: ' + (error.response?.data.message || error.message))
               })
               .finally(() => setIsEmailCodeLoading(false))
-          }
-      })
-      .catch((response) => {
-        setErrorMessage(response)
+            }
+          })
+      .catch((error : AxiosError<DefaultErrorResponse>) => {
+        setErrorMessage('Erro ao enviar código: ' + (error.response?.data.message || error.message))
       })
       .finally(() => setIsRequesting(false))
 
@@ -281,12 +282,12 @@ export default function SignUp() {
               setSuccessMessage('Cadastro realizado com sucesso!')
               router.replace('home')
             })
-            .catch((response) => {
-              setErrorMessage('Erro ao registrar-se: ' + response.message)
+            .catch((error : AxiosError<DefaultErrorResponse>) => {
+              setErrorMessage('Erro ao registrar-se: ' + (error.response?.data.message || error.message))
             })
-        }
-      })
-      .catch((response) => {
+          }
+        })
+        .catch((response) => {
         setErrorMessage('Erro ao cadastrar: ' + response.message)
       })
     },[createUsuarioRequest]) 
@@ -298,15 +299,15 @@ export default function SignUp() {
       setIsRequesting(true)
       checkToken(createCodigoRequest, createUsuarioForms.email, null)
         .then((response) => {
-          if(response){
+          if(response.success){
             setCreateUsuarioRequest({ nome: createUsuarioForms.firstName + ' ' + createUsuarioForms.secondName, nomeUsuario: createUsuarioForms.nomeUsuario, endereco: {  numero: parseInt(createUsuarioForms.numero), cep: createUsuarioForms.cep, estado: createUsuarioForms.estado, cidade: createUsuarioForms.cidade, bairro: createUsuarioForms.bairro, rua: createUsuarioForms.rua, } , email: createUsuarioForms.email, senha: createUsuarioForms.senha, cpf: createUsuarioForms.cpf, cnpj: createUsuarioForms.cnpj, nivelHabilidade: createUsuarioForms.nivelHabilidade.id })
           } else {
             setCodigoError('Código inválido')
             setErrorMessage('Código inválido')
           }
         })
-        .catch((response) => {
-          setErrorMessage('Erro ao validar código: ' + response.message)
+        .catch((error : AxiosError<DefaultErrorResponse>) => {
+          setErrorMessage('Erro ao validar código: ' + (error.response?.data.message || error.message))
         })
         .finally(() => setIsRequesting(false))
       },[createCodigoRequest])
