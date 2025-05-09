@@ -3,7 +3,7 @@ import ENDPOINTS from "./endpoints"
 
 
 export const checkToken = async (token: string, email: string, abortSignal: AbortController | null) => {
-    const response = await api.get<boolean>(ENDPOINTS.TOKEN_CHECK, {
+    const response = await api.get<{success: boolean, token: string | null}>(ENDPOINTS.TOKEN_CHECK, {
         params: {
             token: token,
             email: email

@@ -61,7 +61,7 @@ export const getUser = async () => {
 }
 
 export const updateUser = async (user: RequestUpdateUsuario, abortSignal: AbortController | null ) => {
-    const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT+ user.id , {
+    const response = await api.put<RequestUpdateUsuario, Usuario>(ENDPOINTS.USUARIO_PUT , {
                 nome: user.nome, 
                 nomeUsuario: user.nomeUsuario,
                 endereco: {
@@ -84,7 +84,7 @@ export const updateUser = async (user: RequestUpdateUsuario, abortSignal: AbortC
 }
 
 export const updateImageUser = async (id: number, image: FormData, abortSignal: AbortController | null ) => {
-    const response = await api.put<Usuario>(ENDPOINTS.USUARIO_PUT + id + '/foto', image, {
+    const response = await api.put<Usuario>(ENDPOINTS.USUARIO_PUT + '/foto', image, {
         signal: abortSignal?.signal,
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -101,4 +101,17 @@ export const getImageUser = async (id: number, s3Key: string) => {
         responseType: 'blob'
     })
     return response
+}
+
+export const recoverPassword = async (novaSenha: string,token: string, abortSignal: AbortController | null) => {
+    const response = await api.post(ENDPOINTS.USUARIO_RECUPERAR_SENHA, {}, {
+        params: {
+            novaSenha: novaSenha,
+        },
+        signal: abortSignal?.signal,
+        headers: {
+            'Authorization' : `Bearer ${token}`,
+        },
+    })
+    return response.data
 }

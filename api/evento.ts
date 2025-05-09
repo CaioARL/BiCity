@@ -114,7 +114,7 @@ export const createEventoImage = async (eventoImage: RequestCreateEventoImage, a
 
 
 export const getEventoByUsuario = async (pageEvento: RequestPageEvento, idUsuario: number, abortSignal: AbortController) => {
-    const response = await api.get<PageEvento>(ENDPOINTS.EVENTO_GET_BY_USUARIO + idUsuario, 
+    const response = await api.get<PageEvento>(ENDPOINTS.EVENTO_GET_BY_USUARIO , 
         { 
             params: {
             pagina: pageEvento.page,
