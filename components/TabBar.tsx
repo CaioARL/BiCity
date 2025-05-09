@@ -21,7 +21,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     });
   };
 
-
   useEffect(()=>{
     const showListener = Keyboard.addListener('keyboardDidShow', () => setIsVisible(false))
     const hideListener = Keyboard.addListener('keyboardDidHide', () => tabBarVisible !== "no"  && setIsVisible(true))
@@ -32,10 +31,16 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     };
   })
 
+  const visibleRoutes = state.routes.filter(route => {
+    if(authState?.user?.role === 'PJ' && route.name === 'home') return false;
+    return true;
+  });
+
   useEffect(() => {
-    const buttonWidth = dimensions.width / state.routes.length;
-    tabPositionX.value = withSpring(buttonWidth * state.index, { damping: 100, stiffness: 150 });
-  }, [state.index, dimensions.width]);
+    const realIndex = visibleRoutes.findIndex(route => route.key === state.routes[state.index].key);
+    const buttonWidth = dimensions.width / visibleRoutes.length;
+    tabPositionX.value = withSpring(buttonWidth * realIndex, { damping: 100, stiffness: 150 });
+  }, [state.index, dimensions.width, visibleRoutes]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -49,12 +54,11 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
     if(tabBarVisible === "no")
       setIsVisible(false)
-  }
-  ,[tabBarVisible])
+  }, [tabBarVisible])
 
   if (!isVisible) return null
 
-  const buttonWidth = dimensions.width / state.routes.length;
+  const buttonWidth = dimensions.width / visibleRoutes.length;
 
   return (
     <Animated.View style={[CustomTabBar.tabbar]} onLayout={onTabLayout}>
@@ -62,18 +66,22 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         className={`absolute bg-primary_green rounded-[30] mx-[12px]`}
         style={[animatedStyle, {
           height: dimensions.height - 15,
-          width: buttonWidth - 25,
+          width: authState?.user?.role === 'PJ' ? buttonWidth - 60 : buttonWidth - 25,
+          left: authState?.user?.role === 'PJ' ? 15 : 0, 
+          marginHorizontal: 0
         }]}
       />
 
       {state.routes.map((route, index) => {
-        if(authState?.user?.role === 'PJ' && route.name === 'home') return null
+        if(authState?.user?.role === 'PJ' && route.name === 'home') return null;
+        
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
         const isFocused = state.index === index;
         
         const onPress = () => {
-          tabPositionX.value = withSpring(buttonWidth * index, { damping: 100, stiffness: 150 });
+          const realIndex = visibleRoutes.findIndex(r => r.key === route.key);
+          tabPositionX.value = withSpring(buttonWidth * realIndex, { damping: 100, stiffness: 150 });
 
           const event = navigation.emit({
             type: 'tabPress',
