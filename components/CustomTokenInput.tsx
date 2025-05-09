@@ -8,9 +8,10 @@ interface TokenInputProps {
   msg: string;
   isValid: boolean | undefined;
   maxLength: number;
+  onFocus?: () => void;
 }
 
-const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText, msg, isValid, maxLength }) => {
+const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText, msg, isValid, maxLength, onFocus }) => {
   const [token, setToken] = useState<string[]>(['', '', '', '']);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -65,7 +66,7 @@ const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText,
             value={digit}
             onChangeText={(text) => handleInputChange(text, index)}
             maxLength={1}
-            
+            onFocus={onFocus}
           />
         ))}
       </View>

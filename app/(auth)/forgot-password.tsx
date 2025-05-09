@@ -4,47 +4,39 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { sendToken } from '../../api/token'
-import { router, useNavigation } from 'expo-router'
+import { checkToken, sendToken } from '../../api/token'
+import { router } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
+import { recoverPassword } from 'api/usuario'
+import { validationSchemas } from 'util/validationSchemas'
+import { DefaultErrorResponse } from 'types'
+import { AxiosError } from 'axios'
 
-type AlertType = 'success' | 'error' | 'loading'
 
 export default function ResetPassword() {
-  const navigation = useNavigation()
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    })
-  }, [navigation])
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined)
-  const [isEmailLoading, setIsEmailLoading] = useState(false)
 
-  const [token, setToken] = useState('')
-  const [tokenError, setTokenError] = useState('')
-  const [isValidToken, setIsValidToken] = useState<boolean | undefined>(undefined)
-  const [isTokenLoading, setIsTokenLoading] = useState(false)
+  const [verificationToken, setVerificationToken] = useState('')
+  const [verificationTokenError, setVerificationTokenError] = useState('')
   const [timer, setTimer] = useState(300)
 
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordError, setNewPasswordError] = useState('')
-  const [isValidNewPassword, setIsValidNewPassword] = useState<boolean | undefined>(undefined)
 
   const [confirmPassword, setConfirmPassword] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
-  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined)
 
   const [step, setStep] = useState(1)
-  const abortControllerRef = useRef<AbortController | null>(null)
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png')
+
+  const [authToken, setAuthToken] = useState<string | null>(null)
 
   const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
-
 
   // Timer para o token
   useEffect(() => {
@@ -66,83 +58,84 @@ export default function ResetPassword() {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`
   }
 
-  // Validação de campos obrigatórios (baseado no SignUp)
-  const validateRequiredFields = (
-    fields: { value: string, setError: (msg: string) => void, check: () => void }[]
-  ) => {
-    let allFilledAndValid = true
-    fields.forEach(({ value, setError, check }) => {
-      if (!value.trim()) {
-        setError('Campo obrigatório')
-        allFilledAndValid = false
-      } else {
-        check()
-      }
-    })
-    return allFilledAndValid
-  }
-
   const nextStep = () => {
     if (step === 1) {
-      const fields = [
-        { value: email, setError: setEmailError, check: () => checkEmail(email) },
-      ]
-      if (!validateRequiredFields(fields) || !isValidEmail) {
-        setUserAlert({type: 'error', message: 'Preencha o email corretamente'})
-        return
-      }
-      setIsEmailLoading(true)
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      sendToken(email, abortControllerRef.current as AbortController)
-        .then((response) => {
-          setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
-          setTimer(300)
-          setStep(2)
-        })
-        .catch((response) => {
-          setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + response.message})
-        })
-        .finally(() => setIsEmailLoading(false))
+
+    setEmailError('')
+    const validationResult = validationSchemas.email.safeParse(email)
+    if (!validationResult.success) {
+      setEmailError(validationResult.error.errors[0].message)
+      setUserAlert({type: 'error', message: 'Revise os campos!'})
+      return
+    }
+
+    setIsLoading(true)
+    sendToken(email, null)
+    .then((response) => {
+      setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
+      setTimer(300)
+      setStep(2)
+    })
+    .catch((error: AxiosError<DefaultErrorResponse>) => {
+      setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+    })
+    .finally(() => setIsLoading(false))
+    
     } else if (step === 2) {
-      const fields = [
-        { value: token, setError: setTokenError, check: () => checkToken(token) },
-      ]
-      if (!validateRequiredFields(fields) || !isValidToken) {
-        setUserAlert({type: 'error', message: 'Preencha o código corretamente'})
-        return
+
+      setVerificationTokenError('')
+      const validationResult = validationSchemas.verificationToken.safeParse(verificationToken)
+      if (!validationResult.success) {
+        setVerificationTokenError(validationResult.error.errors[0].message)
+          setUserAlert({type: 'error', message: 'Revise os campos!'})
+          return 
       }
-      setIsTokenLoading(true)
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      // checkToken(token, email, abortControllerRef.current as AbortController)
-      //   .then(() => {
-      //     setStep(3)
-      //   })
-      //   .catch((response) => {
-      //     setUserAlert({type: 'error', 'Código inválido: ' + response.message)
-      //   })
-        // .finally(() => setIsTokenLoading(false))
+
+      setIsLoading(true)
+      checkToken(verificationToken, email,  null )
+      .then((response) => {
+        if (response.success) {
+          setUserAlert({type: 'success', message: 'Código verificado com sucesso!'})
+          setAuthToken(response.token)
+        } else {
+          setUserAlert({type: 'error', message: 'Código inválido!'})
+        }
+        setStep(3)
+      })
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+      })
+      .finally(() => setIsLoading(false))
+          
     } else if (step === 3) {
-      const fields = [
-        { value: newPassword, setError: setNewPasswordError, check: () => checkNewPassword(newPassword) },
-        { value: confirmPassword, setError: setConfirmPasswordError, check: () => checkConfirmPassword(confirmPassword) },
-      ]
-      if (!validateRequiredFields(fields) || !isValidNewPassword || !isValidConfirmPassword || newPassword !== confirmPassword) {
-        if (newPassword !== confirmPassword) setConfirmPasswordError('As senhas não coincidem')
-        setUserAlert({type: 'error', message: 'Preencha as senhas corretamente'})
+
+      if(authToken === null) return
+      setNewPasswordError('')
+      setConfirmPasswordError('')
+      const validationResult = validationSchemas.senha.safeParse(newPassword)
+      if (!validationResult.success) {
+        setNewPasswordError(validationResult.error.errors[0].message)
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
         return
       }
-      abortControllerRef.current?.abort()
-      abortControllerRef.current = new AbortController()
-      // resetPassword(email, token, newPassword, abortControllerRef.current as AbortController)
-      //   .then(() => {
-      //     setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
-      //     router.replace('/sign-in')
-      //   })
-      //   .catch((response) => {
-      //     setUserAlert({type: 'error', message: 'Erro ao redefinir senha: ' + response.message })
-      //   })
+
+      if (newPassword !== confirmPassword) {
+        setConfirmPasswordError('As senhas não coincidem')
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
+        return 
+      }
+
+      setIsLoading(true)
+      recoverPassword(newPassword, authToken, null)
+        .then(() => {
+          setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
+          router.replace('/sign-in')
+        })
+        .catch((error: AxiosError<DefaultErrorResponse>) => {
+          setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+        })
+        .finally(() => setIsLoading(false))
+
     }
   }
 
@@ -154,41 +147,10 @@ export default function ResetPassword() {
     }
   }
 
-  const checkEmail = (text: string) => {
-    setEmail(text)
-    // const result = valid.emailSchema.safeParse(text)
-    // setIsValidEmail(text.trim() ? result.success : undefined)
-    // setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkToken = (text: string) => {
-    setToken(text)
-    // const result = valid.codeUserValidationSchema.safeParse(text)
-    // setIsValidToken(text.trim() ? result.success : undefined)
-    // setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '')
-  }
-
-  const checkNewPassword = (text: string) => {
-    setNewPassword(text)
-    // const result = valid.passwordSchema.safeParse(text)
-    // setIsValidNewPassword(text.trim() ? result.success : undefined)
-    // setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '')
-    // if (confirmPassword) checkConfirmPassword(confirmPassword)
-  }
-
-  const checkConfirmPassword = (text: string) => {
-    setConfirmPassword(text)
-    // const result = valid.passwordSchema.safeParse(text)
-    // const passwordsMatch = newPassword === text
-    // setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined)
-    // setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '')
-  }
-
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
       <ImageBackground
-        source={backgroundImage}
+        source={require('../../assets/img/background-fundo-figura.png')}
         style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
         resizeMode="cover"
       />
@@ -213,27 +175,39 @@ export default function ResetPassword() {
               title="Email"
               value={email}
               placeholder="Digite seu email"
-              handleChangeText={checkEmail}
+              handleChangeText={setEmail}
               msg={emailError}
-              isValid={isValidEmail}
-              isLoading={isEmailLoading}
+              isLoading={isLoading}
+              onFocus={() => setEmailError('')}
+              maxLength={50}
               keyboardType="email-address"
             />
-            <CustomButton title="Próximo" handlePress={nextStep} isLoading={isEmailLoading} />
+            <CustomButton title="Próximo" handlePress={nextStep} isLoading={isLoading} />
           </View>
         )}
         {step === 2 && (
           <View style={{ position: 'absolute', width: '100%', bottom: 0, top: 250 }}>
             <TokenInput
               title="Código de verificação"
-              value={token}
-              handleChangeText={checkToken}
-              msg={tokenError}
-              isValid={isValidToken}
+              value={verificationToken}
+              handleChangeText={setVerificationToken}
+              msg={verificationTokenError}
+              isValid={verificationTokenError === ''}
+              onFocus={() => setVerificationTokenError('')}
               maxLength={4}
             />
+            {/* <FormField
+              title="Código de verificação"
+              value={verificationToken}
+              placeholder="Digite o código"
+              handleChangeText={setVerificationToken}
+              msg={verificationTokenError}
+              onFocus={() => setVerificationTokenError('')}
+              isLoading={isLoading}
+              maxLength={4}
+            /> */}
             <Text className="text-center text-gray-600 mt-2">Tempo restante: {formatTime(timer)}</Text>
-            <CustomButton title="Verificar" handlePress={nextStep} isLoading={isTokenLoading} />
+            <CustomButton title="Verificar" handlePress={nextStep} isLoading={isLoading} />
           </View>
         )}
         {step === 3 && (
@@ -242,22 +216,25 @@ export default function ResetPassword() {
               title="Nova Senha"
               value={newPassword}
               placeholder="Digite sua nova senha"
-              handleChangeText={checkNewPassword}
+              handleChangeText={setNewPassword}
               msg={newPasswordError}
-              isValid={isValidNewPassword}
+              onFocus={() => setNewPasswordError('')}
+              maxLength={20}
+              isLoading={isLoading}
               secureTextEntry={true}
             />
             <FormField
               title="Confirmar Nova Senha"
               value={confirmPassword}
               placeholder="Confirme sua nova senha"
-              handleChangeText={checkConfirmPassword}
+              handleChangeText={setConfirmPassword}
               msg={confirmPasswordError}
-              isValid={isValidConfirmPassword}
               secureTextEntry={true}
               maxLength={20}
+              onFocus={() => setConfirmPasswordError('')}
+              isLoading={isLoading}
             />
-            <CustomButton title="Redefinir Senha" handlePress={nextStep} />
+            <CustomButton title="Redefinir Senha" handlePress={nextStep} isLoading={isLoading}/>
           </View>
         )}
       </ScrollView>

@@ -56,17 +56,6 @@ export const updateUsuario = z.object({
     }),
 })    
 
-export const userSignUpSchema  = z.object(
-    {
-        cpfCnpj: z.string().min(11).max(14),
-        email: z.string().email(),
-        password: z.string().min(6),
-        confirmPassword: z.string().min(6),
-        firstName: z.string(),
-        lastName: z.string(),
-    }
-) 
-
 export const createEventSchema = z.object(
     {
         nome: z.string().min(5, { message: 'Nome: deve ter pelo ao menos 5 caracteres' }),
@@ -111,3 +100,9 @@ export const createProblemaSchema = z.object(
         idTipoProblema: z.number().min(1, "{Tipo: deve selecionar um tipo de problema'}),"),
     }
 )
+
+export const validationSchemas = {
+    email: z.string().email({message: 'Exemplo de email valido: email@email.com'}),
+    senha: z.string().regex(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!-@#\$%\^&\*])(?=.{6,20})'), {message: 'Senha deve conter pelo menos uma letra maiuscula, uma letra minuscula, um numero e um caracter especial'}).min(6, {message: 'Senha deve ter pelo ao menos 6 caracteres' }).max(20, {message: 'Senha deve ter no maximo 20 caracteres' }),
+    verificationToken: z.string().min(4, {message: 'Código de verificação deve ter pelo ao menos 4 caracteres' }).max(4, {message: 'Código de verificação deve ter no maximo 4 caracteres' }),
+}
