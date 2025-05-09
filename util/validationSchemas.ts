@@ -97,3 +97,17 @@ export const createEventSchema = z.object(
         })
     }
 )
+
+export const createAvaliacaoSchema = z.object(
+    {
+        nota: z.number().min(1, {message: 'Nota: deve selecionar uma nota de 1 a 5'}).max(5, {message: 'Nota: deve selecionar uma nota de 1 a 5'}),
+        comentario: z.string().max(200, {message: 'Comentario: deve ter no maximo 200 caracteres'}).nullish()
+    }
+)
+
+export const createProblemaSchema = z.object(
+    {
+        descricao: z.string().min(10, {message: 'Descrição: deve ter pelo ao menos 10 caracteres'}),
+        idTipoProblema: z.number().min(1, "{Tipo: deve selecionar um tipo de problema'}),"),
+    }
+)

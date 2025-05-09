@@ -4,6 +4,7 @@ import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
 import { RequestCreateAvaliacao } from '../types'
 import { useAuthProvider } from '../app/context/AuthProvider'
+import { createAvaliacaoSchema } from 'util/validationSchemas'
 
 interface AvalicaoModalProps {
     idInfraestruturaCicloviaria: number 
@@ -22,6 +23,11 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
     nota: 0,
     comentario: '',
     })
+
+  const [requestCreateAvaliacaoError, setRequestCreateAvaliacaoError] = useState({	
+    nota: '',
+    comentario: ''
+  })
 
   // useEffect(() => {
   //   if (visible) {
@@ -46,6 +52,20 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
   //     nota: nota
   //   }))
   // }, [comentario, nota])
+
+  const validateRequest = () => {
+    setRequestCreateAvaliacaoError({ nota: '', comentario: '' })
+    const validateResult = createAvaliacaoSchema.safeParse(requestCreateAvaliacao)
+    if (!validateResult.success) {
+      validateResult.error.issues.forEach(issue => {
+        setRequestCreateAvaliacaoError(prev => ({ ...prev, 
+          [issue.path[0]]: issue.message 
+        }))
+      })
+      return
+    }
+    closeModal(requestCreateAvaliacao)
+  }
 
   const renderStars = () => {
     const stars = [1, 2, 3, 4, 5]
@@ -98,6 +118,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
                  5 ★ = Muito satisfatório</Text>
               {renderStars()}
             </View>
+            <Text className='text-color_red_error text-'>*{requestCreateAvaliacaoError.nota}</Text>
 
             <FormFieldModal
               title="Comentário (opcional)"
@@ -106,6 +127,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               maxLength={200}
               handleChangeText={e=> updateCampoAvaliacao("comentario",e)}
               value={requestCreateAvaliacao.comentario}
+              msg={requestCreateAvaliacaoError.comentario}
               validantionCheck={() => {}}
             />
 
@@ -117,7 +139,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               />
               <ButtonModal
                 title="Enviar Avaliação"
-                handlePress={() => closeModal(requestCreateAvaliacao)}
+                handlePress={() => validateRequest()}
                 customStyles='py-[10px] rounded-[8px] bg-green-500 border-[1px] border-green-300'
                 disabled={requestCreateAvaliacao.nota===0}
                 textStyles='text-center color-black'
