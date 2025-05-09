@@ -97,10 +97,10 @@ export default function ResetPassword() {
         if (response.success) {
           setUserAlert({type: 'success', message: 'Código verificado com sucesso!'})
           setAuthToken(response.token)
+          setStep(3)
         } else {
           setUserAlert({type: 'error', message: 'Código inválido!'})
         }
-        setStep(3)
       })
       .catch((error: AxiosError<DefaultErrorResponse>) => {
         setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
