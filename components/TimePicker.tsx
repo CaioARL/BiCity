@@ -13,8 +13,8 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
   const minutesScrollViewRef = useRef<ScrollView>(null);
 
   const ITEM_HEIGHT = 50;
-
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  
+  const hours = Array.from({ length: 23 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
   const infiniteHours = [...hours, ...hours, ...hours];
