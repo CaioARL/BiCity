@@ -78,7 +78,7 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
       <View className="bg-white rounded-lg w-[90%] p-5">
         {/* Botão de Fechar */}
         <TouchableOpacity
-          className="right-2 z-10 w-8 h-8 items-center justify-center"
+          className="right-2 z-10 w-8 h-8 items-center justify-center position absolute top-2"
           onPress={() => onClose('')}
         >
           <Text className="text-gray-500 font-[12] text-xl">✕</Text>
@@ -88,7 +88,8 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
   
         {/* Conteúdo do seletor de horas e minutos */}
         <View className="flex-row items-center justify-center mb-[16px]">
-          <View className="h-[120px] w-[60px] overflow-hidden">
+          <View className="h-[120px] w-[60px] overflow-hidden relative">
+            <View className="absolute top-1/2 -translate-y-5 bg-[#C3FF00] rounded-full w-10 h-10 self-center z-[-1]"/>
             <ScrollView
               ref={hoursScrollViewRef}
               showsVerticalScrollIndicator={false}
@@ -107,8 +108,6 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
                       alignItems: 'center',
                     },
                     hour === selectedHour && {
-                      backgroundColor: '#C3FF00',
-                      borderRadius: 25,
                       width: 40,
                       height: 40,
                       alignSelf: 'center',
@@ -131,10 +130,11 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
               ))}
             </ScrollView>
           </View>
-  
+
           <Text className="text-[18px]">:</Text>
-  
-          <View className="h-[120px] w-[60px] overflow-hidden">
+
+          <View className="h-[120px] w-[60px] overflow-hidden relative">
+            <View className="absolute top-1/2 -translate-y-5 bg-[#C3FF00] rounded-full w-10 h-10 self-center z-[-1]"/>
             <ScrollView
               ref={minutesScrollViewRef}
               showsVerticalScrollIndicator={false}
@@ -153,8 +153,6 @@ const TimePicker = ({ onClose } : TimePickerProps) => {
                       alignItems: 'center',
                     },
                     minute === selectedMinute && {
-                      backgroundColor: '#C3FF00',
-                      borderRadius: 25,
                       width: 40,
                       height: 40,
                       alignSelf: 'center',
