@@ -393,7 +393,7 @@ export default function Events() {
                           onPress={() => handleLocalizarEvento(item.id)}
                           >
                           <Ionicons name="location-outline" size={20} color="white" />
-                          <Text style={CustomEvents.customButtonText}>Ir para o Local</Text>
+                          <Text style={CustomEvents.customButtonText}>Localização</Text>
                         </TouchableOpacity>}
                         {/* <TouchableOpacity 
                           style={CustomEvents.customButton} 
