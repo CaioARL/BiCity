@@ -4,7 +4,7 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { checkToken, sendTokenRecuperacao } from '../../api/token'
+import { checkToken, checkTokenRecuperacao, sendTokenRecuperacao } from '../../api/token'
 import { router } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
@@ -92,7 +92,7 @@ export default function ResetPassword() {
       }
 
       setIsLoading(true)
-      checkToken(verificationToken, email,  null )
+      checkTokenRecuperacao(verificationToken, email,  null )
       .then((response) => {
         if (response.success) {
           setUserAlert({type: 'success', message: 'Código verificado com sucesso!'})
@@ -115,6 +115,13 @@ export default function ResetPassword() {
       const validationResult = validationSchemas.senha.safeParse(newPassword)
       if (!validationResult.success) {
         setNewPasswordError(validationResult.error.errors[0].message)
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
+        return
+      }
+
+      const confirmPasswordValidationResult = validationSchemas.senha.safeParse(confirmPassword)
+      if (!confirmPasswordValidationResult.success) {
+        setConfirmPasswordError(confirmPasswordValidationResult.error.errors[0].message)
         setUserAlert({type: 'error', message: 'Revise os campos!'})
         return
       }
