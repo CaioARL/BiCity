@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity } from 'react-native'
+import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity, Share } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getEventoById } from '../../api/evento'
 import { Evento } from '../../types'
@@ -59,8 +59,43 @@ export default function EventV() {
     // console.log('Você foi direcionar para o evento no mapa:', evento.nome);
   }
 
-  const handleToshareEvent = (item: Evento) => {
-    console.log('Você compartilhou o evento:', item.nome);
+  const handleToshareEvent = async (item: Evento) => {
+    try {
+      // Título 
+      const title = `Evento: ${item.nome}`;
+      
+      // Conteúdo
+      const shareMessage = `🎉 *${item.nome}*\n\n${item.descricao}\n\n📍 *Local:* ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.cidade} - ${item.endereco.estado}\n\n📆 *Data:* ${item.data}\n🏃 *Distância:* ${item.faixaKm} km\n💰 *Tipo:* ${item.gratuito ? 'Gratuito' : 'Pago'}\n\n [©] 2025 BiCity`;
+      
+      // Construir opções de compartilhamento
+      const shareOptions = {
+        title: title,
+        message: shareMessage,
+      };
+      
+      // Adicionar URL do site ou da imagem se disponíveis
+      if (item.urlSite) {
+        shareOptions.message += `\n\n🔗 ${item.urlSite}`;
+      } else if (item.s3Url) {
+        shareOptions.message += `\n\n🖼️ ${item.s3Url}`;
+      }
+      
+      // Chamar a API de compartilhamento
+      const result = await Share.share(shareOptions);
+      
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log(`Compartilhado com sucesso via: ${result.activityType}`);
+        } else {
+          console.log('Compartilhado com sucesso');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Compartilhamento cancelado');
+      }
+    } catch (error) {
+      console.error('Erro ao compartilhar:', error);
+      setErrorMessage('Erro ao compartilhar evento. Por favor, tente novamente.');
+    }
   }
 
   return (
