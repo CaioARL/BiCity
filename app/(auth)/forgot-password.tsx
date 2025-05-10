@@ -4,7 +4,7 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { checkToken, sendToken } from '../../api/token'
+import { checkToken, sendTokenRecuperacao } from '../../api/token'
 import { router } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
@@ -70,7 +70,7 @@ export default function ResetPassword() {
     }
 
     setIsLoading(true)
-    sendToken(email, null)
+    sendTokenRecuperacao(email, null)
     .then((response) => {
       setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
       setTimer(300)
@@ -129,7 +129,9 @@ export default function ResetPassword() {
       recoverPassword(newPassword, authToken, null)
         .then(() => {
           setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
-          router.replace('/sign-in')
+          setTimeout(() => {
+            router.replace('/sign-in')
+          }, 2000)
         })
         .catch((error: AxiosError<DefaultErrorResponse>) => {
           setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})

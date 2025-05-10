@@ -27,6 +27,8 @@ const ENDPOINTS = {
 
     TOKEN_VALIDAR: '/token/',
     TOKEN_CHECK: '/token/validate',
+    TOKEN_RECOVER: '/token/recover',
+    TOKEN_RECOVER_CHECK: '/token/recover/validate',
 
     NIVEL_GET: '/nivel/habilidade/',
     NIVEL_POST: '/nivel/habilidade/create',

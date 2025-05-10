@@ -80,7 +80,7 @@ export default function SignUp() {
     return () => backHandler.remove()
   }, [])
 
-  const nextStep = () => {
+  const nextStep = async () => {
     setErrorCreateUsuarioForms({ bairro: '', cep: '', cidade: '', cnpj: '', cpf: '', email: '', estado: '', nivelHabilidade: '', firstName: '' , secondName: '', nomeUsuario: '', numero: '', rua: '',  senha: '', confirmaSenha: ''})
     if (step === 1) {
 
@@ -97,7 +97,7 @@ export default function SignUp() {
       }
 
       setIsRequesting(true)
-      validateUser({email: null, nomeUsuario: createUsuarioForms.nomeUsuario}, null) //NOMEUSUARIO
+      await validateUser({email: null, nomeUsuario: createUsuarioForms.nomeUsuario}, null) //NOMEUSUARIO
         .then((response) => {
           if(response) {
             updateCampoErrorForms('nomeUsuario', 'Nome de usuario já utilizado, tente outro.')            
@@ -106,8 +106,8 @@ export default function SignUp() {
             setStep(2)
           }
       })
-      .catch((response) => {
-        setErrorMessage(response)
+      .catch((error : AxiosError<DefaultErrorResponse>) => {
+        setErrorMessage("Algo deu errado: "+ error.response?.data.message || error.message)
       })
       .finally(() => setIsRequesting(false))
       
@@ -153,7 +153,7 @@ export default function SignUp() {
 
       if(createUsuarioForms.cpf !== null){
         setIsRequesting(true)
-        validateCPF(createUsuarioForms.cpf, null)
+        await validateCPF(createUsuarioForms.cpf, null)
           .then((response) => {
             if(response.isValid) {
               setStep(4)
@@ -161,39 +161,40 @@ export default function SignUp() {
               updateCampoErrorForms('cpf', response.message)
             }
         })
-        .catch((response) => {
-          setErrorMessage(response)
+        .catch((error : AxiosError<DefaultErrorResponse>) => {
+          setErrorMessage("Algo deu errado: "+ error.response?.data.message || error.message)
         })
         .finally(() => setIsRequesting(false))
       }
 
       if(createUsuarioForms.cnpj !== null){
+        const cnpj = createUsuarioForms.cnpj
         setIsRequesting(true)
-        validateCNPJAuthenticity(createUsuarioForms.cnpj, null)
-          .then((response) => {
-            if(!response) {
+        await validateCNPJAuthenticity(cnpj, null)
+        .then((response) => {
+          if(!response) {
               updateCampoErrorForms('cnpj', 'CNPJ inválido')
-              return
+            } else {
+              setIsRequesting(true)
+              validateCNPJ(cnpj, null)
+                .then((response) => {
+                  if(response) {
+                    updateCampoErrorForms('cnpj', 'CNPJ já cadastrado')
+                  }
+                  else {
+                    setStep(4)
+                  }
+              })
+              .catch((error : AxiosError<DefaultErrorResponse>) => {
+                updateCampoErrorForms('cnpj', 'CNPJ inválido')
+                setErrorMessage("Algo deu errado: "+ error.response?.data.message || error.message)
+              })
+              .finally(() => setIsRequesting(false))
             }
         })
-        .catch((response) => {
-          setErrorMessage(response)
-        })
-        .finally(() => setIsRequesting(false))
-
-        setIsRequesting(true)
-        validateCNPJ(createUsuarioForms.cnpj, null)
-          .then((response) => {
-            if(response) {
-              updateCampoErrorForms('cnpj', 'CNPJ já cadastrado')
-              return
-            }
-            else {
-              setStep(4)
-            }
-        })
-        .catch((response) => {
-          setErrorMessage(response)
+        .catch((error : AxiosError<DefaultErrorResponse>) => {
+          updateCampoErrorForms('cnpj', 'CNPJ inválido')
+          setErrorMessage("Algo deu errado: "+ error.response?.data.message || error.message)
         })
         .finally(() => setIsRequesting(false))
       }
@@ -213,7 +214,7 @@ export default function SignUp() {
       }
 
       setIsRequesting(true)
-      validateUser({email:createUsuarioForms.email, nomeUsuario: null}, null) //EMAIL
+      await validateUser({email:createUsuarioForms.email, nomeUsuario: null}, null) //EMAIL
         .then((response) => {
           if(response) {
             updateCampoErrorForms('email', 'Email já cadastrado')
@@ -265,9 +266,9 @@ export default function SignUp() {
           }))
         }
       })
-      .catch((response) => {
-        updateCampoErrorForms('cep', response.message)
-        setErrorMessage('Erro ao buscar CEP: ' + response.message)
+      .catch((error : AxiosError<DefaultErrorResponse>) => {
+        updateCampoErrorForms('cep', error.response?.data.message || error.message)
+        setErrorMessage("Erro ao buscar CEP: "+ error.response?.data.message || error.message)
       })
       .finally(() => setIsRequesting(false)) 
   }
@@ -280,16 +281,16 @@ export default function SignUp() {
           onRegister(response)
             .then(() => {
               setSuccessMessage('Cadastro realizado com sucesso!')
-              router.replace('home')
+              router.replace('events')
             })
             .catch((error : AxiosError<DefaultErrorResponse>) => {
               setErrorMessage('Erro ao registrar-se: ' + (error.response?.data.message || error.message))
             })
           }
         })
-        .catch((response) => {
-        setErrorMessage('Erro ao cadastrar: ' + response.message)
-      })
+        .catch((error : AxiosError<DefaultErrorResponse>) => {
+          setErrorMessage('Erro ao registrar-se: ' + (error.response?.data.message || error.message))
+        })        
     },[createUsuarioRequest]) 
 
     useEffect(() =>  {
