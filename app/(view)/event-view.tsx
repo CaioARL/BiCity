@@ -168,7 +168,7 @@ export default function EventV() {
               
                   {evento.urlSite && (
                   <View className="flex-row items-center justify-center mt-3">
-                    <Text className="text-text-matte_gray text-[12px]">
+                    <Text className="text-color__text__link text-[12px]">
                       Site:{' '}
                       <Text onPress={() => Linking.openURL(evento.urlSite)}>
                         {evento.urlSite}
