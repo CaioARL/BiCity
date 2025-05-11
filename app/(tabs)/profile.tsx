@@ -150,12 +150,12 @@ export default function Profile(){
     getHabilidades()
     .then((response) => {
       if(!response) return
-      const nivels: ListNivelHabilidade[] = response.map(nivel => ({
+      const niveis: ListNivelHabilidade[] = response.map(nivel => ({
         nome: nivel.nome,
         id: nivel.id,
         value: nivel,
       }))
-      setListNivelHabilidade(nivels)
+      setListNivelHabilidade(niveis)
     })
     .catch((error) => {
       setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + error.message)

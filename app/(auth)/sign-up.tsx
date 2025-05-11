@@ -7,7 +7,6 @@ import { signUpStep1, signUpStep2, signUpStep3, signUpStep4 } from '../../util/v
 import { getViaCep } from '../../api/endereco'
 import { ListNivelHabilidade, NivelHabilidade } from '../../types/nivel-habilidade'
 import FormFieldSelectList from '../../components/FormFieldSelectList'
-import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { createUser, validateCNPJ, validateCNPJAuthenticity, validateCPF, validateUser } from '../../api/usuario'
 import { CreateUsuarioForms, CreateUsuarioRequest, DefaultErrorResponse, ErrorCreateUsuarioForms } from '../../types'
@@ -17,6 +16,7 @@ import { router } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from '../../components/ShowAlert'
 import { AxiosError } from 'axios'
+import { getHabilidades } from 'storage/nivel-habilidade'
 
 export default function SignUp() {
   const [createUsuarioRequest, setCreateUsuarioRequest] = useState<CreateUsuarioRequest | null>()
@@ -42,17 +42,18 @@ export default function SignUp() {
   const [successMessage, setSuccessMessage] = useState<string | null>()
 
   useEffect(() => {
-    getNivelHabilidade()
+    getHabilidades()
       .then((response) => {
-        const niveles: ListNivelHabilidade[] = response.map(nivel => ({
+        if(!response) return
+        const niveis: ListNivelHabilidade[] = response.map(nivel => ({
           nome: nivel.nome,
           id: nivel.id,
           value: nivel,
         }))
-        setListNivelHabilidade(niveles)
+        setListNivelHabilidade(niveis)
       })
-      .catch((response) => {
-        setStaticErrorMessage('Erro ao carregar níveis de habilidade: ' + response.message)
+      .catch((error) => {
+        setStaticErrorMessage('Erro ao carregar níveis de habilidade: ' + error.message)
       })
   }, [])
 
