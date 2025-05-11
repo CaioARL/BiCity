@@ -68,8 +68,6 @@ export default function Events() {
     [
       {id:1, name: 'Gratuito', isActive: false , campo: 'gratuito', value: true},
       {id:2, name: 'Pago', isActive: false , campo: 'gratuito', value: false},
-      {id:3, name: 'Aprovado', isActive: false , campo: 'aprovado', value: true},
-      {id:4, name: 'Não Aprovado', isActive: false , campo: 'aprovado', value: false},
     ]
   )
   
@@ -153,8 +151,8 @@ export default function Events() {
   const applyFastFowardFilter = (filter: FastFowardFilter) => {
     setFastFowardFilter(prev => 
       prev
-      .map(fastFoward => fastFoward.campo === filter.campo && fastFoward.id !== filter.id ? { ...fastFoward, isActive: false } : fastFoward )
-      .map(fastFoward => fastFoward.id === filter.id ? { ...fastFoward, isActive: !fastFoward.isActive } : fastFoward )
+      .map(fastFoward => fastFoward.campo === filter.campo && fastFoward.id !== filter.id ? { ...fastFoward, isActive: false } 
+        : fastFoward.id === filter.id ? { ...fastFoward, isActive: !fastFoward.isActive } : fastFoward )
     )
     setEventos(null)
     currentPageRef.current = 0
