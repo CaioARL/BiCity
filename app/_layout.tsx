@@ -1,10 +1,10 @@
-import "../global.css";
-import React, { useEffect } from 'react';
-import { SplashScreen, Stack } from 'expo-router';
-import { useFonts } from 'expo-font';
-import AuthProvider from "./context/AuthProvider";
+import "../global.css"
+import React, { useEffect } from 'react'
+import { SplashScreen, Stack } from 'expo-router'
+import { useFonts } from 'expo-font'
+import AuthProvider from "./context/AuthProvider"
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
@@ -15,23 +15,24 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded, error]);
+    if (error) throw error
+    if (fontsLoaded) SplashScreen.hideAsync()
+  }, [fontsLoaded, error])
 
   if (!fontsLoaded && !error) {
-    return null;
+    return null
   }
 
   return (
       <AuthProvider>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(view)" options={{ headerShown: false }} />
           <Stack.Screen name="(event)" options={{ headerShown: false }} />
         </Stack>
       </AuthProvider> 
-  );
+      )
 }

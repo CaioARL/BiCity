@@ -4,7 +4,7 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useAuthProvider } from './context/AuthProvider'
-import { checkStoredVersion } from 'util/versioning'
+import { checkStoredVersion, isFirstLaunch } from 'util/versioning'
 import { getNivelHabilidade } from 'api/nivel-habilidade'
 import { AxiosError } from 'axios'
 import { DefaultErrorResponse } from 'types'
@@ -14,16 +14,39 @@ import { storeTiposEvento, storeHabilidades } from 'storage'
 export default function Index() {
   const {authState, isLoading} = useAuthProvider() 
 
-  useEffect(() => {
+  useEffect(() => { // remove abort implementation in prodution, it is only for testing. - by Gabu
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loading = async () => {
-      await initialize()
-      if (authState?.authenticated) {
-        router.replace('/events')
-      } else {
-        router.replace('/sign-in')
+      try {
+        await initialize()
+        if (!signal.aborted) {
+          const isFirstLaunchValue = await isFirstLaunch()
+          if (authState?.authenticated) {
+            router.replace('/events')
+          } else {
+            if(isFirstLaunchValue){
+              router.replace('/onboarding')
+            }else{
+              router.replace('/sign-in')
+            }
+          }
+        }
+      } catch (error) {
+        if (signal.aborted) {
+          console.log('Effect was aborted:', error)
+        } else {
+          console.error('Error in initialize:', error)
+        }
       }
     }
+
     loading()
+
+    return () => {
+      controller.abort()
+    }
   }, [isLoading])
 
   const initialize = async () => {

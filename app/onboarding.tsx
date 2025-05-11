@@ -26,18 +26,18 @@ export default function Onboarding() {
           animated: true
         })
       } else {
-        // completeOnboarding() // problema com router, aqui ele retorna imediatamente assim que este componente é montado
-        console.log('Onboarding sendo chamado')
+        completeOnboarding() 
+        // console.log('Onboarding sendo chamado')
       }
     }
   
     const completeOnboarding = () => {
-      // try {
+      try {
         console.log('Onboarding sendo chamado')
         router.back()
-      // } catch (error) {
-        // console.error('Erro ao salvar status do onboarding:', error)
-      // }
+      } catch (error) {
+        console.error('Erro ao salvar status do onboarding:', error)
+      }
     }
   
     return (
