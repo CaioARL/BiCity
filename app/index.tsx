@@ -9,6 +9,8 @@ import { getNivelHabilidade } from 'api/nivel-habilidade';
 import { storeHabilidades } from 'storage/nivel-habilidade';
 import { AxiosError } from 'axios';
 import { DefaultErrorResponse } from 'types';
+import { getTipoEvento } from 'api/tipo-evento';
+import { storeTiposEvento } from 'storage/tipo-evento';
 
 export default function Index() {
   const {authState, isLoading} = useAuthProvider() 
@@ -31,6 +33,13 @@ export default function Index() {
         await getNivelHabilidade()
         .then((response)=>{
           storeHabilidades(response)
+        })
+        .catch((error : AxiosError<DefaultErrorResponse>)=>{
+          Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)
+        })
+        await getTipoEvento()
+        .then((response)=>{
+          storeTiposEvento(response)
         })
         .catch((error : AxiosError<DefaultErrorResponse>)=>{
           Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { NivelHabilidade } from '../types/nivel-habilidade'
+import { NivelHabilidade } from 'types'
 
 
 const NIVEIS_HABILIDADE_KEY = '@niveis_habilidade'
