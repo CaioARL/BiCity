@@ -157,10 +157,10 @@ export default function Profile(){
       }))
       setListNivelHabilidade(nivels)
     })
-    .catch((response) => {
-      setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message)
+    .catch((error) => {
+      setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + error.message)
     })
-  })
+  },[])
 
   const toggleEdit = () => {
     setIsEditing(!isEditing)
