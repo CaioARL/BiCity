@@ -17,3 +17,17 @@ export const checkStoredVersion = async () => {
         return false
     }
 }
+
+export const isFirstLaunch = async (): Promise<boolean> => {
+    try {
+        const value = await AsyncStorage.getItem('@isFirstLaunch')
+        if (value === null) {
+            await AsyncStorage.setItem('@isFirstLaunch', 'false')
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error('Error checking first launch:', error)
+        return false
+    }
+}
