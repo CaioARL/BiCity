@@ -10,10 +10,10 @@ import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario, RequestUpda
 import { updateImageUser, updateUser } from '../../api/usuario'
 import LoadingActivity from '../../components/LoadingActivity'
 import FormFieldDropdownSelectList from '../../components/FormFieldDropdownSelectList'
-import { getNivelHabilidade } from '../../api/nivel-habilidade'
 import ShowAlert from '../../components/ShowAlert'
 import { updateUsuario } from 'util/validationSchemas'
 import SimpleTextInput from 'components/SimpleTextInput'
+import { getHabilidades } from 'storage/nivel-habilidade'
 
 
 
@@ -146,22 +146,23 @@ export default function Profile(){
     }
   }
 
-  const toggleEdit = () => {
-    if(!isEditing) {
-      getNivelHabilidade()
-         .then((response) => {
-           const nivels: ListNivelHabilidade[] = response.map(nivel => ({
-             nome: nivel.nome,
-             id: nivel.id,
-             value: nivel,
-           }))
-           setListNivelHabilidade(nivels)
-         })
-         .catch((response) => {
-           setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message)
-         })
-    }
+  useEffect(() => {
+    getHabilidades()
+    .then((response) => {
+      if(!response) return
+      const nivels: ListNivelHabilidade[] = response.map(nivel => ({
+        nome: nivel.nome,
+        id: nivel.id,
+        value: nivel,
+      }))
+      setListNivelHabilidade(nivels)
+    })
+    .catch((response) => {
+      setNivelHabilidadeError('Erro ao carregar níveis de habilidade: ' + response.message)
+    })
+  })
 
+  const toggleEdit = () => {
     setIsEditing(!isEditing)
     setShowMoreInfo(!showMoreInfo)
   }
