@@ -11,6 +11,7 @@ import Terms from './terms'
 import ShowAlert from 'components/ShowAlert'
 import { AxiosError } from 'axios'
 import { loginSchema } from 'util/validationSchemas'
+import { isFirstLaunch } from 'util/versioning'
 
 export default function SignIn() {
   const { onLogin, errorLoading } = useAuthProvider()
@@ -25,6 +26,18 @@ export default function SignIn() {
 
   const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
+
+  useEffect(() => {
+    const loading = async () => {
+      isFirstLaunch().then((response) => {
+        console.log('isFirstLaunch', response)
+        if (response) {
+          router.push('/onboarding')
+        }
+      })
+    }
+    loading()
+  },[])
 
   const validationAndLogin = () => {
     if(!login.credencial) return

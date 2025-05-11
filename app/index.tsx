@@ -1,16 +1,15 @@
-import { View, Text, ScrollView, Image, ActivityIndicator, Alert  } from 'react-native';
-import React, { useEffect } from 'react';
-import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useAuthProvider } from './context/AuthProvider';
-import { checkStoredVersion } from 'util/versioning';
-import { getNivelHabilidade } from 'api/nivel-habilidade';
-import { storeHabilidades } from 'storage/nivel-habilidade';
-import { AxiosError } from 'axios';
-import { DefaultErrorResponse } from 'types';
-import { getTipoEvento } from 'api/tipo-evento';
-import { storeTiposEvento } from 'storage/tipo-evento';
+import { View, Text, ScrollView, Image, ActivityIndicator, Alert  } from 'react-native'
+import React, { useEffect } from 'react'
+import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+import { useAuthProvider } from './context/AuthProvider'
+import { checkStoredVersion } from 'util/versioning'
+import { getNivelHabilidade } from 'api/nivel-habilidade'
+import { AxiosError } from 'axios'
+import { DefaultErrorResponse } from 'types'
+import { getTipoEvento } from 'api/tipo-evento'
+import { storeTiposEvento, storeHabilidades } from 'storage'
 
 export default function Index() {
   const {authState, isLoading} = useAuthProvider() 
@@ -78,5 +77,5 @@ export default function Index() {
           </View>
         <StatusBar backgroundColor='#161622' style='light' />
       </SafeAreaView>
-  );
+  )
 }
