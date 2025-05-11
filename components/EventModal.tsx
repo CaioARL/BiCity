@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native'
 import { Region } from 'react-native-maps'
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento'
-import { getTipoEvento } from '../api/tipo-evento'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
 import { Evento, Horario, NivelHabilidade, RequestCreateEvento, RequestCreateEventoError } from '../types'
 import * as ImagePicker from 'expo-image-picker'
@@ -18,6 +17,7 @@ import { useAuthProvider } from '../app/context/AuthProvider'
 import ImageSelectionPopup from '../components/ImgPickerModal'
 import { Ionicons } from '@expo/vector-icons'
 import TimePicker from './TimePicker'
+import { getTiposEvento } from 'storage/tipo-evento'
 
 interface EventModalProps {
   visible: boolean
@@ -69,8 +69,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
 
   useEffect(() => {
-    getTipoEvento()
+    getTiposEvento()
     .then((response) => {
+      if(!response) return
       setListTipoEvento([])
       response.map((tipoEvento)=>{
         setListTipoEvento((prevList) => {
@@ -85,8 +86,8 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
         })
       })
     })
-    .catch((response)=>{
-      alert('Error ao carregar Tipos de Eventos, verifique sua conexão. \nCode error:' + response.message)
+    .catch((error)=>{
+      alert('Error ao carregar Tipos de Eventos: ' + error.message)
       closeModal(null, null)
     })
   },[])

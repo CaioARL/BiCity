@@ -17,6 +17,7 @@ export default function Index() {
 
   useEffect(() => {
     const loading = async () => {
+      await initialize()
       if (authState?.authenticated) {
         router.replace('/events')
       } else {
@@ -26,28 +27,25 @@ export default function Index() {
     loading()
   }, [isLoading])
 
-  useEffect(()=>{
-    const initialize = async () => {
-      const isUpdated = await checkStoredVersion()
-      if(isUpdated){
-        await getNivelHabilidade()
-        .then((response)=>{
-          storeHabilidades(response)
-        })
-        .catch((error : AxiosError<DefaultErrorResponse>)=>{
-          Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)
-        })
-        await getTipoEvento()
-        .then((response)=>{
-          storeTiposEvento(response)
-        })
-        .catch((error : AxiosError<DefaultErrorResponse>)=>{
-          Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)
-        })
-      }
+  const initialize = async () => {
+    const isUpdated = await checkStoredVersion()
+    if(isUpdated){
+      await getNivelHabilidade()
+      .then((response)=>{
+        storeHabilidades(response)
+      })
+      .catch((error : AxiosError<DefaultErrorResponse>)=>{
+        Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)
+      })
+      await getTipoEvento()
+      .then((response)=>{
+        storeTiposEvento(response)
+      })
+      .catch((error : AxiosError<DefaultErrorResponse>)=>{
+        Alert.alert("Erro ao iniciar", error?.response?.data?.message || error.message)
+      })
     }
-    initialize()
-  },[])
+  }
 
   return (
       <SafeAreaView className="h-full bg-primary_green">

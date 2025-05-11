@@ -4,9 +4,9 @@ import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
 import { ListTipoEvento, RequestPageEvento, TipoEvento } from '../types';
-import { getTipoEvento } from '../api/tipo-evento';
 import FormFieldCalendarSelectModal from './FormFieldCalendarSelectModal';
 import ButtonModal from './ButtonModal';
+import { getTiposEvento } from 'storage/tipo-evento';
 
 
 
@@ -58,8 +58,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
   
   useEffect(() => {
     setIsLoadingTipoEvento(true)
-      getTipoEvento()
+      getTiposEvento()
       .then((response) => {
+        if(!response) return
         setListTipoEvento([])
         response.map((tipoEvento)=>{
           setListTipoEvento((prevList) => {
@@ -167,6 +168,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               <FormFieldCalendarSelectModal
                 handleChangeValue={setFilterData}
                 value={filterData}
+                msg=''
               />
 
 
