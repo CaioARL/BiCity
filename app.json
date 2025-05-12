@@ -23,9 +23,15 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "process.env.EXPO_PUBLIC_API_MAP"
+          "apiKey": "SENTRY_AUTH_TOKEN"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.gabuh.BiCity"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +51,14 @@
         }
       ],
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
+      }
+    }
   }
 }
