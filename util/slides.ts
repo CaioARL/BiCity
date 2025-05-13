@@ -22,7 +22,7 @@ export const slides: Slide[] = [
     id: '1',
     media: {
       type: 'image',
-      source: require('../assets/img/profile.jpg'),
+      source: require('../assets/slide/quem-somos.png'),
     },
     title: 'Quem Somos?',
     description: 'Somos o BiCity, aplicativo feito para os ciclistas de São Paulo, não temos corrente dentro do Brasil, seremos o primeiro e com uma grande parte do mercado beneficiando todos que praticam esporte.',
@@ -31,7 +31,7 @@ export const slides: Slide[] = [
     id: '2',
     media: {
       type: 'video',
-      source: require('../assets/slide/3.mp4'),
+      source: require('../assets/slide/oque-oferecemos.mp4'),
     },
     title: 'Oque Oferecemos?',
     description: 'Objetivo de oferecer avaliação coletiva das ciclovias da cidade, além da centralização de eventos relacionados ao esporte.',
@@ -39,19 +39,37 @@ export const slides: Slide[] = [
   {
     id: '3',
     media: {
-      type: 'image',
-      source: require('../assets/img/profile.jpg'),
+      type: 'video',
+      source: require('../assets/slide/como-usar.mp4'),
     },
     title: 'Como Usar?',
-    description: 'Ciclistas: Cadastre-se com e-mail ou CPF, avalie ciclovias e descubra eventos incríveis para pedalar. \nEmpresas: Registre-se com e-mail ou CNPJ e comece a divulgar seus eventos de ciclismo na hora. \nTudo simples, rápido e feito para unir a comunidade do pedal. Pronto para fazer parte?',
+    description: 'Empresas: \nRegistre-se com e-mail ou CNPJ e comece a divulgar seus eventos de ciclismo na hora',
   },
     {
     id: '4',
+    media: {
+      type: 'video',
+      source: require('../assets/slide/como-usar2.mp4'),
+    },
+    title: 'Como Usar?',
+    description: 'Ciclistas:\n Cadastre-se com e-mail ou CPF, avalie ciclovias e descubra eventos incríveis para pedalar.',
+  },
+    {
+    id: '5',
     media: {
       type: 'image',
       source: require('../assets/img/profile.jpg'),
     },
     title: 'Sobre Nós:',
-    description: '1. Cadastre-se como Ciclista ou Empresa.',
+    description: '\nLorem',
+  },
+  {
+    id: '6',
+    media: {
+      type: 'image',
+      source: require('../assets/img/profile.jpg'),
+    },
+    title: 'Sobre Nós:',
+    description: '\nTudo simples, rápido e feito para unir a comunidade do pedal. Pronto para fazer parte?',
   },
 ];
