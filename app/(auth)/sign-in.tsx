@@ -31,12 +31,12 @@ export default function SignIn() {
     const checkOnboardin = async () => {
       const isVisualized = await isOnboardingVisualized()
       if(isVisualized){
-        router.replace('/onboarding')
+        router.push('/onboarding')
       }
     }
     checkOnboardin()
   },[])
-  
+
   const validationAndLogin = () => {
     if(!login.credencial) return
     const typeResult = checkInputType(login.credencial)
