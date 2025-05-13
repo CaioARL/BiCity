@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import {  CriarUsuarioResponse, Usuario  } from '../../types'
+import {  CriarUsuarioResponse, DefaultErrorResponse, Usuario  } from '../../types'
 import { getUser } from '../../api/usuario'
 import * as SecureStore from 'expo-secure-store'
 import api from '../../api/index'
+import { getNivelHabilidade } from 'api/nivel-habilidade'
+import { getTipoEvento } from 'api/tipo-evento'
+import { checkHabilidades, checkTiposEvento, storeHabilidades, storeTiposEvento } from 'storage'
+import { AxiosError } from 'axios'
+import { checkStoredVersion } from 'util/versioning'
+
 
 
     interface AuthProps {
@@ -33,6 +39,11 @@ export default function AuthProvider({children}: any) {
   }>({authenticated: null, user: null})
   const [errorLoading, setErrorLoading] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  
+  const [isLoaded, setIsLoaded] = useState<{auth: boolean, essentialData: boolean}>({ auth: false, essentialData: false })
+  const updateIsLoaded = (key: 'auth' | 'essentialData', value: boolean) => { 
+    setIsLoaded(prev => ({ ...prev, [key]: value } )) 
+  }
 
 
 
@@ -41,7 +52,7 @@ export default function AuthProvider({children}: any) {
 
     useEffect(() => {
 
-      const loadToken = async () => {
+      const authenticate = async () => {
 
         try{
           const token = await SecureStore.getItemAsync('hash')
@@ -55,25 +66,61 @@ export default function AuthProvider({children}: any) {
               setErrorLoading("Erro ao carregar dados de usuário, verifique sua conexão : "+ error.message)
               console.log("Error on retrieving user info: "+ error)
             }).finally(() => {
-              setIsLoading(false)
+              updateIsLoaded('auth', true)
             })            
             
           } else {
             setAuthState({authenticated: false, user: authState.user})
             api.defaults.headers.common['Authorization'] = ''
-            setIsLoading(false)
+              updateIsLoaded('auth', true)
           }
         }catch(error){
           console.log("Main Loading Error: "+ error)
           setErrorLoading("Erro ao carregar dados iniciais: "+ error)
         }
       }
-      loadToken()
+      authenticate()
 
     }, [])
 
+    useEffect(()=> {
+      if(isLoaded.auth === true && isLoaded.essentialData !== false ) return
+      const loadEssentialData = async () => {
+        const isUpdated = await checkStoredVersion()
+        const isHabilidadeLoaded = await checkHabilidades()
+        const isTiposEvento = await checkTiposEvento()
 
+        if(!isHabilidadeLoaded || !isUpdated ) {
+          getNivelHabilidade()
+          .then((response)=>{
+            storeHabilidades(response)
+          })
+          .catch((error : AxiosError<DefaultErrorResponse>)=>{
+            setErrorLoading("Erro ao carregar dados: " + error?.response?.data?.message || error.message)
+          })
+        }
 
+        if (!isTiposEvento || !isUpdated) {
+          getTipoEvento()
+          .then((response)=>{
+            storeTiposEvento(response)
+          })
+          .catch((error : AxiosError<DefaultErrorResponse>)=>{
+            setErrorLoading("Erro ao carregar dados: " + error?.response?.data?.message || error.message)
+          })
+        }
+
+        updateIsLoaded('essentialData', true)
+
+      }
+      loadEssentialData()
+    }, [isLoaded])
+
+    useEffect(() => {
+      if (isLoaded.auth && isLoaded.essentialData) {
+        setIsLoading(false)
+      }
+    }, [isLoaded])
 
     const onLogin = async (usuario: Usuario) => {
       return new Promise ((resolve, reject) => {

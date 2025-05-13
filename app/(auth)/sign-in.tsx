@@ -89,7 +89,7 @@ export default function SignIn() {
   }, [requestLogin])
 
   useEffect(() => {
-    if (errorLoading) setUserAlert({type: 'error', message: 'Erro ao carregar: ' + errorLoading})
+    if (errorLoading) setUserAlert({type: 'error', message: errorLoading})
   }, [errorLoading])
 
   const checkInputType = (credential: string)  => {

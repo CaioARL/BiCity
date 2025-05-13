@@ -3,7 +3,23 @@ import { TipoEvento } from 'types'
 
 
 const TIPOS_EVENTO_KEY = '@tipos_evento'
-
+/**
+ * Check if TipoEvento is registered in memory
+ * 
+ * @returns Retorna verdadeiro se tipos eventos esta registrado em memoria
+ * @returns Return true if tipoEvento is registered in memory
+ */
+export const checkTiposEvento = async (): Promise<boolean> => {
+    try {
+        const value = await AsyncStorage.getItem(TIPOS_EVENTO_KEY)
+        if ( value === null )
+            return false
+        return true
+    } catch(e) {
+        console.error('Error checking tipos de evento', e)
+        return false
+    }
+}
 
 export const storeTiposEvento = async (tipos: TipoEvento[]) => {
     try {
