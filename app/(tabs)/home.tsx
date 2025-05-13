@@ -661,6 +661,13 @@ export default function Home() {
                 <Ionicons name="locate" size={24} color="black" />
               </TouchableOpacity>
 
+              <TouchableOpacity
+                className='absolute z-0 top-[20px] left-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                onPress={()=>{router.replace('navigation')}}
+              >
+                <Ionicons name="navigate" size={24} color="black" />
+              </TouchableOpacity>
+
       </SafeAreaView>
     )
   }
