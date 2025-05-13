@@ -8,7 +8,7 @@ interface NextButtonProps {
   percentage: number
   data: Slide[]
   scrollX: Animated.Value
-  scrollTo: () => void // Adicionado a prop scrollTo corretamente
+  scrollTo: () => void 
 }
 
 export default function NextButton({ percentage, data, scrollX, scrollTo }: NextButtonProps) {
@@ -24,7 +24,7 @@ export default function NextButton({ percentage, data, scrollX, scrollTo }: Next
   const animation = (toValue: number) => {
     return Animated.timing(progressAnimation, {
       toValue,
-      duration: 250, // Reduzi para ser mais responsivo
+      duration: 250, 
       useNativeDriver: true,
     }).start()
   }
@@ -64,20 +64,20 @@ export default function NextButton({ percentage, data, scrollX, scrollTo }: Next
 
           <Circle
             ref={progressRef}
-            stroke="#F4338F"
+            stroke="#C3FF00"
             fill="none"
             cx={center}
             cy={center}
             r={radius}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
-            strokeDashoffset={circumference} // Valor inicial
+            strokeDashoffset={circumference} 
           />
         </G>
       </Svg>
 
       <TouchableOpacity 
-        onPress={scrollTo} // Usando a props scrollTo passada de Onboarding
+        onPress={scrollTo}
         activeOpacity={0.7}
         className="bg-primary_green p-5"
         style={{ position: 'absolute', borderRadius: 100 }}

@@ -22,18 +22,18 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
 
   return (
     <View className="justify-center items-cente" style={{ width }}>
-      <View className="flex-[0.8] justify-center items-center bg-primary_green" style={{ width }}>
+      <View className="flex-[0.9] justify-end items-center bg-primary_green" style={{ width }}>
 
         {item.media.type === 'image' ? (
           <Image
             source={item.media.source}
-            className="flex-1 w-full"
+            style={{ width: 230,  height:'80%'}}
             resizeMode="cover"
           />
         ) : (
           <VideoView
             player={player}
-            style={{ width: 500, height: '90%', flex: 1 }}
+            style={{ width: 500, height: '90%', flex: item.id === '3' || item.id === '4'  ? 0.62 : 0.8 }}
             allowsFullscreen={false}
             nativeControls={false}
           />
