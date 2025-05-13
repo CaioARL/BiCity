@@ -11,6 +11,7 @@ import Terms from './terms'
 import ShowAlert from 'components/ShowAlert'
 import { AxiosError } from 'axios'
 import { loginSchema } from 'util/validationSchemas'
+import { isOnboardingVisualized } from 'util/versioning'
 
 export default function SignIn() {
   const { onLogin, errorLoading } = useAuthProvider()
@@ -26,6 +27,16 @@ export default function SignIn() {
   const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
 
+  useEffect(() => {
+    const checkOnboardin = async () => {
+      const isVisualized = await isOnboardingVisualized()
+      if(isVisualized){
+        router.replace('/onboarding')
+      }
+    }
+    checkOnboardin()
+  },[])
+  
   const validationAndLogin = () => {
     if(!login.credencial) return
     const typeResult = checkInputType(login.credencial)
@@ -72,7 +83,7 @@ export default function SignIn() {
       })
       .catch((error: AxiosError<DefaultErrorResponse>) => {
         setUserAlert({type:'error', message: error.response?.data.message || error.message})
-        setRequestError(error.response?.data.message.replace('Erro:', '') || error.message)
+        setRequestError(error.response?.data.message.replace('Erro:', '') || error.message + (error.request._response))
       })
       .finally(() => setIsLoading(false))
   }, [requestLogin])

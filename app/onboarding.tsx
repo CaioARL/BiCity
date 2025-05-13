@@ -5,6 +5,7 @@ import { slides } from 'util/slides'
 import OnBoardingItem from 'components/onboarding/OnboardingItem'
 import Paginator from 'components/onboarding/Paginator'
 import NextButton from 'components/onboarding/NextButton'
+import { setOnboardingVisualized } from 'util/versioning'
 
 export default function Onboarding() {
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -33,7 +34,7 @@ export default function Onboarding() {
   
     const completeOnboarding = () => {
       try {
-        console.log('Onboarding sendo chamado')
+        setOnboardingVisualized()
         router.back()
       } catch (error) {
         console.error('Erro ao salvar status do onboarding:', error)
