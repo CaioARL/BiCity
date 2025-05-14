@@ -52,7 +52,6 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
   const validateRequestProblema = () => {
     const validationResult = createProblemaSchema.safeParse(problema)
     if (!validationResult.success) {
-      console.log(validationResult.error.issues)
       validationResult.error.issues.forEach((issue) => {
         setProblemaError((prevState) => ({
           ...prevState,
@@ -140,7 +139,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
       })
   }, [])
 
-  const updateCampoProblema = (campo: string, value: string) => {
+  const updateCampoProblema = (campo: string, value: string | number) => {
     setProblema((prevState) => ({
       ...prevState,
       [campo]: value,
@@ -174,7 +173,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 selectedValue={listTipoProblema.find((item) => item.id === problema.idTipoProblema)}
                 options={listTipoProblema}
                 handleChange={(e) => {
-                  updateCampoProblema('idTipoProblema', String(e.id))
+                  updateCampoProblema('idTipoProblema', e.id)
                 }}
                 isLoading={false}
                 dropDownSize={'100%'}
@@ -210,7 +209,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 )}
                 <ButtonModal
                   title="Reportar !"
-                  handlePress={() => validateRequestProblema}
+                  handlePress={() => validateRequestProblema()}
                   customStyles="bg-[#ffcc00]"
                   textStyles="text-black "
                 />
