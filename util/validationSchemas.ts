@@ -38,7 +38,7 @@ export const loginSchema = z.object({
 })
 
 export const updateUsuario = z.object({
-    nome: z.string().min(3, {message: 'Nome deve ter pelo ao menos 3 caracteres' }).max(20, {message: 'Nome deve ter no maximo 20 caracteres' }).regex(new RegExp('^[a-zA-Z ]*$'), {message: 'Nome deve conter apenas letras'}),
+    nome: z.string().min(3, {message: 'Nome deve ter pelo ao menos 3 caracteres' }).max(20, {message: 'Nome deve ter no maximo 20 caracteres' }).regex(new RegExp('^[a-zA-ZãõçéóáàêíúüâôõÁÉÍÓÚÀÃÕÇÊÜÂÔ ]*$'), {message: 'Nome deve conter apenas letras'}),
     nomeUsuario: z.string().min(4, {message: 'Nome de usuario deve ter pelo ao menos 4 caracteres' }).max(20, {message: 'Nome de usuario deve ter no maximo 20 caracteres' }).regex(new RegExp('^[a-zA-Z0-9]*$'), {message: 'Nome de usuario deve conter apenas letras e numeros'}),
     endereco: z.object({
         cep: z.string().min(8, {message: 'Cep: deve digitar um cep com 8 digitos '}).max(8, {message: 'Cep: deve digitar um cep com 8 digitos '}),

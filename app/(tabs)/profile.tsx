@@ -271,7 +271,7 @@ export default function Profile(){
                   type={'number-pad'}
                   max={8}
                   onFocus={()=>updateCampoUsuarioError('cep','')}
-                  handleChange={text => updateCampoUsuarioEndereco('cep', parseInt(text))}
+                  handleChange={text => updateCampoUsuarioEndereco('cep', text)}
                 />}
                 {authState?.user?.endereco?.rua &&<SimpleTextInput
                   errorMessage={updateUsuarioError.rua}
