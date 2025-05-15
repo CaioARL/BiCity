@@ -5,7 +5,7 @@ import FormFieldModal from './FormFieldModal'
 import * as ImagePicker from 'expo-image-picker'
 import { ListTipoProblema, RequestCreateProblema } from '../types'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
-import { getTipoProblema } from '../api/tipo-problema'
+import { getTipoProblema } from '../storage'
 import ImageSelectionPopup from '../components/ImgPickerModal'
 import { createProblemaSchema } from 'util/validationSchemas'
 
@@ -122,6 +122,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
   useEffect(() => {
     getTipoProblema()
       .then((response) => {
+        if (!response) return
         setListTipoProblema([])
         response.forEach((tipoProblema) => {
           setListTipoProblema((prevState) => [

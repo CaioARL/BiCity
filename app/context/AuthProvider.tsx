@@ -5,7 +5,8 @@ import * as SecureStore from 'expo-secure-store'
 import api from '../../api/index'
 import { getNivelHabilidade } from 'api/nivel-habilidade'
 import { getTipoEvento } from 'api/tipo-evento'
-import { checkHabilidades, checkTiposEvento, storeHabilidades, storeTiposEvento } from 'storage'
+import { getTipoProblema } from 'api/tipo-problema'
+import { checkHabilidades, checkTipoProblema, checkTiposEvento, storeHabilidades, storeTipoProblema, storeTiposEvento } from 'storage'
 import { AxiosError } from 'axios'
 import { checkStoredVersion } from 'util/versioning'
 
@@ -89,6 +90,7 @@ export default function AuthProvider({children}: any) {
         const isUpdated = await checkStoredVersion()
         const isHabilidadeLoaded = await checkHabilidades()
         const isTiposEvento = await checkTiposEvento()
+        const isTipoProblema = await checkTipoProblema()
 
         if(!isHabilidadeLoaded || !isUpdated ) {
           getNivelHabilidade()
@@ -104,6 +106,16 @@ export default function AuthProvider({children}: any) {
           getTipoEvento()
           .then((response)=>{
             storeTiposEvento(response)
+          })
+          .catch((error : AxiosError<DefaultErrorResponse>)=>{
+            setErrorLoading("Erro ao carregar dados: " + error?.response?.data?.message || error.message)
+          })
+        }
+
+        if (!isTipoProblema || !isUpdated) {
+          getTipoProblema()
+          .then((response)=>{
+            storeTipoProblema(response)
           })
           .catch((error : AxiosError<DefaultErrorResponse>)=>{
             setErrorLoading("Erro ao carregar dados: " + error?.response?.data?.message || error.message)
