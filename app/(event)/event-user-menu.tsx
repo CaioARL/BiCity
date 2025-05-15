@@ -175,7 +175,7 @@ export default function EventDetail() {
       
       {isContentLoading && <LoadingActivity/>}
       <View className="h-full w-full container" >
-        {eventos && (
+        {eventos?.length!==0 ? (
                     <FlatList
                       className="min-h-[100%] my-10"
                       contentContainerStyle={{ 
@@ -249,7 +249,13 @@ export default function EventDetail() {
                       )
                       }}
                     />
-                  )}
+                  )
+                  :
+                  <View className="flex-1 justify-center items-center">
+                    <Text className="text-lg font-bold text-center">Nenhum evento encontrado</Text>
+                    <Text className="text-sm text-gray-500">Crie um evento</Text>
+                  </View>
+                }
 
             <TouchableOpacity className='absolute bottom-[20%] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
               onPress={()=>setIsCreatingEvento(true)}>
