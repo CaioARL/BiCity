@@ -16,7 +16,7 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
   return (
     <>
     <View  className='absolute flex-row items-center h-full w-full bg-[rgba(0,0,0,0.5)]'>
-      <View className='bg-white h-fit w-full rounded-lg p-5'>
+      <View className='bg-white left-[5%] h-fit w-[90%] rounded-lg p-5'>
 
         <View className='flex-row items-center justify-end'>
           <TouchableOpacity
@@ -32,7 +32,7 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
             <Text className='w-[48%] text-center'>minuto</Text>
         </View>
 
-        <View className='flex-row items-center h-[100px]'> 
+        <View className='flex-row items-end h-[70px]'> 
           <View className='rounded-full bg-primary_green '>
             <View className='flex-row w-full items-center justify-center h-[50px]'>
               <TouchableOpacity className='w-[48%] h-full items-center justify-center border-r-[1px] ' onPress={() => {
@@ -53,6 +53,8 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
 
           
         </View>
+        <Text className='text-base text-center'>Clique para selecionar</Text>
+
           <TouchableOpacity
               onPress={()=> onClose(`${hour}:${minute}:00`) }
               className='bg-[#C3FF00] p-[10px] rounded-[8px] mt-5'
