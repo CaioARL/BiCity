@@ -17,7 +17,6 @@ interface ModalProps {
 
 export default function ProblemaModal({ visible, closeModal, coords }: ModalProps) {
   const [listTipoProblema, setListTipoProblema] = useState<ListTipoProblema[]>([])
-  const [descricao, setDecricao] = useState<string>('')
   const [image, setImage] = useState<string | null>(null)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const [showImagePopup, setShowImagePopup] = useState(false)
@@ -162,11 +161,8 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 placeholder="Descreva o problema"
                 multiline={true}
                 maxLength={100}
-                handleChangeText={setDecricao}
-                value={descricao}
-                validantionCheck={(e) => {
-                  updateCampoProblema('descricao', e.nativeEvent.text)
-                }}
+                handleChangeText={e=> updateCampoProblema('descricao', e)}
+                value={problema.descricao}
                 msg={problemError.descricao}
               />
               <FormFieldDropdownSelectList
