@@ -6,7 +6,7 @@ import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, Reques
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
-import { getInfraestrutura } from '../../api/infraestrutura'
+import { getInfraestrutura, getInfraestruturaById } from '../../api/infraestrutura'
 import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
@@ -313,6 +313,24 @@ export default function Home() {
       createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
       .then(() => {
         setSuccessMessage("Avaliação criada com sucesso")
+        getInfraestruturaById(idInfraAvaliacao!, null)
+        .then((response) => {
+            setInfraestrutura(prev => {
+              if (!prev) return mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response)
+              return {
+                ...prev,
+                features: [
+                ...prev.features,
+                ...mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response).features
+                ]
+              }
+            })
+        })
+        .catch((response)=>{
+          setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+        })
+    
+
       })
       .catch((response) => {
         setErrorMessage("Error ao criar avaliação: " + response.message)
@@ -331,6 +349,7 @@ export default function Home() {
       setIsContentLoading(true)
       createProblema(requestCreateProblema, abortControllerRef.current)
       .then((response) => {
+        setProblemas((prev) => [...prev, response])
         setSuccessMessage("Problema criado com sucesso")
         if(problemaImage){
           const formData = new FormData()
