@@ -25,6 +25,7 @@ import {
   getOutOfBoundsMessage
 } from '../../util/restrict-map';
 import EventCardCarousel from 'components/EventCardCarousel'
+import FloatingButton from 'components/FloatingButton'
 
 
 interface Region {
@@ -600,7 +601,7 @@ export default function Home() {
                 handleProblemSelect={setPinProblemaSelector}
               />
             )}
-            
+
             {pinProblemaSelector &&
               <ProblemaView
                 problema={pinProblemaSelector}
@@ -679,6 +680,8 @@ export default function Home() {
               >
                 <Ionicons name="locate" size={24} color="black" />
               </TouchableOpacity>
+
+              <FloatingButton />
 
       </SafeAreaView>
     )
