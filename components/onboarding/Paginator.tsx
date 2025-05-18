@@ -12,7 +12,7 @@ export default function Paginator({ data, scrollX }: PaginatorProps) {
   const { width } = useWindowDimensions()
 
   return (
-    <View className="flex-row flex-[0.8] items-center justify-center">
+    <View className="flex-row flex-[0.7] items-center justify-center">
       {data.map((_: Slide, i: number) => {
         const inputRange = [(i - 1) * width, i * width, (i + 1) * width]
 
@@ -25,7 +25,7 @@ export default function Paginator({ data, scrollX }: PaginatorProps) {
         const opacity = scrollX.interpolate({
           inputRange,
           outputRange: [0.3, 1, 0.3],
-          // extrapolate: 'clamp',
+          extrapolate: 'clamp',
         })
 
         return (

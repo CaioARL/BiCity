@@ -33,7 +33,7 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         ) : (
           <VideoView
             player={player}
-            style={{ width: 500, height: '90%', flex: item.id === '3' || item.id === '4'  ? 0.62 : 0.8 }}
+            style={{ width: 500, height: '90%', flex: item.id === '5' || item.id === '4'  ? 0.8 : 0.8 }}
             allowsFullscreen={false}
             nativeControls={false}
           />
