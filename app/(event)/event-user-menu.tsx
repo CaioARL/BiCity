@@ -10,7 +10,7 @@ import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
 import { ArrowLeft } from 'lucide-react-native'
-
+import ScrollUp from '../../components/ScrollUp'; 
 
 
 export default function EventDetail() {
@@ -36,6 +36,9 @@ export default function EventDetail() {
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
 
+  const flatListRef = useRef<FlatList>(null);
+  const [scrollY, setScrolly] = useState<number>(0)
+  
   useEffect(()=>{
     if(!requestUpdateEvento) return
     setIsContentLoading(true)
@@ -177,6 +180,7 @@ export default function EventDetail() {
       <View className="h-full w-full container" >
         {eventos?.length!==0 ? (
                     <FlatList
+                      ref={flatListRef}
                       className="min-h-[100%] my-10"
                       contentContainerStyle={{ 
                         paddingBottom: 50,
@@ -184,6 +188,7 @@ export default function EventDetail() {
                       ListHeaderComponent={
                         <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
                       }
+                      onScroll={e => setScrolly(e.nativeEvent.contentOffset.y)}
                       onEndReached={loadMorePage}
                       onEndReachedThreshold={0.1}
                       refreshing={isContentLoading}
@@ -311,6 +316,8 @@ export default function EventDetail() {
               onClose={()=>{setSuccessMessage(null)}}
             />
           )}
+
+          <ScrollUp scrollY={scrollY} flatListRef={flatListRef} />
 
       </View>
     </SafeAreaView>
