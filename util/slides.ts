@@ -43,16 +43,16 @@ export const slides: Slide[] = [
       source: require('../assets/img/profile.jpg'),
     },
     title: 'Como Usar?',
-    description: 'Empresas: \nRegistre-se com e-mail e CNPJ e comece a divulgar seus eventos de ciclismo na hora',
+    description: 'Empresas: \nRegistre-se com E-mail e CNPJ e comece a divulgar seus eventos de ciclismo na hora.',
   },
     {
     id: '4',
     media: {
-         type: 'image',
-      source: require('../assets/img/profile.jpg'),
+      type: 'video',
+      source: require('../assets/slide/como-usar-ciclista.mp4'),
     },
     title: 'Como Usar?',
-    description: 'Ciclistas:\n Cadastre-se com e-mail e CPF, avalie ciclovias e descubra eventos incríveis para pedalar.',
+    description: 'Ciclistas:\n Cadastre-se com E-mail e CPF, avalie ciclovias e descubra eventos incríveis para pedalar.',
   },
   {
     id: '5',

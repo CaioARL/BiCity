@@ -11,7 +11,7 @@ import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
 import { set } from 'zod';
-
+import ScrollUp from '../../components/ScrollUp'; 
 
 // interface EventItem {
 //   id: string;
@@ -62,7 +62,7 @@ export default function Events() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   
-
+  const flatListRef = useRef<FlatList>(null);
 
   const [fastFowardFilter, setFastFowardFilter] = useState<FastFowardFilter[]>(
     [
@@ -300,6 +300,7 @@ export default function Events() {
 
            {eventos && (
             <FlatList
+              ref={flatListRef}
               onScroll={e=>setScrolly(e.nativeEvent.contentOffset.y)}
               contentContainerStyle={{ paddingBottom: '100%'}}
               onEndReached={loadMorePage}
@@ -351,7 +352,7 @@ export default function Events() {
                             
                             }
                             
-                            <Text style={{ ...CustomEvents.cardUserTitle}}>{item.usuario.nome.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+                            <Text style={{ ...CustomEvents.cardUserTitle}}>{item.usuario.nome.replace(/\b\w/, (c: string) => c.toUpperCase())}</Text>
                             {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
                             {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
                           </View>
@@ -412,7 +413,6 @@ export default function Events() {
         </View>
 
         {/* Add - Eventos */}
-
         {/* Modal Criar - Eventos */}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
@@ -439,7 +439,8 @@ export default function Events() {
         {isContentLoading && <LoadingActivity/>}
 
 
-      
+        <ScrollUp scrollY={scrollY} flatListRef={flatListRef} />
+
       </View>
 
     </SafeAreaView>
