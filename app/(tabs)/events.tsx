@@ -54,7 +54,7 @@ export default function Events() {
 
 
   //modals - filtro e criar evento
-  const [modalVisible, setModalVisible] = useState(false)
+  const [showScrollUpButton, setShowScrollUpButton] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
 
 
@@ -80,6 +80,11 @@ export default function Events() {
       router.setParams({tabBarVisible: 'no'})
     :
       router.setParams({tabBarVisible: 'yes'})
+    
+    scrollY > 100 ? 
+      setShowScrollUpButton(true)
+    :
+      setShowScrollUpButton(false)
   },[scrollY])
 
 
@@ -439,7 +444,9 @@ export default function Events() {
         {isContentLoading && <LoadingActivity/>}
 
 
-        <ScrollUp scrollY={scrollY} flatListRef={flatListRef} />
+        <ScrollUp  hide={showScrollUpButton} onClick={()=>{
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true })
+          }}/>
 
       </View>
 

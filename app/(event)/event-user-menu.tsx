@@ -36,8 +36,9 @@ export default function EventDetail() {
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList>(null)
   const [scrollY, setScrolly] = useState<number>(0)
+  const [showScrollUpButton, setShowScrollUpButton] = useState<boolean>(false)
   
   useEffect(()=>{
     if(!requestUpdateEvento) return
@@ -160,9 +161,12 @@ export default function EventDetail() {
     setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
   }   
 
-  const handleLocationEventMap = (item: Evento) => {
-    console.log('Você foi direcionar para o evento no mapa:', item.nome);
-  };
+  useEffect(() => {
+    scrollY > 100 ?
+      setShowScrollUpButton(true)
+    :
+      setShowScrollUpButton(false)
+  }, [scrollY])
 
   return (
     <SafeAreaView className="bg-white h-full w-full">
@@ -317,7 +321,9 @@ export default function EventDetail() {
             />
           )}
 
-          <ScrollUp scrollY={scrollY} flatListRef={flatListRef} />
+          <ScrollUp hide={showScrollUpButton} onClick={()=>{
+            flatListRef.current?.scrollToOffset({ animated: true, offset: 0 })
+            }} />
 
       </View>
     </SafeAreaView>
