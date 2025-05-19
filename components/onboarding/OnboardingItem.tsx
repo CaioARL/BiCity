@@ -33,14 +33,14 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         ) : (
           <VideoView
             player={player}
-            style={{ width: 500, height: '90%', flex: item.id === '5' || item.id === '4'  ? 0.8 : 0.8 }}
+            style={{ width: 500, height: '90%', flex: item.id === '5' || item.id === '4' ? 0.8 : 0.8 }}
             allowsFullscreen={false}
             nativeControls={false}
           />
         )}
         
       </View>
-      <View className="flex-[0.3] px-4">
+      <View className="flex-[0.4] px-4">
         <Text className="text-[18px] text-matte_gray mb-3 mt-3 text-center font-bold capitalize">
           {item.title}
         </Text>

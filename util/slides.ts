@@ -72,24 +72,13 @@ export const slides: Slide[] = [
     title: 'Estamos com Novos Ícones',
     description: 'Ícones de Evento: representam os Eventos, com as cores Verde(Gratuitos) e Bronze(Pagos)\n\n  Ícone de Problemas: representam as Ocorrências ou Obstáculos, com cores diversas.\n',
   },
-
-
-    {
+  {
     id: '7',
     media: {
-      type: 'image',
-      source: require('../assets/img/profile.jpg'),
+      type: 'video',
+      source: require('../assets/slide/sobre-nos.mp4'),
     },
     title: 'Sobre Nós:',
-    description: '\nLorem',
-  },
-  {
-    id: '8',
-    media: {
-      type: 'image',
-      source: require('../assets/img/profile.jpg'),
-    },
-    title: 'Sobre Nós:',
-    description: '\nTudo simples, rápido e feito para unir a comunidade do pedal. Pronto para fazer parte?',
+    description: 'BiCity foi idealizado em 2024, em uma sala de aula no IFSP, pelos orientadores Prof. Bernardo, Prof. Palladino e Prof. Quirino, junto com o grupo formado por Caio Arruda, Gabriel Josué, Gabriel Nogueira, Luiza Tempobono e Kayan Garbi.\n BiCity foi lançado na Play Store em 2025, para conectar empresas com ciclistas na cidade de São Paulo.',
   },
 ];
