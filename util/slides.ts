@@ -39,8 +39,8 @@ export const slides: Slide[] = [
   {
     id: '3',
     media: {
-        type: 'image',
-      source: require('../assets/img/profile.jpg'),
+        type: 'video',
+      source: require('../assets/slide/como-usar-empresa.mp4'),
     },
     title: 'Como Usar?',
     description: 'Empresas: \nRegistre-se com E-mail e CNPJ e comece a divulgar seus eventos de ciclismo na hora.',
