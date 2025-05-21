@@ -10,7 +10,8 @@ import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
-
+import { set } from 'zod';
+import ScrollUp from '../../components/ScrollUp'; 
 
 // interface EventItem {
 //   id: string;
@@ -27,8 +28,13 @@ import { router } from 'expo-router';
 // Versão original
 //type FilterType = "Todos" | "Ativos" | "Realizados" | "Pendentes";
 
-type FilterType = "Ativos" | "Realizados" ;
-
+interface FastFowardFilter {
+  id: number
+  name: string
+  isActive: boolean
+  campo: string
+  value: boolean | null | string | number
+}
 
 export default function Events() {
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', role: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' }, sessao: {id:0, token:''}, s3Url:'' });
@@ -41,28 +47,45 @@ export default function Events() {
   const totalPagesRef = useRef<number>(2)
   const totalRegistrosRef = useRef<number>()
   const currentPageRef = useRef<number>(0)
-  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
   const abortControllerRef = useRef<AbortController>()
+  const [scrollY, setScrolly] = useState<number>(0)
+  
 
 
   //modals - filtro e criar evento
-  const [modalVisible, setModalVisible] = useState(false)
+  const [showScrollUpButton, setShowScrollUpButton] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
 
 
 
-  const [modalViewEvento, setModalViewEvento] = useState<Evento | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   
+  const flatListRef = useRef<FlatList>(null);
 
-
-  const [filter, setFilter] = useState<FilterType>("Ativos");
+  const [fastFowardFilter, setFastFowardFilter] = useState<FastFowardFilter[]>(
+    [
+      {id:1, name: 'Gratuito', isActive: false , campo: 'gratuito', value: true},
+      {id:2, name: 'Pago', isActive: false , campo: 'gratuito', value: false},
+    ]
+  )
   
 
 
 
 
+  useEffect(()=>{
+    scrollY > 50 ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+    
+    scrollY > 100 ? 
+      setShowScrollUpButton(true)
+    :
+      setShowScrollUpButton(false)
+  },[scrollY])
 
 
 
@@ -111,14 +134,15 @@ export default function Events() {
   
 
   const refreshContent = () => {
-        setEventos(null)
-        setSearchText('')
-        currentPageRef.current = 0
-        setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+    setEventos(null)
+    setSearchText('')
+    currentPageRef.current = 0
+    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
+    setFastFowardFilter(prev => prev.map(item => ({ ...item, isActive: false })))	
   }
-  
-
-
+      
+      
+      
   const setFilteredEvents = (tipoEvento: TipoEvento | null, faixaKm: number | null, data: string| null) => {
     setEventos(null)
     currentPageRef.current = 0
@@ -129,6 +153,20 @@ export default function Events() {
   }
 
 
+  const applyFastFowardFilter = (filter: FastFowardFilter) => {
+    setFastFowardFilter(prev => 
+      prev
+      .map(fastFoward => fastFoward.campo === filter.campo && fastFoward.id !== filter.id ? { ...fastFoward, isActive: false } 
+        : fastFoward.id === filter.id ? { ...fastFoward, isActive: !fastFoward.isActive } : fastFoward )
+    )
+    setEventos(null)
+    currentPageRef.current = 0
+    if(filter.isActive){
+      setRequestPageEvento({...requestPageEvento, [filter.campo]: null, page: 1})
+    }else{
+      setRequestPageEvento({...requestPageEvento, [filter.campo]: filter.value, page: 1})
+    }
+  }
 
 
 
@@ -157,17 +195,14 @@ export default function Events() {
     );
   };
 
-  const handleSave = (item: Evento) => {
-    console.log('Evento salvo:', item.nome);
+  const handleLocalizarEvento = (id: number) => {
+    router.navigate({pathname:'home', params:{ eventoId: id.toString() }})
   };
 
-  const handleAddEvent = () => {
-    setModalVisible(true);
-  };
-  
+
   return (
   <SafeAreaView>
-      <View className='container' style={{ backgroundColor: 'white' }}>
+      <View className='container h-full' style={{ backgroundColor: 'white' }}>
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
@@ -183,7 +218,8 @@ export default function Events() {
                 <Image
                   src={authState.user.s3Url}
                   // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
-                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, borderColor: '#EAEAEC', marginRight: 10 }}
+                  className="w-20 h-20 rounded-full border-color_light_gray"
+                  style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
                 />
                 :
                 <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
@@ -210,14 +246,15 @@ export default function Events() {
             </View>
 
                 {authState?.user?.role !== 'PF' &&
-                <View>
+                <View className='mr-[10px]'>
                   <TouchableOpacity 
                   className='flex-col flex-nowrap items-center justify-center'
                   onPress={()=>{
                           router.push('event-user-menu')
                   }}>
-                      <Ionicons name="menu" size={30} style={{marginLeft: 2}}/> 
-                      <Text>Meus Eventos</Text>
+                      <Image source={require('../../assets/img/1581943.png')} style={{ width: 25, height: 25, tintColor: '#555' }} resizeMode="contain" />
+
+                      <Text className='text-xs text-matte_gray text-center'>Meus {'\n'} Eventos</Text>
                   </TouchableOpacity>
                 </View>}
 
@@ -238,15 +275,15 @@ export default function Events() {
           </View>
 
           <View style={CustomEvents.filterContainer}>
-            {["Ativos",  "Realizados"].map((item) => (
+            {fastFowardFilter.map((item) => (
               <TouchableOpacity 
-                key={item} 
-                onPress={() => setFilter(item as FilterType)}
+                key={item.id.toString()} 
+                onPress={() => applyFastFowardFilter(item)}
               >
                 <Text
                   style={[
                     CustomEvents.filterText,
-                    filter === item && {
+                    item.isActive && {
                       ...CustomEvents.filterText,fontWeight: "bold",
                       color: "#555",
                       backgroundColor: "#C3FF00",
@@ -254,7 +291,7 @@ export default function Events() {
                     }
                   ]}
                 >
-                  {item}
+                  {item.name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -268,8 +305,9 @@ export default function Events() {
 
            {eventos && (
             <FlatList
-              style={{ minHeight: "100%" }}
-              contentContainerStyle={{ paddingBottom: "300%" }}
+              ref={flatListRef}
+              onScroll={e=>setScrolly(e.nativeEvent.contentOffset.y)}
+              contentContainerStyle={{ paddingBottom: '100%'}}
               onEndReached={loadMorePage}
               onEndReachedThreshold={0.1}
               refreshing={isContentLoading}
@@ -286,7 +324,6 @@ export default function Events() {
                       CustomEvents.card,
                       isSelected && { backgroundColor: "#d3e5ff" }
                     ]}
-                    // onPress={() => setModalViewEvento(item)}
                     onPress={()=>router.push({pathname:'event-view', params:{ eventoId: item.id }})}
                   >
                     <ImageBackground  
@@ -304,13 +341,23 @@ export default function Events() {
                           </TouchableOpacity>
                         </View> */}
                         <View style={CustomEvents.cardInfo}>
-                          <View style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            zIndex: 3, 
-                            position: 'relative', 
-                            top: 10 
-                          }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 3, position: 'relative', top: 10 }}>
+                          { item.usuario.s3Url ? 
+                            
+                            <Image
+                              src={item.usuario.s3Url}
+                              // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
+                              className="w-20 h-20 rounded-full border-color_light_gray"
+                              style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                            />
+                            :
+                            <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
+                              <Text className='text-[45px]'>{item.usuario.nome[0]}</Text>
+                            </View>
+                            
+                            }
+                            
+                            <Text style={{ ...CustomEvents.cardUserTitle}}>{item.usuario.nome.replace(/\b\w/, (c: string) => c.toUpperCase())}</Text>
                             {/* <Image source={{ uri: item.userImage }} style={CustomEvents.CarduserImage} /> */}
                             {/* <Text style={CustomEvents.cardUserTitle}>{item.nameUser}</Text> */}
                           </View>
@@ -327,7 +374,8 @@ export default function Events() {
                             >
                               {item.descricao}
                             </Text>
-                            <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                            <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
+                            <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                           </View>
                         </View>
                       </View>
@@ -343,13 +391,14 @@ export default function Events() {
                         </View> */}
 
                       <View style={CustomEvents.containerButton}>
-                        <TouchableOpacity 
+                        {authState?.user?.role !== "PJ" &&
+                          <TouchableOpacity 
                           style={CustomEvents.customButton} 
-                          onPress={() => handleSave(item)}
+                          onPress={() => handleLocalizarEvento(item.id)}
                           >
                           <Ionicons name="location-outline" size={20} color="white" />
-                          <Text style={CustomEvents.customButtonText}>Localizada</Text>
-                        </TouchableOpacity>
+                          <Text style={CustomEvents.customButtonText}>Localização</Text>
+                        </TouchableOpacity>}
                         {/* <TouchableOpacity 
                           style={CustomEvents.customButton} 
                           onPress={() => handleFavorite(item)}
@@ -369,7 +418,6 @@ export default function Events() {
         </View>
 
         {/* Add - Eventos */}
-
         {/* Modal Criar - Eventos */}
         {/* Modal Filtro - Eventos */}  
         <FilterModal
@@ -396,7 +444,10 @@ export default function Events() {
         {isContentLoading && <LoadingActivity/>}
 
 
-      
+        <ScrollUp  hide={showScrollUpButton} onClick={()=>{
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true })
+          }}/>
+
       </View>
 
     </SafeAreaView>

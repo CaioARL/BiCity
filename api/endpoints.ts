@@ -2,19 +2,22 @@ const ENDPOINTS = {
     USUARIO_LOGIN: '/login/',
     USUARIO_RECUPERAR_SENHA: '/login/recover',
     USUARIO_CADASTRO: '/usuario',
-    USUARIO_PUT: '/usuario/',
+    USUARIO_PUT: '/usuario',
     USUARIO_GET: '/usuario/',
     USUARIO: '/usuario',
     USUARIO_VALIDAR_CPF: '/usuario/cpf/validate',
+    USUARIO_VALIDAR_CNPJ: '/usuario/cnpj/validate',
+    USUARIO_VALIDAR_CNPJ_AUTHENTICITY: '/empresa/is/active/cnpj',
+    USUARIO_VALIDAR: '/usuario/validate',
     USUARIO_GET_IMAGE: '/usuario/foto/file',
-
 
     PROBLEMA_GET_BY_RADIUS: '/problema/radius',
     PROBLEMA_GET_BY_ID: '/problema/',
     PROBLEMA_POST: '/problema/',    
     PROBLEMA_GET: '/problema/',
     PROBLEMA_CHECK: '/problema/check',    
-    
+    PROBLEMA_REPORT: '/report',
+
     TIPO_PROBLEMA_GET: '/tipo/problema/',
 
     AVALIACAO_INFRAESTRUTURA: '/avaliacao/infraestrutura/',
@@ -24,6 +27,8 @@ const ENDPOINTS = {
 
     TOKEN_VALIDAR: '/token/',
     TOKEN_CHECK: '/token/validate',
+    TOKEN_RECOVER: '/token/recover',
+    TOKEN_RECOVER_CHECK: '/token/recover/validate',
 
     NIVEL_GET: '/nivel/habilidade/',
     NIVEL_POST: '/nivel/habilidade/create',
@@ -46,6 +51,7 @@ const ENDPOINTS = {
 
 
     INFRAESTRUTURA_GET: '/infraestrutura/geojson',
+    INFRAESTRUTURA_GET_BY_ID: '/infraestrutura/',
 
 
 } as const;

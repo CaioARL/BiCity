@@ -1,32 +1,22 @@
-import { View, Text, ScrollView, ImageBackground, Image, ActivityIndicator  } from 'react-native';
-import React, { useEffect } from 'react';
-import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useAuthProvider } from './context/AuthProvider';
+import { View, Text, ScrollView, Image, ActivityIndicator, Alert  } from 'react-native'
+import React, { useEffect } from 'react'
+import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+import { useAuthProvider } from './context/AuthProvider'
 
 export default function Index() {
-  const {authState, isLoading} = useAuthProvider()
-  const backgroundImageLogo = require('../assets/img/logo.png'); 
+  const {authState, isLoading} = useAuthProvider() 
 
   useEffect(() => {
     const loading = async () => {
       if (authState?.authenticated) {
-        router.replace('/home') // Redirect to the main app if user is logged in
+        router.replace('/events')
       } else {
-        router.replace('/sign-in') // Redirect to the sign-in page
-      } 
+        router.replace('/sign-in')
+      }
     }
     loading()
-    // const timeout = setTimeout(() => {
-    //   if (authState?.authenticated) {
-    //     router.replace('/mapView'); // Redirect to the main app if user is logged in
-    //   } else {
-    //     router.replace('/sign-in'); // Redirect to the sign-in page
-    //   }
-    // }, 3000);
-
-    // return () => clearTimeout(timeout);
   }, [isLoading])
 
   return (
@@ -36,7 +26,7 @@ export default function Index() {
               <View className="flex-1 items-center justify-center">
                 <Text className="text-[32px] text-white font-robotobold mb-[54px]"> BICITY </Text>
                 <Image 
-                  source={backgroundImageLogo} 
+                  source={require('../assets/img/logo.png')} 
                   resizeMode="contain" 
                   className='h-[172px] w-[135px]'
                   
@@ -60,5 +50,5 @@ export default function Index() {
           </View>
         <StatusBar backgroundColor='#161622' style='light' />
       </SafeAreaView>
-  );
+  )
 }

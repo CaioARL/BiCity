@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text} from "react-native";
+import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -9,11 +9,12 @@ import ShowAlert from "../../components/ShowAlert";
 import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
-
+import { ArrowLeft } from 'lucide-react-native'
+import ScrollUp from '../../components/ScrollUp'; 
 
 
 export default function EventDetail() {
-  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
+  const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
   const { authState } = useAuthProvider()
 
   const [eventos, setEventos] = useState<Evento[] | null>()
@@ -34,8 +35,11 @@ export default function EventDetail() {
   const [eventoImage, setEventoImage] = useState<string | null>(null)
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
-  
 
+  const flatListRef = useRef<FlatList>(null)
+  const [scrollY, setScrolly] = useState<number>(0)
+  const [showScrollUpButton, setShowScrollUpButton] = useState<boolean>(false)
+  
   useEffect(()=>{
     if(!requestUpdateEvento) return
     setIsContentLoading(true)
@@ -43,7 +47,7 @@ export default function EventDetail() {
     abortControllerRef.current = new AbortController
     updateEvento(requestUpdateEvento, abortControllerRef.current)
     .then((response)=>{
-      setSuccessMessage('Evento: ' + response.nome + ' atualizado com sucesso')
+      setSuccessMessage('Evento: atualizado com sucesso')
       if(eventoImage){
         const formData = new FormData()
         formData.append('file', {
@@ -52,7 +56,7 @@ export default function EventDetail() {
           type: 'image/jpeg',
         } as any)
         setRequestEventoImage({
-          id: response.id,
+          id: requestUpdateEvento.id,
           image: formData
         })
       }else{
@@ -108,11 +112,12 @@ export default function EventDetail() {
     setIsContentLoading(true)
     createEventoImage(requestCreateEventoImage, abortControllerRef.current)
     .then((response) => {
-      setSuccessMessage("Imagem enviada com sucesso" + response)
-      
+      // setSuccessMessage("Imagem enviada com sucesso" + response)
+      setSuccessMessage("Imagem enviada com sucesso")
     })
     .catch((response) => {
-      setErrorMessage("Error ao enviar imagem: " + response.message)
+      setErrorMessage("Error ao enviar imagem. Check o formato e o tamanho.")
+      // setErrorMessage("Error ao enviar imagem: " + response.message)
     }).finally(() => {
       setIsContentLoading(false)
       setRequestEventoImage(null)
@@ -122,11 +127,11 @@ export default function EventDetail() {
   }, [requestCreateEventoImage])
 
   useEffect(() => {
-    if(!requestPageEvento || !authState?.id) return
+    if(!requestPageEvento || !authState?.user) return
     abortControllerRef.current?.abort()
     abortControllerRef.current = new AbortController
     setIsContentLoading(true)
-    getEventoByUsuario(requestPageEvento, authState.id , abortControllerRef.current)
+    getEventoByUsuario(requestPageEvento, authState.user.id , abortControllerRef.current)
     .then((response) =>{
       totalPagesRef.current = response.totalPaginas
       totalRegistrosRef.current = response.totalRegistros
@@ -153,19 +158,41 @@ export default function EventDetail() {
     setEventos(null)
     // setSearchText('')
     currentPageRef.current = 1
-    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null})
-  }
+    setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
+  }   
+
+  useEffect(() => {
+    scrollY > 100 ?
+      setShowScrollUpButton(true)
+    :
+      setShowScrollUpButton(false)
+  }, [scrollY])
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-white h-full w-full">
+     
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
+          paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
+          className='bg-primary_green'
+           onPress={() => router.back()}
+        >
+        <ArrowLeft size={24} color="#555" />
+      </TouchableOpacity>
+      
       {isContentLoading && <LoadingActivity/>}
-      <View className="h-full w-full container bg-white">
-        {eventos && (
+      <View className="h-full w-full container" >
+        {eventos?.length!==0 ? (
                     <FlatList
+                      ref={flatListRef}
                       className="min-h-[100%] my-10"
+                      contentContainerStyle={{ 
+                        paddingBottom: 50,
+                      }}
                       ListHeaderComponent={
-                        <Text className="font-robotobold text-4xl my-4" >Meus Eventos</Text>
+                        <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
                       }
+                      onScroll={e => setScrolly(e.nativeEvent.contentOffset.y)}
                       onEndReached={loadMorePage}
                       onEndReachedThreshold={0.1}
                       refreshing={isContentLoading}
@@ -191,9 +218,24 @@ export default function EventDetail() {
                               <View style={CustomEvents.overlay}>
                                
                                 <View style={CustomEvents.cardInfo}>
-                                  <View  className='relative top-10 flex-row items-center z-[3px]'>
-                                    {/* visual component */}
+                                 <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 3, position: 'relative', top: 10 }}>
+                                 
+                                      { authState?.user?.s3Url ? 
+                                        <Image
+                                          src={authState.user.s3Url}
+                                          className="w-20 h-20 rounded-full border-color_light_gray"
+                                          style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1, marginRight: 10 }}
+                                        />
+                                        :
+                                        <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center bg-white text-white'>
+                                          <Text className='text-[45px]'>{authState?.user?.nome?.[0]}</Text>
+                                        </View>
+                                      }
+                                      <Text style={{ ...CustomEvents.cardUserTitle}}>{authState?.user?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                                   </View>
+                                  
+                                  <View style={CustomEvents.cardLine}/> 
+
                                   <View style={CustomEvents.cardInfoBox}>
                                     <Text style={CustomEvents.cardTitle}>{item.nome}</Text>
                                     <Text style={CustomEvents.cardLocation}>{item.endereco.bairro}</Text>
@@ -204,21 +246,27 @@ export default function EventDetail() {
                                     >
                                       {item.descricao}
                                     </Text>
-                                    <Text style={CustomEvents.cardDate}>{item.data}</Text>
+                                     <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
+                                    <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
                                   </View>
+                                  
                                 </View>
                               </View>
                               
-        
-                        
                             </ImageBackground>
                           </TouchableOpacity>
                       )
                       }}
                     />
-                  )}
+                  )
+                  :
+                  <View className="flex-1 justify-center items-center">
+                    <Text className="text-lg font-bold text-center">Nenhum evento encontrado</Text>
+                    <Text className="text-sm text-gray-500">Crie um evento</Text>
+                  </View>
+                }
 
-            <TouchableOpacity className='absolute bottom-[20%] elevation-[5px] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
+            <TouchableOpacity className='absolute bottom-[20%] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
               onPress={()=>setIsCreatingEvento(true)}>
               <Ionicons name="add-circle-outline" size={24} color="#333" />
             </TouchableOpacity>
@@ -272,6 +320,10 @@ export default function EventDetail() {
               onClose={()=>{setSuccessMessage(null)}}
             />
           )}
+
+          <ScrollUp hide={showScrollUpButton} onClick={()=>{
+            flatListRef.current?.scrollToOffset({ animated: true, offset: 0 })
+            }} />
 
       </View>
     </SafeAreaView>

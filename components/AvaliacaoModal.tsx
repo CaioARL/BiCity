@@ -1,9 +1,10 @@
-import { View, Text, Animated, Modal, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { View, Text, Modal, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
 import { RequestCreateAvaliacao } from '../types'
 import { useAuthProvider } from '../app/context/AuthProvider'
+import { createAvaliacaoSchema } from 'util/validationSchemas'
 
 interface AvalicaoModalProps {
     idInfraestruturaCicloviaria: number 
@@ -22,6 +23,11 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
     nota: 0,
     comentario: '',
     })
+
+  const [requestCreateAvaliacaoError, setRequestCreateAvaliacaoError] = useState({	
+    nota: '',
+    comentario: ''
+  })
 
   // useEffect(() => {
   //   if (visible) {
@@ -46,6 +52,20 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
   //     nota: nota
   //   }))
   // }, [comentario, nota])
+
+  const validateRequest = () => {
+    setRequestCreateAvaliacaoError({ nota: '', comentario: '' })
+    const validateResult = createAvaliacaoSchema.safeParse(requestCreateAvaliacao)
+    if (!validateResult.success) {
+      validateResult.error.issues.forEach(issue => {
+        setRequestCreateAvaliacaoError(prev => ({ ...prev, 
+          [issue.path[0]]: issue.message 
+        }))
+      })
+      return
+    }
+    closeModal(requestCreateAvaliacao)
+  }
 
   const renderStars = () => {
     const stars = [1, 2, 3, 4, 5]
@@ -86,16 +106,19 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
       {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
           <View className='rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto bg-white'>
-            <Text className={'text-xl font-bold text-center mb-4 color-black'} >
+            <Text className='flex-col text-lg font-bold text-center mb-10' >
               Avaliar Ciclovia
             </Text>
 
             <View className="mb-4">
-              <Text className='text-base mb-2 color-gray-600' >
-                Qualidade da ciclovia:
-              </Text>
+              <Text className='text-[16px] text-matte_gray mb-[5px]' >
+                Qualidade da Ciclovia:
+              </Text> 
+              <Text className="text-xs text-gray-400 text-center py-2">1 ★ = Insatisfatório ||
+                 5 ★ = Muito satisfatório</Text>
               {renderStars()}
             </View>
+            <Text className='text-color_red_error text-'>{requestCreateAvaliacaoError.nota}</Text>
 
             <FormFieldModal
               title="Comentário (opcional)"
@@ -104,6 +127,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               maxLength={200}
               handleChangeText={e=> updateCampoAvaliacao("comentario",e)}
               value={requestCreateAvaliacao.comentario}
+              msg={requestCreateAvaliacaoError.comentario}
               validantionCheck={() => {}}
             />
 
@@ -111,12 +135,11 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               <ButtonModal
                 title="Cancelar"
                 handlePress={() => closeModal(null)}
-                customStyles='py-[10px] rounded-[8px] bg-gray-300 border-[1px] border-gray-200'
                 textStyles='text-center color-black'
               />
               <ButtonModal
                 title="Enviar Avaliação"
-                handlePress={() => closeModal(requestCreateAvaliacao)}
+                handlePress={() => validateRequest()}
                 customStyles='py-[10px] rounded-[8px] bg-green-500 border-[1px] border-green-300'
                 disabled={requestCreateAvaliacao.nota===0}
                 textStyles='text-center color-black'

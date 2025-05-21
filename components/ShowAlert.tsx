@@ -35,7 +35,7 @@ useEffect(() => {
       duration: 300,
       useNativeDriver: true,
     }),
-    Animated.delay(2000),
+    Animated.delay(3000),
     Animated.timing(animation, {
       toValue: 0,
       duration: 300,
@@ -70,29 +70,29 @@ useEffect(() => {
 
 
   return (
-        <View className="absolute top-10 left-0 bottom-0 z-10 right-0 px-4">
-        <Animated.View
-            style={[
-            styles.alert,
-            {
-                backgroundColor: getAlertColor(),
-                transform: [{
-                translateY: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-100, 0],
-                }),
-                }],
-            },
-            ]}
-        >
-            <View className="flex-row items-center flex-1">
-            {getIcon()}
-            <Text className="text-white ml-3 text-base flex-1">{message}</Text>
-            </View>
-            <TouchableOpacity onPress={ onClose } className="p-1">
-            <Text className="text-white text-2xl font-bold">×</Text>
-            </TouchableOpacity>
-        </Animated.View>
+        <View className="absolute h-[100px] top-10 left-0 bottom-0 z-10 right-0 px-4">
+          <Animated.View className='h-fit'
+              style={[
+              styles.alert,
+              {
+                  backgroundColor: getAlertColor(),
+                  transform: [{
+                  translateY: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-100, 0],
+                  }),
+                  }],
+              },
+              ]}
+          >
+              <View className="flex-row items-center flex-1">
+              {getIcon()}
+              <Text className="text-white ml-3 text-base flex-1">{message}</Text>
+              </View>
+              <TouchableOpacity onPress={ onClose } className="p-1">
+              <Text className="text-white text-2xl font-bold">×</Text>
+              </TouchableOpacity>
+          </Animated.View>
         </View>
   )
 }

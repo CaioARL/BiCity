@@ -10,9 +10,10 @@ interface FormFieldProps <T>{
     isValid?: boolean
     placeholder?: string
     handleChangeText: (e : string) => void
-    validantionCheck: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
+    validantionCheck?: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
+    onFocus?: () => void
     otherStyles?: string
-    keyboardType?: 'email-address' | 'default' | 'numeric'
+    keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad' | 'url' | 'ascii-capable'
     secureTextEntry?: boolean;
     disableEdit?: boolean;
     isLoading?: boolean;
@@ -22,17 +23,18 @@ interface FormFieldProps <T>{
 
 
 
-export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
+export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck, onFocus , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
   const [showPassword, setShowPassword] = useState(false)
 
 
   return (
     <View className={`mb-[10px] ${otherStyles}`}>
-      {title && <Text className='text-[16px] text-[#555] mb-[1px]'>{title}</Text>}
+      {title && <Text className='text-[16px] text-matte_gray mb-[5px]'>{title}</Text>}
       <View className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8px] p-[1px] ${disableEdit==true &&  'bg-color_lightGray' } ${msg? 'border-color_red_error': isValid && 'border-color_green_success'} `}>
         <TextInput
           className={`flex-1 w-full  }  ${multiline && 'h-[120px] align-top'}`}
           value={value}
+          onFocus={onFocus}
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}

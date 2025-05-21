@@ -38,3 +38,9 @@ yarn-error.*
 
 # non-permanent docs
 todo-list.md
+
+# local images
+production-images/
+
+#build 
+eas.json

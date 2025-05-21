@@ -1,7 +1,6 @@
 import { NivelHabilidade } from "./nivel-habilidade"
 
-
-export interface CriarUsuarioRequest {
+export interface CreateUsuarioRequest {
     nome: string
     nomeUsuario: string
     endereco: {
@@ -14,11 +13,46 @@ export interface CriarUsuarioRequest {
     }
     email: string
     senha: string
-    cpf: string
-    cnpj: string
+    cpf: string | null
+    cnpj: string | null
     nivelHabilidade: number
 }
 
+export interface CreateUsuarioForms {
+    firstName: string 
+    secondName: string 
+    nomeUsuario: string 
+    cep: string 
+    estado: string 
+    cidade: string  
+    bairro: string 
+    rua: string 
+    numero: string 
+    email: string 
+    senha: string 
+    confirmaSenha: string 
+    cpf: string | null
+    cnpj: string | null
+    nivelHabilidade: NivelHabilidade
+}
+
+export interface ErrorCreateUsuarioForms {
+    firstName : string
+    secondName : string
+    nomeUsuario: string
+    cep: string
+    estado: string
+    cidade: string
+    bairro: string
+    rua: string
+    numero: string
+    email: string
+    senha: string
+    confirmaSenha: string 
+    cpf: string
+    cnpj: string
+    nivelHabilidade: string
+}
 
 export interface Usuario {
     id: number
@@ -51,8 +85,6 @@ export interface Usuario {
     s3Url: string
 }
 
-
-
 export interface CriarUsuarioResponse {
     id: number
     nome: string
@@ -84,31 +116,18 @@ export interface CriarUsuarioResponse {
     s3Url: string
 }
 
-
-
 export interface EnderecoUsuario {
-    endereco: {
       rua: string,
       numero: number,
-      complemento: string,
       bairro: string,
       cidade: string,
       estado: string,
       cep: string
-    }
-}
-
-
-export interface UsuarioLoginRequest {
-    nomeUsuario: string
-    email: string
-    cpf: string
-    cnpj: string
-    senha: string
 }
 
 
 export interface RequestUpdateUsuario {
+    id: number
     nome: string
     nomeUsuario: string
     endereco: {
@@ -121,4 +140,32 @@ export interface RequestUpdateUsuario {
     }
     email: string
     nivelHabilidade: NivelHabilidade
+}
+
+export interface RequestUpdateUsuarioError{
+    nome: string
+    nomeUsuario: string
+    cep: string
+    estado: string
+    cidade: string
+    bairro: string
+    rua: string
+    numero: string
+    email: string
+    nivelHabilidade: string
+}
+
+export interface CpfValidationResponse {
+    isValid: boolean
+    message: string
+}
+
+export interface CnpjValidationResponse {
+    isValid: boolean
+    message: string
+}
+
+export interface ValidateUsuarioRequest {
+    email: string | null
+    nomeUsuario: string | null
 }

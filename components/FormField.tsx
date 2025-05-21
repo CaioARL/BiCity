@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 
@@ -10,17 +10,19 @@ interface FormFieldProps {
   isValid?: boolean;
   placeholder?: string;
   handleChangeText: (e: string) => void;
+  handleEndEditing?: (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => void;
   otherStyles?: string;
   keyboardType?: 'email-address' | 'default' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad';
   secureTextEntry?: boolean;
   disableEdit?: boolean;
   isLoading?: boolean;
   maxLength?: number;
+  onFocus?: () => void
 }
 
 export default function FormField({
-  title, value, placeholder, handleChangeText, otherStyles,
-  keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength,
+  title, value, placeholder, handleChangeText, otherStyles, onFocus,
+  keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength, handleEndEditing
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,14 +41,16 @@ export default function FormField({
         className={`border-2 ${disableEdit ? 'bg-color_lightGray' : ''} ${getBorderColor()} w-full h-16 px-4 rounded-[2px] bg-orange-5001e items-center flex-row`}
       >
         <TextInput
-           className="flex-1 text-base w-full"
+          className="flex-1 text-base w-full"
           value={value}
           placeholder={placeholder}
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry && !showPassword}
+          onEndEditing={handleEndEditing}
           editable={!disableEdit}
           maxLength={maxLength}
+          onFocus={onFocus}
         />
         {secureTextEntry && (
           <Text
@@ -60,7 +64,7 @@ export default function FormField({
           <ActivityIndicator size="small" color="#0000ff" />
         )}
       </View>
-      {msg && <Text className="text-sm text-color_red_error">{msg}</Text>}
+      {msg && <Text className="text-sm text-color_red_error">* {msg}</Text>}
     </View>
   );
 }

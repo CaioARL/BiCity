@@ -1,22 +1,32 @@
-import { View, Text, SafeAreaView, Modal} from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity, Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Callout, Circle, Geojson, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, PageAvaliacao, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestPageEvento, RequestProblemaByRadius } from '../../types'
-import { getEventoByRadius } from '../../api/evento'
+import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
+import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
-import { getInfraestrutura } from '../../api/infraestrutura'
+import { getInfraestrutura, getInfraestruturaById } from '../../api/infraestrutura'
 import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
-import PinProblemaView from '../../components/PinProblemaView'
+import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
 import { isPointNearLine } from '../../util/map-util'
 import OpsModal from '../../components/OpsModalMap'
-import { set } from 'zod'
-import { createAvaliacao, getAvaliacoesByInfraestrutura } from '../../api/avaliacao'
+import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
+import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
+import { router, useLocalSearchParams } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons';
+import { 
+  isRegionWithinBounds, 
+  animateToUserLocation,
+  getOutOfBoundsMessage
+} from '../../util/restrict-map';
+import EventCardCarousel from 'components/EventCardCarousel'
+import FloatingButton from 'components/FloatingButton'
+
 
 interface Region {
   latitude: number
@@ -26,16 +36,10 @@ interface Region {
 
 }
 
-
 interface LocationError {
   key: string
   message: string
 }
-
-
-
-
-
 
 export default function Home() {
 
@@ -43,8 +47,10 @@ export default function Home() {
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
-  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
+  const mapRef = useRef<MapView>(null)
+
   const [isMoved, setIsMoved] = useState<boolean|undefined>(false)
+  const isGestureRef = useRef<boolean>(false) 
 
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
@@ -65,11 +71,10 @@ export default function Home() {
   const [showAvaliacaoModal, setShowAvaliacaoModal] = useState<boolean>(false)
   const [idInfraAvaliacao, setIdInfraAvaliacao] = useState<number | null>(null)
   const [requestPageAvaliacao, setRequestPageAvaliacao] = useState<RequestPageAvaliacao | null>(null)
-  const [pageAvaliacoes, setPageAvaliacoes] = useState<PageAvaliacao | null>(null)
-  const [isRequestingPage, setIsRequestingPage] = useState<boolean>(false)
 
   const [showOpsModal, setShowOpsModal] = useState<boolean>(false)
 
+  const [hilightedEvento, setHilightedEvento] = useState<{evento :Evento, interno: boolean} | null>(null)
 
   const abortControllerRef = useRef<AbortController>()
   const [initalLoading, setInitalLoading] = useState<boolean>(true)
@@ -84,6 +89,9 @@ export default function Home() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const { eventoId } = useLocalSearchParams<{eventoId: string}>()
+  
+  const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const locationErrors = {
     PERMISSION : {key: 'PERMISSION', message: 'Permissão de localização negada, cheque as permissões do aplicativo'},
     SERVICE : {key: 'SERVICE', message: 'Serviço de localização desativado'},
@@ -93,27 +101,31 @@ export default function Home() {
   const emptyGeoJson: InfraestruturaGeoJson = {
     type: "FeatureCollection",
     features: [],
-  };
+  }
+
   
 
-   const getCurrentLocation = async (): Promise<void>  => {
-     let {status} = await Location.requestForegroundPermissionsAsync()
-     
-     if (status !== 'granted'){
-       setCurrentLocationError(locationErrors.PERMISSION)
-       return
-      }
-    await Location.hasServicesEnabledAsync()
-    .then((response) => {
-      if (!response){
-        setCurrentLocationError(locationErrors.SERVICE)
-      }else {
-        setCurrentLocationError(null)
-      }
-    })
-    .catch((error)=> {
-      setErrorMessage("Error ao checar serviço de localização: "+ error)
-    })
+    const getCurrentLocation = async (): Promise<void>  => {
+      setInitalLoading(true)
+      await Location.hasServicesEnabledAsync()
+      .then((response) => {
+        if (!response){
+          setCurrentLocationError(locationErrors.SERVICE)
+          setInitalLoading(false)
+        }else {
+          setCurrentLocationError(null)
+        }
+      })
+      .catch((error)=> {
+        setErrorMessage("Error ao checar serviço de localização: "+ error)
+      })
+
+      let {status} = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted'){
+        setCurrentLocationError(locationErrors.PERMISSION)
+        setInitalLoading(false)
+        return
+    }
     
     await Location.getCurrentPositionAsync({})
     .then((response) => {
@@ -134,33 +146,44 @@ export default function Home() {
         raio: 7000
       })
       setInitialRegion({latitude: response.coords.latitude, longitude: response.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
-      initalLoading && setInitalLoading(false)
     })
     .catch((error) => {
       setCurrentLocationError(locationErrors.ERROR)
       setErrorMessage("Error ao obter localização: "+ error)
     }).finally(() => {
+      setInitalLoading(false)
     })
 
 
 
   }
 
-
-
-  
-
-
   useEffect(()=>{
     if(!currentLocation){
       getCurrentLocation()
     }
-  setInterval(
-    getCurrentLocation
-  , 120000)
+  // setInterval(
+  //   getCurrentLocation
+  // , 120000)
 
   }, [])
 
+  const handleMyLocationPress = () => {
+    if(!mapRef.current) return
+    if(!currentLocation) return
+    mapRef.current.animateToRegion({
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta:0.0043, longitudeDelta:0.0034
+    })
+  }
+    
+  useEffect(()=>{
+    isMoved ? 
+      router.setParams({tabBarVisible: 'no'})
+    :
+      router.setParams({tabBarVisible: 'yes'})
+  },[isMoved])
 
   useEffect( () => {
     if (!requestEventos) {return}
@@ -200,7 +223,7 @@ export default function Home() {
       if (!requestInfraestrutura) {return}
       getInfraestrutura(requestInfraestrutura, null)
       .then((response) => {
-        setInfraestrutura(response)
+        setInfraestrutura(mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response))
       })
       .catch((response)=>{
         setErrorMessage("Error ao carregar infraestrutura: " + response.message)
@@ -212,7 +235,57 @@ export default function Home() {
     }, [requestInfraestrutura])
 
 
-    const getEventsOnViewLocation = () => {
+    useEffect(()=>{
+      if(!eventoId) return
+      var attempts = 0
+      setIsContentLoading(true)
+      const interval = setInterval(async () => {
+        if (mapRef.current?.state.isReady) {
+          getEventoById(eventoId, null)
+            .then((response)=>{
+              isGestureRef.current = true
+              mapRef.current?.animateToRegion({
+                latitude: response.endereco.latitude,
+                longitude: response.endereco.longitude,
+                latitudeDelta:0.0043, longitudeDelta:0.0034})
+              getEventsOnViewLocation(response.endereco)
+            })
+            .catch((error)=>{
+              setErrorMessage('Erro ao carregar Evento' + error.message)
+            })
+            .finally(()=>{
+              setIsContentLoading(false)
+            })
+            clearInterval(interval)
+          } else if (attempts >= 15){
+            setIsContentLoading(false)
+            setErrorMessage("Falha ao encontrar evento, verifique sua localização")
+            clearInterval(interval)
+          }
+          attempts++
+        }, 3000)
+    },[eventoId])
+
+    const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
+      abortControllerRef.current?.abort()
+      setRequestInfraestrutura({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 750
+        })
+        setRequestProblemas({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 7000
+        })
+        setRequestEventos({
+          latitude: latitude,
+          longitude: longitude,
+          raio: 7000
+        })
+    }
+
+    const searchOnViewLocation = () => {
       abortControllerRef.current?.abort()
       if(!currentViewLocation){return}
       setIsContentLoading(true)
@@ -233,10 +306,6 @@ export default function Home() {
         })
     }
 
-
-
-
-
     useEffect(()=>{
       if(!requestCreateAvaliacao){return}
       abortControllerRef.current?.abort()
@@ -245,6 +314,24 @@ export default function Home() {
       createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
       .then(() => {
         setSuccessMessage("Avaliação criada com sucesso")
+        getInfraestruturaById(idInfraAvaliacao!, null)
+        .then((response) => {
+            setInfraestrutura(prev => {
+              if (!prev) return mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response)
+              return {
+                ...prev,
+                features: [
+                ...prev.features,
+                ...mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response).features
+                ]
+              }
+            })
+        })
+        .catch((response)=>{
+          setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+        })
+    
+
       })
       .catch((response) => {
         setErrorMessage("Error ao criar avaliação: " + response.message)
@@ -256,10 +343,6 @@ export default function Home() {
 
     },[requestCreateAvaliacao])
 
-
-
-    
-
     useEffect(()=>{
       if(!requestCreateProblema){return}
       abortControllerRef.current?.abort()
@@ -267,6 +350,7 @@ export default function Home() {
       setIsContentLoading(true)
       createProblema(requestCreateProblema, abortControllerRef.current)
       .then((response) => {
+        setProblemas((prev) => [...prev, response])
         setSuccessMessage("Problema criado com sucesso")
         if(problemaImage){
           const formData = new FormData()
@@ -291,7 +375,6 @@ export default function Home() {
     
     },[requestCreateProblema])
 
-
     useEffect(()=>{
       if(!requestProblemaImage){return}
       abortControllerRef.current?.abort()
@@ -309,22 +392,14 @@ export default function Home() {
       })
     }, [requestProblemaImage])
 
-
-    useEffect(()=>{
-      if(!requestPageAvaliacao) return
-      setIsRequestingPage(true)
-      getAvaliacoesByInfraestrutura(requestPageAvaliacao, null)
-      .then((response)=>{        
-          setPageAvaliacoes(response)
-      })
-      .catch((reponse)=>{
-        setErrorMessage("Erro buscando avaliações: " + reponse.message)
-      })
-      .finally(()=>{
-        setIsRequestingPage(false)
-      })
-    },[requestPageAvaliacao])
-
+    useEffect(() => {
+      if(!hilightedEvento) return
+      if(hilightedEvento.interno) return
+      if(!hilightedEvento.evento.endereco) return
+      const region : Region = { ...hilightedEvento.evento.endereco ,latitudeDelta:0.0043, longitudeDelta:0.0034 } 
+      isGestureRef.current=true
+      mapRef.current?.animateToRegion(region)
+    }, [hilightedEvento])
 
     /*
     * Função chamada quando o usuário clicar o mapa
@@ -388,208 +463,228 @@ export default function Home() {
 
     }
 
-
-
-
-    
     if(initalLoading)
       return (
         <LoadingActivity/>
       )
+    else if (!currentLocation)
+      return (
+        <SafeAreaView>
+          <View className='flex-col h-full w-full justify-center items-center'>
+ 
+              <Image
+                source={require('../../assets/notificacoesErro/localização.webp')}
+                style={{ width: 150, height: 170 }}
+                resizeMode="cover"
+              />
 
-
+              <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>
+                {currentLocationError && currentLocationError.message}
+              </Text>
+              <TouchableOpacity 
+              className='bg-primary_green mt-4 p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center'
+              onPress={()=>getCurrentLocation()}
+              >
+                <Text className='text-[14px] text-black mb-[5px]'>
+                  Tentar Novamente
+                </Text>
+              </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      )
     else
       return (   
         <SafeAreaView >
-        {/* <View className='h-[10%]'>
-          <Text > {JSON.stringify(currentLocation)} </Text>
-        </View> */}
-        
-
-        <MapView style={{width: '100%', height:'100%'}} 
-            onRegionChange={setCurrentViewLocation}
-            mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
-            initialRegion={initialRegion}
-            showsUserLocation={true} 
-            zoomEnabled={true}
-
-
-            onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
-            onLongPress={e=> {
-              console.log('Long Press', e.nativeEvent.coordinate)
-              pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)
-            }}
-            onRegionChangeComplete={ (e, {isGesture}  ) => {setIsMoved(isGesture)}}
-          >
-            
-
-              {eventos.map((evento) => (
-
-                  <View key={evento.id}>
-                    <Circle
-                      fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
-                      strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
-                      center={evento.endereco}
-                      radius={evento.faixaKm*100}
-                      strokeWidth={2}
-                    />  
-        
-                   <Marker 
-                      key={evento.id} 
-                      coordinate={evento.endereco} 
-                      title={evento.nome}
-                      image={evento.gratuito
-                        ? require('../../assets/pins/pin_free_evento.png')
-                        : require('../../assets/pins/pin_paid_evento.png')
-                      }
-
-                    />
-                  </View>
-                ))}
-
-                {problemas.map((problema) => (        
-                   <Marker 
-                      key={problema.id} 
-                      coordinate={problema} 
-                      title={problema.descricao}
-                      image={
-                        problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1.png')) 
-                        :
-                        problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2.png') )
-                        : 
-                        problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3.png') )
-                        :
-                        problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4.png') ) 
-                        :
-                        problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5.png') )   
-                        :
-                        problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6.png') )   
-                        :
-                        problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7.png') )   
-                        :  
-                        problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8.png') )   
-                        :  
-                          require('../../assets/pins/pin_problema_tipo_1.png')
-                          
-                      }
-                      onPress={()=>setPinProblemaSelector(problema)}
-                    >
-                    
-                    </Marker>
-                ))}
-
-          
-            
-        
-
-          <Geojson
-            geojson={infraestrutura || emptyGeoJson}
-            strokeColor='rgba(255, 0, 0, 0.35)'
-            strokeWidth={10}
-          />
-            
-
-  
-           </MapView>
-           {/**<Marker key={evento.id} coordinate={evento.endereco} title={evento.nome}>
-            //   <Image
-            //     source={evento.gratuito
-            //       ? require('../../assets/pins/pin_free_evento.png')
-            //       : require('../../assets/pins/pin_paid_evento.png')}
-            //       style={{width: 30, height: 35}} 
-            //       resizeMode="contain"
-            //       />
-            // </Marker>*/} 
-
-          {currentLocationError &&
-            (<View className='items-center justify-center h-fit w-[90%] left-[5%] bg-primary_green absolute top-[50%] rounded-[10px]' >
-            <Text className='text-xl text-color_lightGray'> {currentLocationError.message}</Text>
-              {currentLocationError.key === 'SERVICE' &&
-              <ButtonModal
-                title='Tentar Novamente'
-                handlePress={getCurrentLocation}
-                customColor=''
-                customStyles='w-[200px] h-[50px] px-4 py-2 bg-primary_green_light'
-              />}
-            </View>)}
-
-          {pinProblemaSelector &&
-            <PinProblemaView
-              problema={pinProblemaSelector}
-              onClose={() => setPinProblemaSelector(null)}
-            />}
-                
-              {isMoved && 
-            (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
-              <ButtonModal
-                title='Achar Eventos Próximos'
-                handlePress={getEventsOnViewLocation}
-                textStyles='text-[#000] text-center'
-                customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
-              />
-            </View>)}
-            {isContentLoading && <LoadingActivity/>}
-            {successMessage && 
-            <ShowAlert
-              message={successMessage}
-              type='success'
-              onClose={()=>setSuccessMessage(null)}
-            />}
-            {errorMessage && 
-            <ShowAlert
-              message={errorMessage}
-              type='error'
-              onClose={()=>setErrorMessage(null)}
-            />}
-            {showProblemaModal && problemaCoords &&
-            <ProblemaModal
-              coords={problemaCoords}
-              visible={showProblemaModal}
-              closeModal={(createProblema, image) => {
-                if(createProblema){setShowOpsModal(false)}
-                setRequestCreateProblema(createProblema)
-                setProblemaImage(image)
-                setShowProblemaModal(false)
+          <MapView style={{width: '100%', height:'100%'}} 
+              ref={mapRef}
+              onRegionChange={setCurrentViewLocation}
+              mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
+              initialRegion={initialRegion}
+              showsUserLocation={true}
+              showsMyLocationButton={false} 
+              zoomEnabled={true}
+              googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
+              onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
+              onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
+              onRegionChangeComplete={(region) => {
+                  setIsMoved(isGestureRef.current);
+                  isGestureRef.current = false;
+                  if (!isRegionWithinBounds(region)) {
+                    animateToUserLocation(mapRef, currentLocation);
+                    setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.');
+                  }
+                }
+              }
+              onTouchEnd={()=>{
+                isGestureRef.current = true
+                setHilightedEvento(null) 
               }}
-              />
-            }
+            >
+              
 
-            {showAvaliacaoModal && idInfraAvaliacao &&
-              <AvaliacaoModal
-                idInfraestruturaCicloviaria={idInfraAvaliacao}
-                closeModal={(createAvaliacao)=>{
-                  if(createAvaliacao){setShowOpsModal(false)}
-                  setRequestCreateAvaliacao(createAvaliacao)
-                  setShowAvaliacaoModal(false)
+                {eventos.map((evento) => (
+
+                    <View key={evento.id}>
+                      <Circle
+                        fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
+                        strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
+                        center={evento.endereco}
+                        radius={evento.faixaKm*100}
+                        strokeWidth={2}
+                      />  
+          
+                    <Marker 
+                        tracksViewChanges={false}
+                        key={evento.id} 
+                        coordinate={evento.endereco} 
+                        image={evento.gratuito
+                          ? require('../../assets/pins/pin_free_evento.png')
+                          : require('../../assets/pins/pin_paid_evento.png')
+                        }
+                        onPress={()=> {
+                          setHilightedEvento({evento: evento, interno :true})}}
+                      />
+                    </View>
+                  ))}
+
+                  {problemas.map((problema) => (        
+                    <Marker 
+                        key={problema.id} 
+                        tracksViewChanges={false}
+                        coordinate={problema} 
+                        titleVisibility='hidden'
+                        image={
+                          problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1_round.png')) 
+                          :
+                          problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2_round.png') )
+                          : 
+                          problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3_round.png') )
+                          :
+                          problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4_round.png') ) 
+                          :
+                          problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5_round.png') )   
+                          :
+                          problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6_round.png') )   
+                          :
+                          problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7_round.png') )   
+                          :  
+                          problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8_round.png') )   
+                          :  
+                            require('../../assets/pins/pin_problema_tipo_1_round.png')
+                            
+                        }
+                        onPress={()=>setPinProblemaSelector(problema)}
+                      >
+                      </Marker>
+                  ))}
+
+            
+              
+          
+
+            <Geojson
+              geojson={infraestrutura || emptyGeoJson}
+              strokeWidth={10}
+            />
+              
+
+    
+            </MapView>
+            
+            {eventos && hilightedEvento && isMoved && (
+              <EventCardCarousel
+                data={eventos}
+                problemas={problemas}
+                visible={hilightedEvento !== null}
+                hilightedEvento={hilightedEvento.evento}
+                handleChangeEvento={setHilightedEvento}
+                handleProblemSelect={setPinProblemaSelector}
+              />
+            )}
+
+            {pinProblemaSelector &&
+              <ProblemaView
+                problema={pinProblemaSelector}
+                onClose={() => setPinProblemaSelector(null)}
+              />}
+
+                  
+                {isMoved && 
+              (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
+                <ButtonModal
+                  title='Buscar nesta localização'
+                  handlePress={searchOnViewLocation}
+                  textStyles='text-[#000] text-center'
+                  customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
+                />
+              </View>)}
+              {isContentLoading && <LoadingActivity/>}
+              {successMessage && 
+              <ShowAlert
+                message={successMessage}
+                type='success'
+                onClose={()=>setSuccessMessage(null)}
+              />}
+              {errorMessage && 
+              <ShowAlert
+                message={errorMessage}
+                type='error'
+                onClose={()=>setErrorMessage(null)}
+              />}
+              {showProblemaModal && problemaCoords &&
+              <ProblemaModal
+                coords={problemaCoords}
+                visible={showProblemaModal}
+                closeModal={(createProblema, image) => {
+                  if(createProblema){setShowOpsModal(false)}
+                  setRequestCreateProblema(createProblema)
+                  setProblemaImage(image)
+                  setShowProblemaModal(false)
                 }}
                 />
-            }
+              }
 
-            {showOpsModal && !showAvaliacaoModal && !showProblemaModal &&
-              <OpsModal
-                  onSelectInfraestrutura={()=>setShowAvaliacaoModal(true)}
-                  visible={showOpsModal}
-                  onSelectProblema={()=>setShowProblemaModal(true)}
-                  problemaAvailable={ problemaCoords !== null }
-                  onClose={()=>setShowOpsModal(false)}
-              />
-            }
+              {showAvaliacaoModal && idInfraAvaliacao &&
+                <AvaliacaoModal
+                  idInfraestruturaCicloviaria={idInfraAvaliacao}
+                  closeModal={(createAvaliacao)=>{
+                    if(createAvaliacao){setShowOpsModal(false)}
+                    setRequestCreateAvaliacao(createAvaliacao)
+                    setShowAvaliacaoModal(false)
+                  }}
+                  />
+              }
 
-            {pageAvaliacoes && requestPageAvaliacao && 
-              <AvaliacaoView
-                pageAvaliacao={pageAvaliacoes}
-                requestPage={requestPageAvaliacao}
-                setRequestPage={setRequestPageAvaliacao}
-                isContentLoading={isRequestingPage}
-                onClose={()=>{
-                  setPageAvaliacoes(null)
-                  setRequestPageAvaliacao(null)
-                }}
-              />
-            }
+              {showOpsModal && !showAvaliacaoModal && !showProblemaModal &&
+                <OpsModal
+                    onSelectInfraestrutura={()=>setShowAvaliacaoModal(true)}
+                    visible={showOpsModal}
+                    onSelectProblema={()=>setShowProblemaModal(true)}
+                    problemaAvailable={ problemaCoords !== null }
+                    onClose={()=>setShowOpsModal(false)}
+                />
+              }
+
+              {requestPageAvaliacao && 
+                <AvaliacaoView
+                  requestPage={requestPageAvaliacao}
+                  onClose={()=>{
+                    setRequestPageAvaliacao(null)
+                  }}
+                />
+              }
+
+              <TouchableOpacity
+                className='absolute z-0 top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                onPress={handleMyLocationPress}
+              >
+                <Ionicons name="locate" size={24} color="black" />
+              </TouchableOpacity>
+
+              <FloatingButton />
 
       </SafeAreaView>
     )
   }
 
-  
+ 

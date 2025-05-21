@@ -20,7 +20,18 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "SENTRY_AUTH_TOKEN"
+        }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.gabuh.BiCity"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,8 +49,14 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
-
-    ]
+      ],
+      "expo-video"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+ 
+    }
   }
 }

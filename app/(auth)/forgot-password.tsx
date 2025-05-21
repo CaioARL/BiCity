@@ -1,242 +1,165 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet } from 'react-native';
-import FormField from '../../components/FormField';
-import CustomButton from '../../components/CustomButton';
-import TokenInput from '../../components/CustomTokenInput';
-import { valid } from '../../util/validationSchemas';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { sendToken, checkToken, resetPassword } from '../../api/token';
-import { router, useNavigation } from 'expo-router';
-import { CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react'
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet } from 'react-native'
+import FormField from '../../components/FormField'
+import CustomButton from '../../components/CustomButton'
+import TokenInput from '../../components/CustomTokenInput'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { checkToken, checkTokenRecuperacao, sendTokenRecuperacao } from '../../api/token'
+import { router } from 'expo-router'
+import { ArrowLeft } from 'lucide-react-native'
+import ShowAlert from 'components/ShowAlert'
+import { recoverPassword } from 'api/usuario'
+import { validationSchemas } from 'util/validationSchemas'
+import { DefaultErrorResponse } from 'types'
+import { AxiosError } from 'axios'
 
-type AlertType = 'success' | 'error' | 'loading';
 
 export default function ResetPassword() {
-  const navigation = useNavigation();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
 
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined);
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [token, setToken] = useState('');
-  const [tokenError, setTokenError] = useState('');
-  const [isValidToken, setIsValidToken] = useState<boolean | undefined>(undefined);
-  const [isTokenLoading, setIsTokenLoading] = useState(false);
-  const [timer, setTimer] = useState(300);
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
 
-  const [newPassword, setNewPassword] = useState('');
-  const [newPasswordError, setNewPasswordError] = useState('');
-  const [isValidNewPassword, setIsValidNewPassword] = useState<boolean | undefined>(undefined);
+  const [verificationToken, setVerificationToken] = useState('')
+  const [verificationTokenError, setVerificationTokenError] = useState('')
+  const [timer, setTimer] = useState(300)
 
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState<boolean | undefined>(undefined);
+  const [newPassword, setNewPassword] = useState('')
+  const [newPasswordError, setNewPasswordError] = useState('')
 
-  const [step, setStep] = useState(1);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const backgroundImage = require('../../assets/img/background-fundo-figura.png');
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
 
-  // Alert state and animation
-  const [alertConfig, setAlertConfig] = useState({
-    visible: false,
-    type: 'success' as AlertType,
-    message: '',
-  });
-  const [animation] = useState(new Animated.Value(0));
+  const [step, setStep] = useState(1)
 
-  const showAlert = (type: AlertType, message: string) => {
-    setAlertConfig({ visible: true, type, message });
-  };
+  const [authToken, setAuthToken] = useState<string | null>(null)
 
-  const hideAlert = () => {
-    setAlertConfig(prev => ({ ...prev, visible: false }));
-  };
-
-  useEffect(() => {
-    if (alertConfig.visible) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.delay(2000),
-        Animated.timing(animation, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => hideAlert());
-    }
-  }, [alertConfig.visible]);
+  const [userAlert , setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
   // Timer para o token
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (step === 2 && timer > 0) {
       interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
+        setTimer(prev => prev - 1)
+      }, 1000)
     } else if (timer === 0) {
-      showAlert('error', 'Tempo esgotado! Solicite um novo código.');
-      setStep(1);
+      setUserAlert({type: 'error', message: 'Tempo esgotado! Solicite um novo código.'})
+      setStep(1)
     }
-    return () => clearInterval(interval);
-  }, [step, timer]);
+    return () => clearInterval(interval)
+  }, [step, timer])
 
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
-  // Validação de campos obrigatórios (baseado no SignUp)
-  const validateRequiredFields = (
-    fields: { value: string; setError: (msg: string) => void; check: () => void }[]
-  ) => {
-    let allFilledAndValid = true;
-    fields.forEach(({ value, setError, check }) => {
-      if (!value.trim()) {
-        setError('Campo obrigatório');
-        allFilledAndValid = false;
-      } else {
-        check();
-      }
-    });
-    return allFilledAndValid;
-  };
+    const minutes = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`
+  }
 
   const nextStep = () => {
     if (step === 1) {
-      const fields = [
-        { value: email, setError: setEmailError, check: () => checkEmail(email) },
-      ];
-      if (!validateRequiredFields(fields) || !isValidEmail) {
-        showAlert('error', 'Preencha o email corretamente');
-        return;
-      }
-      setIsEmailLoading(true);
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
-      sendToken(email, abortControllerRef.current as AbortController)
-        .then((response) => {
-          showAlert('success', `${response} Verifique seu email.`);
-          setTimer(300);
-          setStep(2);
-        })
-        .catch((response) => {
-          showAlert('error', 'Erro ao enviar código: ' + response.message);
-        })
-        .finally(() => setIsEmailLoading(false));
-    } else if (step === 2) {
-      const fields = [
-        { value: token, setError: setTokenError, check: () => checkToken(token) },
-      ];
-      if (!validateRequiredFields(fields) || !isValidToken) {
-        showAlert('error', 'Preencha o código corretamente');
-        return;
-      }
-      setIsTokenLoading(true);
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
-      checkToken(token, email, abortControllerRef.current as AbortController)
-        .then(() => {
-          setStep(3);
-        })
-        .catch((response) => {
-          showAlert('error', 'Código inválido: ' + response.message);
-        })
-        .finally(() => setIsTokenLoading(false));
-    } else if (step === 3) {
-      const fields = [
-        { value: newPassword, setError: setNewPasswordError, check: () => checkNewPassword(newPassword) },
-        { value: confirmPassword, setError: setConfirmPasswordError, check: () => checkConfirmPassword(confirmPassword) },
-      ];
-      if (!validateRequiredFields(fields) || !isValidNewPassword || !isValidConfirmPassword || newPassword !== confirmPassword) {
-        if (newPassword !== confirmPassword) setConfirmPasswordError('As senhas não coincidem');
-        showAlert('error', 'Preencha as senhas corretamente');
-        return;
-      }
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
-      resetPassword(email, token, newPassword, abortControllerRef.current as AbortController)
-        .then(() => {
-          showAlert('success', 'Senha redefinida com sucesso!');
-          router.replace('/sign-in');
-        })
-        .catch((response) => {
-          showAlert('error', 'Erro ao redefinir senha: ' + response.message);
-        });
+
+    setEmailError('')
+    const validationResult = validationSchemas.email.safeParse(email)
+    if (!validationResult.success) {
+      setEmailError(validationResult.error.errors[0].message)
+      setUserAlert({type: 'error', message: 'Revise os campos!'})
+      return
     }
-  };
+
+    setIsLoading(true)
+    sendTokenRecuperacao(email, null)
+    .then((response) => {
+      setUserAlert({type: 'success', message: `${response} Verifique seu email.`})
+      setTimer(300)
+      setStep(2)
+    })
+    .catch((error: AxiosError<DefaultErrorResponse>) => {
+      setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+    })
+    .finally(() => setIsLoading(false))
+    
+    } else if (step === 2) {
+
+      setVerificationTokenError('')
+      const validationResult = validationSchemas.verificationToken.safeParse(verificationToken)
+      if (!validationResult.success) {
+        setVerificationTokenError(validationResult.error.errors[0].message)
+          setUserAlert({type: 'error', message: 'Revise os campos!'})
+          return 
+      }
+
+      setIsLoading(true)
+      checkTokenRecuperacao(verificationToken, email,  null )
+      .then((response) => {
+        if (response.success) {
+          setUserAlert({type: 'success', message: 'Código verificado com sucesso!'})
+          setAuthToken(response.token)
+          setStep(3)
+        } else {
+          setUserAlert({type: 'error', message: 'Código inválido!'})
+        }
+      })
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+      })
+      .finally(() => setIsLoading(false))
+          
+    } else if (step === 3) {
+
+      if(authToken === null) return
+      setNewPasswordError('')
+      setConfirmPasswordError('')
+      const validationResult = validationSchemas.senha.safeParse(newPassword)
+      if (!validationResult.success) {
+        setNewPasswordError(validationResult.error.errors[0].message)
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
+        return
+      }
+
+      const confirmPasswordValidationResult = validationSchemas.senha.safeParse(confirmPassword)
+      if (!confirmPasswordValidationResult.success) {
+        setConfirmPasswordError(confirmPasswordValidationResult.error.errors[0].message)
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
+        return
+      }
+
+      if (newPassword !== confirmPassword) {
+        setConfirmPasswordError('As senhas não coincidem')
+        setUserAlert({type: 'error', message: 'Revise os campos!'})
+        return 
+      }
+
+      setIsLoading(true)
+      recoverPassword(newPassword, authToken, null)
+        .then(() => {
+          setUserAlert({type: 'success', message: 'Senha redefinida com sucesso!'})
+          setTimeout(() => {
+            router.replace('/sign-in')
+          }, 2000)
+        })
+        .catch((error: AxiosError<DefaultErrorResponse>) => {
+          setUserAlert({type: 'error', message: 'Erro ao enviar código: ' + (error.response?.data.message || error.message)})
+        })
+        .finally(() => setIsLoading(false))
+
+    }
+  }
 
   const prevStep = () => {
     if (step === 1) {
-      router.replace('/sign-in');
+      router.replace('/sign-in')
     } else {
-      setStep(step - 1);
+      setStep(step - 1)
     }
-  };
-
-  const checkEmail = (text: string) => {
-    setEmail(text);
-    const result = valid.emailSchema.safeParse(text);
-    setIsValidEmail(text.trim() ? result.success : undefined);
-    setEmailError(text.trim() && !result.success ? result.error.issues[0].message : '');
-  };
-
-  const checkToken = (text: string) => {
-    setToken(text);
-    const result = valid.codeUserValidationSchema.safeParse(text);
-    setIsValidToken(text.trim() ? result.success : undefined);
-    setTokenError(text.trim() && !result.success ? result.error.issues[0].message : '');
-  };
-
-  const checkNewPassword = (text: string) => {
-    setNewPassword(text);
-    const result = valid.passwordSchema.safeParse(text);
-    setIsValidNewPassword(text.trim() ? result.success : undefined);
-    setNewPasswordError(text.trim() && !result.success ? result.error.issues[0].message : '');
-    if (confirmPassword) checkConfirmPassword(confirmPassword);
-  };
-
-  const checkConfirmPassword = (text: string) => {
-    setConfirmPassword(text);
-    const result = valid.passwordSchema.safeParse(text);
-    const passwordsMatch = newPassword === text;
-    setIsValidConfirmPassword(text.trim() ? result.success && passwordsMatch : undefined);
-    setConfirmPasswordError(text.trim() ? (result.success ? (passwordsMatch ? '' : 'As senhas não coincidem') : result.error.issues[0].message) : '');
-  };
-
-  const getAlertColor = () => {
-    switch (alertConfig.type) {
-      case 'success': return '#22c55e';
-      case 'error': return '#ef4444';
-      case 'loading': return '#3b82f6';
-      default: return '#3b82f6';
-    }
-  };
-
-  const getIcon = () => {
-    switch (alertConfig.type) {
-      case 'success': return <CheckCircle size={24} color="white" />;
-      case 'error': return <XCircle size={24} color="white" />;
-      case 'loading': return <AlertCircle size={24} color="white" />;
-      default: return null;
-    }
-  };
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
       <ImageBackground
-        source={backgroundImage}
+        source={require('../../assets/img/background-fundo-figura.png')}
         style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
         resizeMode="cover"
       />
@@ -261,27 +184,39 @@ export default function ResetPassword() {
               title="Email"
               value={email}
               placeholder="Digite seu email"
-              handleChangeText={checkEmail}
+              handleChangeText={setEmail}
               msg={emailError}
-              isValid={isValidEmail}
-              isLoading={isEmailLoading}
+              isLoading={isLoading}
+              onFocus={() => setEmailError('')}
+              maxLength={50}
               keyboardType="email-address"
             />
-            <CustomButton title="Próximo" handlePress={nextStep} isLoading={isEmailLoading} />
+            <CustomButton title="Próximo" handlePress={nextStep} isLoading={isLoading} />
           </View>
         )}
         {step === 2 && (
           <View style={{ position: 'absolute', width: '100%', bottom: 0, top: 250 }}>
             <TokenInput
               title="Código de verificação"
-              value={token}
-              handleChangeText={checkToken}
-              msg={tokenError}
-              isValid={isValidToken}
+              value={verificationToken}
+              handleChangeText={setVerificationToken}
+              msg={verificationTokenError}
+              isValid={verificationTokenError === ''}
+              onFocus={() => setVerificationTokenError('')}
               maxLength={4}
             />
+            {/* <FormField
+              title="Código de verificação"
+              value={verificationToken}
+              placeholder="Digite o código"
+              handleChangeText={setVerificationToken}
+              msg={verificationTokenError}
+              onFocus={() => setVerificationTokenError('')}
+              isLoading={isLoading}
+              maxLength={4}
+            /> */}
             <Text className="text-center text-gray-600 mt-2">Tempo restante: {formatTime(timer)}</Text>
-            <CustomButton title="Verificar" handlePress={nextStep} isLoading={isTokenLoading} />
+            <CustomButton title="Verificar" handlePress={nextStep} isLoading={isLoading} />
           </View>
         )}
         {step === 3 && (
@@ -290,69 +225,36 @@ export default function ResetPassword() {
               title="Nova Senha"
               value={newPassword}
               placeholder="Digite sua nova senha"
-              handleChangeText={checkNewPassword}
+              handleChangeText={setNewPassword}
               msg={newPasswordError}
-              isValid={isValidNewPassword}
+              onFocus={() => setNewPasswordError('')}
+              maxLength={20}
+              isLoading={isLoading}
               secureTextEntry={true}
             />
             <FormField
               title="Confirmar Nova Senha"
               value={confirmPassword}
               placeholder="Confirme sua nova senha"
-              handleChangeText={checkConfirmPassword}
+              handleChangeText={setConfirmPassword}
               msg={confirmPasswordError}
-              isValid={isValidConfirmPassword}
               secureTextEntry={true}
               maxLength={20}
+              onFocus={() => setConfirmPasswordError('')}
+              isLoading={isLoading}
             />
-            <CustomButton title="Redefinir Senha" handlePress={nextStep} />
+            <CustomButton title="Redefinir Senha" handlePress={nextStep} isLoading={isLoading}/>
           </View>
         )}
       </ScrollView>
 
-      {alertConfig.visible && (
-        <Modal transparent visible={alertConfig.visible}>
-          <View className="absolute top-10 left-0 bottom-0 right-0 px-4">
-            <Animated.View
-              style={[
-                styles.alert,
-                {
-                  backgroundColor: getAlertColor(),
-                  transform: [{
-                    translateY: animation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-100, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              <View className="flex-row items-center flex-1">
-                {getIcon()}
-                <Text className="text-white ml-3 text-base flex-1">{alertConfig.message}</Text>
-              </View>
-              <TouchableOpacity onPress={hideAlert} className="p-1">
-                <Text className="text-white text-2xl font-bold">×</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
-      )}
+      {userAlert && 
+        <ShowAlert
+          message={userAlert.message}
+          type={userAlert.type}
+          onClose={()=> setUserAlert(null)}
+        />
+      }
     </SafeAreaView>
-  );
+  )
 }
-
-const styles = StyleSheet.create({
-  alert: {
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-});

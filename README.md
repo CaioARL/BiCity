@@ -1,6 +1,4 @@
-# Welcome to your Expo app BiCity 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Welcome App BiCity 👋
 
 ```mermaid
     gitGraph
@@ -26,28 +24,75 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
   <img src="https://github.com/GabrielAlvesGit/ComenteSobre-EngenhariaSoftwareIII-IFSP/blob/main/comente_sobres/static/img/logo-instituto.png?raw=true" alt="Imagem do IFSP" width="250" height="230" style="border-radius: 50;">
 </h1>
 
-# PI1A5 - Projeto Integrado I - BiCity
+# PI1A5/PI2A6 - Projeto Integrado I e II - App BiCity
 
 ## Informações Gerais
 
 <!-- Informações do curso e professor -->
-<div align="left"> 
-<img align="right" width="130px" height="130px" src="https://github.com/user-attachments/assets/9c006882-89a9-43ad-84d6-12e535fd26d2" alt="Imagem do Prof.Palladino"><img align="right" width="130px" height="130px" src="https://github.com/user-attachments/assets/4d674248-ac71-4d68-8d79-d53fae5a1dab" alt="Imagem do Prof.Bernardo"><p>Trabalho apresentado na matéria de  PI1A5 - Projeto Integrado I
-                do curso Superior de Tecnologia em Análise e
-                Desenvolvimento de Sistemas do Instituto Federal de
-                Educação, Ciência e Tecnologia de São Paulo.<br>
-                Orientador: Prof.Bernardo e Prof.Palladino
-        </p>
+
+<table>
+  <tr>
+    <td style="width: 50%; vertical-align: top; padding: 10px;">
+   Trabalho apresentado nas disciplinas PI1A5 - Projeto Integrado I (2024) e PI2A6 - Projeto Integrado I (2025), do curso Superior de Tecnologia em
+Análise e Desenvolvimento de Sistemas do Instituto Federal de Educação, Ciência e Tecnologia de São Paulo.<br><br>
+Orientadores: Prof. Bernardo e Prof. Palladino (PI1A5 - 2024).<br><br>
+Orientadores: Prof. Palladino e Prof. Quirino (PI2A6 - 2025).
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td>
+            <img src="https://github.com/user-attachments/assets/4d674248-ac71-4d68-8d79-d53fae5a1dab" alt="Imagem do Prof. Bernardo" width="130px" height="130px"><br>
+            <strong>Prof. Bernardo</strong>
+          </td>
+          <td>
+            <img src="https://github.com/user-attachments/assets/9c006882-89a9-43ad-84d6-12e535fd26d2" alt="Imagem do Prof. Palladino" width="130px" height="130px"><br>
+            <strong>Prof. Palladino</strong>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <img src="https://github.com/user-attachments/assets/c84d26b2-311b-4c15-9e4b-0b8ec3443a46" alt="Imagem do Prof. Quirino" width="130px" height="130px"><br>
+            <strong>Prof. Quirino</strong>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
 <!-- Redirecionamento de para redes sociais com Icones -->
- <div>
-  Orientador: Prof.Bernardo:<br>   
-  <a  href="#" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"  alt="Imagem Linkedin"></a> 
-  <a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"  alt="Imagem Github"></a><br><br>
-  Orientador: Prof.Palladino:<br>   
-  <a href="#" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"  alt="Imagem Linkedin"></a> 
-  <a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"  alt="Imagem Github"></a>
-</div>
-</div></br>
+<table>
+  <tr>
+    <td>
+      <strong>Orientador: Prof. Bernardo</strong><br><br>
+      <a href="https://www.linkedin.com/in/domingos-bernardo-487b837/" target="_blank">
+        <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+      </a>
+      <a href="https://github.com/bernardo" target="_blank">
+        <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+      </a>
+    </td>
+    <td>
+      <strong>Orientador: Prof. Palladino</strong><br><br>
+      <a href="https://www.linkedin.com/in/palladino-antonio-a-aa2897b7/" target="_blank">
+        <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+      </a>
+      <a href="https://github.com/palladino" target="_blank">
+        <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+      </a>
+    </td>
+    <td>
+      <strong>Orientador: Prof. Quirino</strong><br><br>
+      <a href="https://www.linkedin.com/in/luizfpq/" target="_blank">
+        <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+      </a>
+      <a href="https://github.com/quirino" target="_blank">
+        <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+      </a>
+    </td>
+  </tr>
+</table></br>
 </br>
 <!--****************************************************************************************************************-->
 <!-- Informações do Aluno -->
@@ -109,15 +154,15 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
 -   Aplicação do Projeto
     - Desenvolver a aplicação utilizando as tecnologias definidas (React Expo, Java e etc.).
     - Implementar funcionalidades de forma incremental, garantindo testes e validações em cada etapa.
-    - Testes e Validações
+    - Testes e Validações.
 -   Apresentação do Projeto
-    - Apresentação clara e concisa que destaque os objetivos, funcionalidades e resultados do projeto.
+    - Apresentação objetiva e concisa que destaque os objetivos, funcionalidades e resultados do projeto.
     - Demonstrações práticas do aplicativo em funcionamento.
 </p>
 
 ## 🔎 Instruções de Como usar
 
-1. Certifique-se de ter o Node.js(Node.js (versão recomendada: >=16.0.0)) e React Expo instalado
+1. Certifique-se de ter o Node.js(Node.js (versão recomendada: >=16.0.0/ expo >=52.0)) e React Expo instalado
     ```
     Link: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
     Link: https://docs.expo.dev/
@@ -148,7 +193,7 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
      npx expo start
     ```
 
-## Create new branch
+## Criar nova branch
 
 1. Crie a nova branch
 
@@ -181,36 +226,7 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
       git push origin feature-nome-que-voce-vai-add
     ```
 
-In the output, you'll find options to open the app in a
-
--   [development build](https://docs.expo.dev/develop/development-builds/introduction/)
--   [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
--   [Alternativa para a instalação do Android emulator](https://www.youtube.com/watch?v=dNhHv4JzsTw)
--   [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
--   [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
--   [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
--   [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-
-
-## Documentações
+## Documentação
 
 <a href="https://www.figma.com/design/KCeLjQD4pfOAC88nYXWICV/Projeto-PI1A5---Grupo-5?node-id=0-1&t=SuQxY3qDCQvJZxQ2-1">Documentação Figma <img src="https://github.com/user-attachments/assets/52e5be79-cbf3-466e-9838-d56ca199090e" alt="Imagem Seta A Direita Blue" style="width: 12px; height: 12px; "></a>
 
@@ -228,3 +244,7 @@ To learn more about developing your project with Expo, look at the following res
    <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/102634725/411400192-3e7d986b-324e-4e2b-b877-f9321cad1367.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250210%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250210T035406Z&X-Amz-Expires=300&X-Amz-Signature=97c9d36beadb06fead10b9307a10492ee0b1d10213a2c6101553db12fb8d0dee&X-Amz-SignedHeaders=host" alt="#" style="width: 270px; height: 500px; ">
      <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/102634725/411400708-e5af57de-ebd9-422e-bb7a-d01b5696b697.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250210%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250210T035714Z&X-Amz-Expires=300&X-Amz-Signature=9610e8885d9960dc91bfa531a2f98068f740587077077b5f0ef5d52c3c9ed2d9&X-Amz-SignedHeaders=host" alt="#" style="width: 270px; height: 500px; ">
 </div>
+
+
+
+

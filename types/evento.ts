@@ -14,16 +14,20 @@ export interface Evento {
     gratuito: boolean
     urlSite: string
     s3Url: string
+    aprovado: boolean
     tipoEvento: TipoEvento
     usuario: Usuario
 }
 
-
+export interface Horario{
+    data: string
+    horario: string
+}
 
 export interface RequestCreateEvento {
     nome: string
     descricao: string
-    data: string
+    data: Horario
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
@@ -36,7 +40,7 @@ export interface RequestUpdateEvento {
     id: number
     nome: string
     descricao: string
-    data: string
+    data: Horario
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
@@ -52,7 +56,10 @@ export interface RequestUpdateEvento {
 export interface RequestCreateEventoError {
     nome: string
     descricao: string
-    data: string
+    data: {
+        data: string
+        horario: string
+    }
     endereco: {
         cep: string
         estado: string
@@ -113,6 +120,7 @@ export interface RequestPageEvento {
     tipoEvento: TipoEvento | null
     nivelHabilidade: NivelHabilidade | null
     gratuito: boolean | null
+    aprovado: boolean | null
 }
 
 export interface PageEvento {
