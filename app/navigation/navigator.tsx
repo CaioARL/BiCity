@@ -20,7 +20,7 @@ export default function Navigator() {
   }
 
   const mapRef = useRef<MapView>(null)
-  const headingRef = useRef<number>(0)
+  const headingRef = useRef<number | null>(null)
   const headingExtremesRef = useRef<[number, number]>([0, 0])
 
   const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
@@ -126,16 +126,24 @@ export default function Navigator() {
       getHeading(nearestStreet)
       console.log('User is now on street:', nearestStreet.properties.name)
     }
+    if(!nearestStreet) {
+      headingRef.current = null
+    }
   }
 
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!headingRef.current) return
     headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
   }, [headingRef.current])
 
   const changeMapView = (lat: number, long: number, heading: number) => {
-    const [left, right] = headingExtremesRef.current
-    const h = (heading >= left && heading <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+    let h
+    if (!headingRef.current) {
+      h = heading
+    } else {
+      const [left, right] = headingExtremesRef.current
+      h = (heading >= left && heading <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+    }
     if (mapRef.current) {
       mapRef.current.animateCamera({
         center: {
@@ -199,9 +207,9 @@ export default function Navigator() {
         showsMyLocationButton={true}
         onUserLocationChange={(e) => {
           if (e.nativeEvent.coordinate) {
-            const { latitude, longitude } = e.nativeEvent.coordinate
+            const { latitude, longitude , heading} = e.nativeEvent.coordinate
             if (latitude && longitude) {
-              changeMapView(latitude, longitude, headingRef.current)
+              changeMapView(latitude, longitude, heading)
               handleLocationChange(latitude, longitude)
               checkAndRequestStreets(latitude, longitude)
             }
