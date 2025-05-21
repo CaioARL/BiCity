@@ -10,7 +10,7 @@ import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
 import { ArrowLeft } from 'lucide-react-native'
-
+import ScrollUp from '../../components/ScrollUp'; 
 
 
 export default function EventDetail() {
@@ -36,6 +36,10 @@ export default function EventDetail() {
   const [requestCreateEventoImage, setRequestEventoImage] = useState<RequestCreateEventoImage | null>(null)
   const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento | null>(null)
 
+  const flatListRef = useRef<FlatList>(null)
+  const [scrollY, setScrolly] = useState<number>(0)
+  const [showScrollUpButton, setShowScrollUpButton] = useState<boolean>(false)
+  
   useEffect(()=>{
     if(!requestUpdateEvento) return
     setIsContentLoading(true)
@@ -157,9 +161,12 @@ export default function EventDetail() {
     setRequestPageEvento({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
   }   
 
-  const handleLocationEventMap = (item: Evento) => {
-    console.log('Você foi direcionar para o evento no mapa:', item.nome);
-  };
+  useEffect(() => {
+    scrollY > 100 ?
+      setShowScrollUpButton(true)
+    :
+      setShowScrollUpButton(false)
+  }, [scrollY])
 
   return (
     <SafeAreaView className="bg-white h-full w-full">
@@ -175,8 +182,9 @@ export default function EventDetail() {
       
       {isContentLoading && <LoadingActivity/>}
       <View className="h-full w-full container" >
-        {eventos && (
+        {eventos?.length!==0 ? (
                     <FlatList
+                      ref={flatListRef}
                       className="min-h-[100%] my-10"
                       contentContainerStyle={{ 
                         paddingBottom: 50,
@@ -184,6 +192,7 @@ export default function EventDetail() {
                       ListHeaderComponent={
                         <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
                       }
+                      onScroll={e => setScrolly(e.nativeEvent.contentOffset.y)}
                       onEndReached={loadMorePage}
                       onEndReachedThreshold={0.1}
                       refreshing={isContentLoading}
@@ -249,7 +258,13 @@ export default function EventDetail() {
                       )
                       }}
                     />
-                  )}
+                  )
+                  :
+                  <View className="flex-1 justify-center items-center">
+                    <Text className="text-lg font-bold text-center">Nenhum evento encontrado</Text>
+                    <Text className="text-sm text-gray-500">Crie um evento</Text>
+                  </View>
+                }
 
             <TouchableOpacity className='absolute bottom-[20%] w-[65px] h-[65px] bg-primary_green rounded-full justify-center items-center drop-shadow-md right-[10px]'
               onPress={()=>setIsCreatingEvento(true)}>
@@ -305,6 +320,10 @@ export default function EventDetail() {
               onClose={()=>{setSuccessMessage(null)}}
             />
           )}
+
+          <ScrollUp hide={showScrollUpButton} onClick={()=>{
+            flatListRef.current?.scrollToOffset({ animated: true, offset: 0 })
+            }} />
 
       </View>
     </SafeAreaView>

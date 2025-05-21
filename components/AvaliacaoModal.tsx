@@ -1,5 +1,5 @@
-import { View, Text, Animated, Modal, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { View, Text, Modal, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
 import { RequestCreateAvaliacao } from '../types'
@@ -118,7 +118,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
                  5 ★ = Muito satisfatório</Text>
               {renderStars()}
             </View>
-            <Text className='text-color_red_error text-'>*{requestCreateAvaliacaoError.nota}</Text>
+            <Text className='text-color_red_error text-'>{requestCreateAvaliacaoError.nota}</Text>
 
             <FormFieldModal
               title="Comentário (opcional)"

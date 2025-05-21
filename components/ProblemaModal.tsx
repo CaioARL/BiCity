@@ -5,7 +5,7 @@ import FormFieldModal from './FormFieldModal'
 import * as ImagePicker from 'expo-image-picker'
 import { ListTipoProblema, RequestCreateProblema } from '../types'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
-import { getTipoProblema } from '../api/tipo-problema'
+import { getTipoProblema } from '../storage'
 import ImageSelectionPopup from '../components/ImgPickerModal'
 import { createProblemaSchema } from 'util/validationSchemas'
 
@@ -17,7 +17,6 @@ interface ModalProps {
 
 export default function ProblemaModal({ visible, closeModal, coords }: ModalProps) {
   const [listTipoProblema, setListTipoProblema] = useState<ListTipoProblema[]>([])
-  const [descricao, setDecricao] = useState<string>('')
   const [image, setImage] = useState<string | null>(null)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const [showImagePopup, setShowImagePopup] = useState(false)
@@ -52,7 +51,6 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
   const validateRequestProblema = () => {
     const validationResult = createProblemaSchema.safeParse(problema)
     if (!validationResult.success) {
-      console.log(validationResult.error.issues)
       validationResult.error.issues.forEach((issue) => {
         setProblemaError((prevState) => ({
           ...prevState,
@@ -123,6 +121,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
   useEffect(() => {
     getTipoProblema()
       .then((response) => {
+        if (!response) return
         setListTipoProblema([])
         response.forEach((tipoProblema) => {
           setListTipoProblema((prevState) => [
@@ -140,7 +139,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
       })
   }, [])
 
-  const updateCampoProblema = (campo: string, value: string) => {
+  const updateCampoProblema = (campo: string, value: string | number) => {
     setProblema((prevState) => ({
       ...prevState,
       [campo]: value,
@@ -162,11 +161,8 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 placeholder="Descreva o problema"
                 multiline={true}
                 maxLength={100}
-                handleChangeText={setDecricao}
-                value={descricao}
-                validantionCheck={(e) => {
-                  updateCampoProblema('descricao', e.nativeEvent.text)
-                }}
+                handleChangeText={e=> updateCampoProblema('descricao', e)}
+                value={problema.descricao}
                 msg={problemError.descricao}
               />
               <FormFieldDropdownSelectList
@@ -174,7 +170,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 selectedValue={listTipoProblema.find((item) => item.id === problema.idTipoProblema)}
                 options={listTipoProblema}
                 handleChange={(e) => {
-                  updateCampoProblema('idTipoProblema', String(e.id))
+                  updateCampoProblema('idTipoProblema', e.id)
                 }}
                 isLoading={false}
                 dropDownSize={'100%'}
@@ -210,7 +206,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                 )}
                 <ButtonModal
                   title="Reportar !"
-                  handlePress={() => validateRequestProblema}
+                  handlePress={() => validateRequestProblema()}
                   customStyles="bg-[#ffcc00]"
                   textStyles="text-black "
                 />

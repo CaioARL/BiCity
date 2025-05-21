@@ -1,8 +1,5 @@
 # Welcome App BiCity 👋
 
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
 ```mermaid
     gitGraph
        commit id: "dbd6712"
@@ -157,15 +154,15 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
 -   Aplicação do Projeto
     - Desenvolver a aplicação utilizando as tecnologias definidas (React Expo, Java e etc.).
     - Implementar funcionalidades de forma incremental, garantindo testes e validações em cada etapa.
-    - Testes e Validações
+    - Testes e Validações.
 -   Apresentação do Projeto
-    - Apresentação clara e concisa que destaque os objetivos, funcionalidades e resultados do projeto.
+    - Apresentação objetiva e concisa que destaque os objetivos, funcionalidades e resultados do projeto.
     - Demonstrações práticas do aplicativo em funcionamento.
 </p>
 
 ## 🔎 Instruções de Como usar
 
-1. Certifique-se de ter o Node.js(Node.js (versão recomendada: >=16.0.0)) e React Expo instalado
+1. Certifique-se de ter o Node.js(Node.js (versão recomendada: >=16.0.0/ expo >=52.0)) e React Expo instalado
     ```
     Link: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
     Link: https://docs.expo.dev/
@@ -196,7 +193,7 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
      npx expo start
     ```
 
-## Create new branch
+## Criar nova branch
 
 1. Crie a nova branch
 
@@ -229,36 +226,7 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
       git push origin feature-nome-que-voce-vai-add
     ```
 
-In the output, you'll find options to open the app in a
-
--   [development build](https://docs.expo.dev/develop/development-builds/introduction/)
--   [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
--   [Alternativa para a instalação do Android emulator](https://www.youtube.com/watch?v=dNhHv4JzsTw)
--   [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
--   [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
--   [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
--   [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-
-
-## Documentações
+## Documentação
 
 <a href="https://www.figma.com/design/KCeLjQD4pfOAC88nYXWICV/Projeto-PI1A5---Grupo-5?node-id=0-1&t=SuQxY3qDCQvJZxQ2-1">Documentação Figma <img src="https://github.com/user-attachments/assets/52e5be79-cbf3-466e-9838-d56ca199090e" alt="Imagem Seta A Direita Blue" style="width: 12px; height: 12px; "></a>
 
