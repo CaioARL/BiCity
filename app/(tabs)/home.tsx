@@ -12,18 +12,12 @@ import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
-import { isPointNearLine } from '../../util/map-util'
+import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate} from '../../util'
 import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
-import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
-import { 
-  isRegionWithinBounds, 
-  animateToUserLocation,
-  getOutOfBoundsMessage
-} from '../../util/restrict-map';
 import EventCardCarousel from 'components/EventCardCarousel'
 import FloatingButton from 'components/FloatingButton'
 
@@ -42,7 +36,7 @@ interface LocationError {
 }
 
 export default function Home() {
-
+  const dateRef = useRef(new Date())
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
@@ -523,7 +517,7 @@ export default function Home() {
               
 
                 {eventos.map((evento) => (
-
+                  isSameDate(evento.data, dateRef.current) ? (
                     <View key={evento.id}>
                       <Circle
                         fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
@@ -545,6 +539,19 @@ export default function Home() {
                           setHilightedEvento({evento: evento, interno :true})}}
                       />
                     </View>
+                  ) : (
+                    <Marker 
+                        tracksViewChanges={false}
+                        key={evento.id} 
+                        coordinate={evento.endereco} 
+                        image={evento.gratuito
+                          ? require('../../assets/pins/pin_free_evento.png')
+                          : require('../../assets/pins/pin_paid_evento.png')
+                        }
+                        onPress={()=> {
+                          setHilightedEvento({evento: evento, interno :true})}}
+                      />
+                  )
                   ))}
 
                   {problemas.map((problema) => (        
