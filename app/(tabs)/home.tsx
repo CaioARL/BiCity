@@ -138,7 +138,7 @@ export default function Home() {
       setRequestProblemas({
         latitude: response.coords.latitude,
         longitude: response.coords.longitude,
-        raio: 7000
+        raio: 750
       })   
       setRequestEventos({
         latitude: response.coords.latitude,
@@ -276,7 +276,7 @@ export default function Home() {
         setRequestProblemas({
           latitude: latitude,
           longitude: longitude,
-          raio: 7000
+          raio: 750
         })
         setRequestEventos({
           latitude: latitude,
@@ -297,7 +297,7 @@ export default function Home() {
         setRequestProblemas({
           latitude: currentViewLocation.latitude,
           longitude: currentViewLocation.longitude,
-          raio: 7000
+          raio: 750
         })
         setRequestEventos({
           latitude: currentViewLocation.latitude,
