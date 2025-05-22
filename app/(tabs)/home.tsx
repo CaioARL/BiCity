@@ -20,6 +20,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
 import FloatingButton from 'components/FloatingButton'
+import { useIsFocused } from '@react-navigation/native';
 
 
 interface Region {
@@ -37,6 +38,10 @@ interface LocationError {
 
 export default function Home() {
   const dateRef = useRef(new Date())
+  const isFocused = useIsFocused()
+
+  const [menuVisible, setMenuVisible] = useState<boolean>(false)
+  
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
@@ -171,13 +176,20 @@ export default function Home() {
       latitudeDelta:0.0043, longitudeDelta:0.0034
     })
   }
-    
+
   useEffect(()=>{
-    isMoved ? 
-      router.setParams({tabBarVisible: 'no'})
+    isFocused ? 
+      setMenuVisible(false)
     :
+      setMenuVisible(true)
+  },[isFocused])
+
+  useEffect(() => {
+    menuVisible ? 
       router.setParams({tabBarVisible: 'yes'})
-  },[isMoved])
+    :
+      router.setParams({tabBarVisible: 'no'})
+  }, [menuVisible])
 
   useEffect( () => {
     if (!requestEventos) {return}
@@ -501,6 +513,7 @@ export default function Home() {
               onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
               onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
               onRegionChangeComplete={(region) => {
+                  menuVisible && setMenuVisible(false)
                   setIsMoved(isGestureRef.current);
                   isGestureRef.current = false;
                   if (!isRegionWithinBounds(region)) {
@@ -689,6 +702,14 @@ export default function Home() {
               </TouchableOpacity>
 
               <FloatingButton />
+
+              {!menuVisible &&
+                <TouchableOpacity
+                className='absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-primary_green p-[10px] rounded-r-[30px] items-start justify-center'
+                onPress={()=>setMenuVisible(!menuVisible)}
+              >
+                <Ionicons name="caret-forward" size={24} color="black"/>
+              </TouchableOpacity>}
 
       </SafeAreaView>
     )
