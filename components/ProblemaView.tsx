@@ -41,7 +41,7 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
     }, [requestProblemaReport])
 
   return (
-    <View className="flex-col justify-center items-center w-full h-full bg-black/50 absolute top-0 left-0 z-10" style={{ zIndex: 10 }}>
+    <View className=" absolute top-0 left-0 z-10 flex-col justify-center items-center w-full h-full bg-black/50" style={{ zIndex: 10 }}>
         <TouchableOpacity className="w-full h-full" onPress={onClose} />
  
      <View className="p-[30px] bg-white rounded-lg shadow-md h-[60%] w-[94%] justify-start">

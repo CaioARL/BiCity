@@ -20,7 +20,6 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
 import FloatingButton from 'components/FloatingButton'
-import { useIsFocused } from '@react-navigation/native';
 
 
 interface Region {
@@ -38,8 +37,6 @@ interface LocationError {
 
 export default function Home() {
   const dateRef = useRef(new Date())
-  const isFocused = useIsFocused()
-
   const [menuVisible, setMenuVisible] = useState<boolean>(false)
   
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
@@ -176,13 +173,6 @@ export default function Home() {
       latitudeDelta:0.0043, longitudeDelta:0.0034
     })
   }
-
-  useEffect(()=>{
-    isFocused ? 
-      setMenuVisible(false)
-    :
-      setMenuVisible(true)
-  },[isFocused])
 
   useEffect(() => {
     menuVisible ? 
@@ -630,7 +620,7 @@ export default function Home() {
 
                   
                 {isMoved && 
-              (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
+              (<View className='absolute top-[3%] items-center justify-center h-fit w-full'>
                 <ButtonModal
                   title='Buscar nesta localização'
                   handlePress={searchOnViewLocation}
