@@ -599,14 +599,11 @@ export default function Home() {
     
             </MapView>
             
-            {eventos && hilightedEvento && isMoved && (
+            {eventos && (
               <EventCardCarousel
                 data={eventos}
-                problemas={problemas}
-                visible={hilightedEvento !== null}
-                hilightedEvento={hilightedEvento.evento}
+                hilightedEvento={hilightedEvento? hilightedEvento.evento : null}
                 handleChangeEvento={setHilightedEvento}
-                handleProblemSelect={setPinProblemaSelector}
               />
             )}
 
