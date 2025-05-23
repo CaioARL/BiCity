@@ -700,6 +700,13 @@ export default function Home() {
                 <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
               </TouchableOpacity>
 
+              <TouchableOpacity
+                className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
+                onPress={()=>{}}
+              >
+                <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
+              </TouchableOpacity>
+
       </SafeAreaView>
     )
   }
