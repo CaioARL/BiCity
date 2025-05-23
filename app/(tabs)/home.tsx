@@ -494,7 +494,7 @@ export default function Home() {
           <MapView style={{width: '100%', height:'100%'}} 
               ref={mapRef}
               onRegionChange={setCurrentViewLocation}
-              mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
+              mapPadding={{top: 0, right: 0, bottom: 0, left: 0}}
               initialRegion={initialRegion}
               showsUserLocation={true}
               showsMyLocationButton={false} 
@@ -520,7 +520,7 @@ export default function Home() {
               
 
                 {eventos.map((evento) => (
-                  isSameDate(evento.data, dateRef.current) ? (
+                  isSameDate(evento.data.split(' ')[0], dateRef.current) ? (
                     <View key={evento.id}>
                       <Circle
                         fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
