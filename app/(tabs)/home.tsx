@@ -695,7 +695,7 @@ export default function Home() {
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
-                onPress={()=>{}}
+                onPress={()=>{router.push('/help-modal')}}
               >
                 <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
               </TouchableOpacity>
