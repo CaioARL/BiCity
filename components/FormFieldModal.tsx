@@ -34,6 +34,7 @@ export default function FormFieldModal({ title, value, placeholder, handleChange
         <TextInput
           className={`flex-1 w-full  }  ${multiline && 'h-[120px] align-top'}`}
           value={value}
+          autoCapitalize='none'
           onFocus={onFocus}
           placeholder={placeholder}
           onChangeText={handleChangeText}

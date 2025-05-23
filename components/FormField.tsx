@@ -44,6 +44,7 @@ export default function FormField({
           className="flex-1 text-base w-full"
           value={value}
           placeholder={placeholder}
+          autoCapitalize='none'
           onChangeText={handleChangeText}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry && !showPassword}
