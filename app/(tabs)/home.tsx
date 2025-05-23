@@ -19,8 +19,6 @@ import AvaliacaoView from '../../components/AvaliacaoView'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
-import FloatingButton from 'components/FloatingButton'
-
 
 interface Region {
   latitude: number
@@ -690,8 +688,6 @@ export default function Home() {
               >
                 <Ionicons name="locate" size={24} color="black" />
               </TouchableOpacity>
-
-              <FloatingButton />
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
