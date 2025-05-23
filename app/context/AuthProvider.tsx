@@ -93,7 +93,7 @@ export default function AuthProvider({children}: any) {
         const isTipoProblema = await checkTipoProblema()
 
         if(!isHabilidadeLoaded || !isUpdated ) {
-          getNivelHabilidade()
+          await getNivelHabilidade()
           .then((response)=>{
             storeHabilidades(response)
           })
@@ -103,7 +103,7 @@ export default function AuthProvider({children}: any) {
         }
 
         if (!isTiposEvento || !isUpdated) {
-          getTipoEvento()
+          await getTipoEvento()
           .then((response)=>{
             storeTiposEvento(response)
           })
@@ -113,7 +113,7 @@ export default function AuthProvider({children}: any) {
         }
 
         if (!isTipoProblema || !isUpdated) {
-          getTipoProblema()
+          await getTipoProblema()
           .then((response)=>{
             storeTipoProblema(response)
           })
