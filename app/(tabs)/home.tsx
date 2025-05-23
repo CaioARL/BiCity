@@ -693,13 +693,12 @@ export default function Home() {
 
               <FloatingButton />
 
-              {!menuVisible &&
-                <TouchableOpacity
-                className='absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-primary_green p-[10px] rounded-r-[30px] items-start justify-center'
+              <TouchableOpacity
+                className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
                 onPress={()=>setMenuVisible(!menuVisible)}
               >
-                <Ionicons name="caret-forward" size={24} color="black"/>
-              </TouchableOpacity>}
+                <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
+              </TouchableOpacity>
 
       </SafeAreaView>
     )
