@@ -9,6 +9,7 @@ import { getInfraestrutura } from 'api/infraestrutura'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from 'util/mapInfraestrutura'
 import { distance, lineString, nearestPointOnLine, point } from '@turf/turf'
 
+import { createAudioPlayer } from 'expo-audio'
 
 export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
@@ -17,8 +18,7 @@ export default function Navigator() {
   const emptyGeoJson: InfraestruturaGeoJson = {
     type: "FeatureCollection",
     features: [],
-  }
-
+  }  
   const mapRef = useRef<MapView>(null)
   const headingRef = useRef<number | null>(null)
   const headingExtremesRef = useRef<[number, number]>([0, 0])
@@ -157,6 +157,11 @@ export default function Navigator() {
     }
   }
 
+  useEffect(() => {
+    const player = createAudioPlayer(require('../../assets/sounds/horn.mp3'))
+    player.play()
+  },[])
+
   const getHeading = (feature: InfraestruturaGeoJsonFeature) => {
     if (!feature) return
     const geometry = feature.geometry
@@ -204,7 +209,8 @@ export default function Navigator() {
         ref={mapRef}
         googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
         showsUserLocation={true}
-        showsMyLocationButton={true}
+        zoomEnabled={false}
+        showsMyLocationButton={false}
         onUserLocationChange={(e) => {
           if (e.nativeEvent.coordinate) {
             const { latitude, longitude , heading} = e.nativeEvent.coordinate
