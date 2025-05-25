@@ -1,19 +1,27 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native'
-import MapView, { Geojson } from 'react-native-maps'
+import MapView, { Geojson, Marker } from 'react-native-maps'
 // import { Ionicons } from '@expo/vector-icons'
 
 
-import { InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, RequestInfraestruturaByRadius } from 'types'
+import { InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestInfraestruturaByRadius, RequestProblemaByRadius } from 'types'
 import { getInfraestrutura } from 'api/infraestrutura'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from 'util/mapInfraestrutura'
 import { distance, lineString, nearestPointOnLine, point } from '@turf/turf'
 
 import { createAudioPlayer } from 'expo-audio'
+import { StatusBar } from 'expo-status-bar'
+import { calculateBearing } from 'util/map-util'
+import ProblemaView from 'components/ProblemaView'
+import { getProblemaByRadius } from 'api/problema'
 
 export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
+  const [problemas, setProblemas] = useState<Problema[]>([])
+  const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
+  const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
+  
   const lastRequestLocation = useRef<{ latitude: number, longitude: number } | null>(null)
   const emptyGeoJson: InfraestruturaGeoJson = {
     type: "FeatureCollection",
@@ -26,21 +34,6 @@ export default function Navigator() {
   const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
   const lastStreet = useRef<InfraestruturaGeoJsonFeature | null>(null)
 
-  const calculateBearing = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const toRadians = (deg: any) => (deg * Math.PI) / 180
-    const toDegrees = (rad: any) => (rad * 180) / Math.PI
-
-    const dLon = toRadians(lon2 - lon1)
-
-    const y = Math.sin(dLon) * Math.cos(toRadians(lat2))
-    const x =
-      Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
-      Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon)
-
-    let bearing = toDegrees(Math.atan2(y, x))
-    bearing = (bearing + 360) % 360 // Normalize to 0-360
-    return bearing
-  }
 
   const checkAndRequestStreets = (latitude: number, longitude: number) => {
     const currentLocation = { latitude, longitude }
@@ -63,6 +56,12 @@ export default function Navigator() {
       longitude,
       raio: 750,
     })
+    setRequestProblemas({
+      latitude,
+      longitude,
+      raio: 750,
+    })
+
   }
 
   const extremesOfOneDirection = (direction: number): [number, number] => {
@@ -203,6 +202,22 @@ export default function Navigator() {
       })
   }, [requestInfraestrutura])
 
+      useEffect(() => {
+        if (!requestProblemas) {return}
+        getProblemaByRadius(requestProblemas, null)
+        .then((response) => {
+          setProblemas(response)
+        })
+        .catch((response)=>{
+          // setErrorMessage("Error ao carregar problemas: " + response.message)
+        })
+        .finally(()=>{
+          // console.log("Teriminou a requisição de problemas")
+          // isContentLoading && setIsContentLoading(false)
+        })
+      }
+      , [requestProblemas])
+
   return (
     <SafeAreaView>
       <MapView style={{ width: '100%', height: '100%' }}
@@ -210,6 +225,8 @@ export default function Navigator() {
         googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
         showsUserLocation={true}
         zoomEnabled={false}
+        scrollEnabled={false}
+        rotateEnabled={false}
         showsMyLocationButton={false}
         onUserLocationChange={(e) => {
           if (e.nativeEvent.coordinate) {
@@ -228,6 +245,37 @@ export default function Navigator() {
           strokeWidth={10}
         />
 
+        {problemas.map((problema) => (        
+                    <Marker 
+                        key={problema.id} 
+                        tracksViewChanges={false}
+                        coordinate={problema} 
+                        titleVisibility='hidden'
+                        image={
+                          problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1_round.png')) 
+                          :
+                          problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2_round.png') )
+                          : 
+                          problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3_round.png') )
+                          :
+                          problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4_round.png') ) 
+                          :
+                          problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5_round.png') )   
+                          :
+                          problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6_round.png') )   
+                          :
+                          problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7_round.png') )   
+                          :  
+                          problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8_round.png') )   
+                          :  
+                            require('../../assets/pins/pin_problema_tipo_1_round.png')
+                            
+                        }
+                        onPress={()=>setPinProblemaSelector(problema)}
+                      >
+                      </Marker>
+                  ))}
+
       </MapView>
       {/* <TouchableOpacity
                 className='absolute z-0 top-[20px] left-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
@@ -236,6 +284,16 @@ export default function Navigator() {
         <Ionicons name="locate" size={24} color="black" />
       </TouchableOpacity> */}
 
+      {pinProblemaSelector &&
+        <ProblemaView
+          problema={pinProblemaSelector}
+          onClose={() => setPinProblemaSelector(null)}
+        />
+      }
+
+        <StatusBar
+          style="dark"
+        />
     </SafeAreaView>
   )
 }

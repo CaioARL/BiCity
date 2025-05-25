@@ -69,3 +69,20 @@
       }
       return false
     }
+
+    export const calculateBearing = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const toRadians = (deg: any) => (deg * Math.PI) / 180
+        const toDegrees = (rad: any) => (rad * 180) / Math.PI
+    
+        const dLon = toRadians(lon2 - lon1)
+    
+        const y = Math.sin(dLon) * Math.cos(toRadians(lat2))
+        const x =
+          Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
+          Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon)
+    
+        let bearing = toDegrees(Math.atan2(y, x))
+        bearing = (bearing + 360) % 360 // Normalize to 0-360
+        return bearing
+      }
+    
