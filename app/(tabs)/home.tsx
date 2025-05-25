@@ -12,21 +12,13 @@ import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
-import { isPointNearLine } from '../../util/map-util'
+import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate} from '../../util'
 import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
-import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from '../../util/mapInfraestrutura'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
-import { 
-  isRegionWithinBounds, 
-  animateToUserLocation,
-  getOutOfBoundsMessage
-} from '../../util/restrict-map';
 import EventCardCarousel from 'components/EventCardCarousel'
-import FloatingButton from 'components/FloatingButton'
-
 
 interface Region {
   latitude: number
@@ -42,7 +34,9 @@ interface LocationError {
 }
 
 export default function Home() {
-
+  const dateRef = useRef(new Date())
+  const [menuVisible, setMenuVisible] = useState<boolean>(false)
+  
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
@@ -138,7 +132,7 @@ export default function Home() {
       setRequestProblemas({
         latitude: response.coords.latitude,
         longitude: response.coords.longitude,
-        raio: 7000
+        raio: 750
       })   
       setRequestEventos({
         latitude: response.coords.latitude,
@@ -177,13 +171,13 @@ export default function Home() {
       latitudeDelta:0.0043, longitudeDelta:0.0034
     })
   }
-    
-  useEffect(()=>{
-    isMoved ? 
-      router.setParams({tabBarVisible: 'no'})
-    :
+
+  useEffect(() => {
+    menuVisible ? 
       router.setParams({tabBarVisible: 'yes'})
-  },[isMoved])
+    :
+      router.setParams({tabBarVisible: 'no'})
+  }, [menuVisible])
 
   useEffect( () => {
     if (!requestEventos) {return}
@@ -276,7 +270,7 @@ export default function Home() {
         setRequestProblemas({
           latitude: latitude,
           longitude: longitude,
-          raio: 7000
+          raio: 750
         })
         setRequestEventos({
           latitude: latitude,
@@ -297,7 +291,7 @@ export default function Home() {
         setRequestProblemas({
           latitude: currentViewLocation.latitude,
           longitude: currentViewLocation.longitude,
-          raio: 7000
+          raio: 750
         })
         setRequestEventos({
           latitude: currentViewLocation.latitude,
@@ -498,7 +492,7 @@ export default function Home() {
           <MapView style={{width: '100%', height:'100%'}} 
               ref={mapRef}
               onRegionChange={setCurrentViewLocation}
-              mapPadding={{top: 0, right: 0, bottom: 100, left: 0}}
+              mapPadding={{top: 0, right: 0, bottom: 0, left: 0}}
               initialRegion={initialRegion}
               showsUserLocation={true}
               showsMyLocationButton={false} 
@@ -507,6 +501,7 @@ export default function Home() {
               onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
               onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
               onRegionChangeComplete={(region) => {
+                  menuVisible && setMenuVisible(false)
                   setIsMoved(isGestureRef.current);
                   isGestureRef.current = false;
                   if (!isRegionWithinBounds(region)) {
@@ -523,7 +518,7 @@ export default function Home() {
               
 
                 {eventos.map((evento) => (
-
+                  isSameDate(evento.data.split(' ')[0], dateRef.current) ? (
                     <View key={evento.id}>
                       <Circle
                         fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
@@ -545,6 +540,19 @@ export default function Home() {
                           setHilightedEvento({evento: evento, interno :true})}}
                       />
                     </View>
+                  ) : (
+                    <Marker 
+                        tracksViewChanges={false}
+                        key={evento.id} 
+                        coordinate={evento.endereco} 
+                        image={evento.gratuito
+                          ? require('../../assets/pins/pin_free_evento.png')
+                          : require('../../assets/pins/pin_paid_evento.png')
+                        }
+                        onPress={()=> {
+                          setHilightedEvento({evento: evento, interno :true})}}
+                      />
+                  )
                   ))}
 
                   {problemas.map((problema) => (        
@@ -591,14 +599,11 @@ export default function Home() {
     
             </MapView>
             
-            {eventos && hilightedEvento && isMoved && (
+            {eventos && (
               <EventCardCarousel
                 data={eventos}
-                problemas={problemas}
-                visible={hilightedEvento !== null}
-                hilightedEvento={hilightedEvento.evento}
+                hilightedEvento={hilightedEvento? hilightedEvento.evento : null}
                 handleChangeEvento={setHilightedEvento}
-                handleProblemSelect={setPinProblemaSelector}
               />
             )}
 
@@ -610,7 +615,7 @@ export default function Home() {
 
                   
                 {isMoved && 
-              (<View className='items-center justify-center h-fit w-full absolute top-[3%]'>
+              (<View className='absolute top-[3%] items-center justify-center h-fit w-full'>
                 <ButtonModal
                   title='Buscar nesta localização'
                   handlePress={searchOnViewLocation}
@@ -682,12 +687,25 @@ export default function Home() {
               </TouchableOpacity>
 
               <TouchableOpacity
+                className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
+                onPress={()=>setMenuVisible(!menuVisible)}
+              >
+                <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
+                onPress={()=>{router.push('/help-modal')}}
+              >
+                <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
+              </TouchableOpacity>
+              <TouchableOpacity
                 className='absolute z-0 top-[20px] left-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
                 onPress={()=>{router.replace('navigation')}}
               >
                 <Ionicons name="navigate" size={24} color="black" />
               </TouchableOpacity>
-              <FloatingButton />
+              
 
       </SafeAreaView>
     )
