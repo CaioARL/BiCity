@@ -12,7 +12,7 @@ export default function HelpModal() {
                 </Text>
                 <Image
                   style={{ width: '100%' , height: 'auto', aspectRatio: 9/16 }}
-                  resizeMode='contain'
+                  resizeMode='center'
                   source={require('../assets/img/illustration_help_cycle_lane_portrait_quality.png')}
                 />
                 
@@ -23,26 +23,35 @@ export default function HelpModal() {
                 A cor verde indica que a ciclovia é de alta qualidade, com boa pavimentação e sinalização adequada. 
               </Text>
               <Image
-                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
-                  resizeMode="center"
-                  source={require('../assets/img/illustration_help_good_quality.png')}
-                  />
+                style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                resizeMode="center"
+                source={require('../assets/img/illustration_help_good_quality.png')}
+              />
               <Text className='text-base font-roboto my-4'>
                 A cor laranja indica uma qualidade média, onde pode haver algumas irregularidades ou falta de sinalização. 
               </Text>
               <Image
-                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
-                  resizeMode="center"
-                  source={require('../assets/img/illustration_help_medium_quality.png')}
+                style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                resizeMode="center"
+                source={require('../assets/img/illustration_help_medium_quality.png')}
               />
               <Text className='text-base font-roboto my-4'>
                 A cor vermelha indica baixa qualidade, com problemas significativos na via, como buracos ou falta de manutenção.
               </Text>
               <Image
-                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
                 resizeMode="center"
                 source={require('../assets/img/illustration_help_bad_quality.png')}
               />
+              <Text className='text-3xl text-center font-robotobold mt-6'>Avalie as vias</Text>
+              <Image
+                style={{ width: '100%' , height: 'auto', aspectRatio: 1/1 }}
+                resizeMode="center"
+                source={require('../assets/img/illustration_help_evaluate_lane_ratio_1by1.png')}
+              />
+              <Text className='text-base font-roboto mb-10'>
+                Você pode contribuir para a melhoria das ciclovias avaliando-as. Para isso, basta pressionar a via no mapa, selecionar uma ciclovia e atribuir uma nota de 1 a 5 estrelas, além de deixar um comentário sobre a qualidade da via.
+              </Text>
       </ScrollView>
     </SafeAreaView>
   )
