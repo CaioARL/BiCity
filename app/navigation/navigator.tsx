@@ -34,6 +34,8 @@ export default function Navigator() {
   const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
   const lastStreet = useRef<InfraestruturaGeoJsonFeature | null>(null)
 
+  const player = createAudioPlayer(require('../../assets/sounds/horn.mp3'))
+
 
   const checkAndRequestStreets = (latitude: number, longitude: number) => {
     const currentLocation = { latitude, longitude }
@@ -128,6 +130,18 @@ export default function Navigator() {
     if(!nearestStreet) {
       headingRef.current = null
     }
+
+    // check if problem is close to the user
+
+    const closeProblems = problemas.filter((problema) => {
+      const problemPoint = point([problema.longitude, problema.latitude])
+      const dist = distance(userPoint, problemPoint)
+      return dist < 0.1 // 100 meters
+    })
+
+    if (closeProblems.length > 0) {
+      player.play()
+    }
   }
 
   useEffect(() => {
@@ -156,10 +170,7 @@ export default function Navigator() {
     }
   }
 
-  useEffect(() => {
-    const player = createAudioPlayer(require('../../assets/sounds/horn.mp3'))
-    player.play()
-  },[])
+  
 
   const getHeading = (feature: InfraestruturaGeoJsonFeature) => {
     if (!feature) return
