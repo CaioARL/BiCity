@@ -1,10 +1,49 @@
-import { View, Text } from 'react-native'
+import { View, Text, SafeAreaView, ScrollView, Image } from 'react-native'
 import React from 'react'
+
 
 export default function HelpModal() {
   return (
-    <View>
-      <Text>SET SOME INSTRUCTIONS FOR USERS</Text>
-    </View>
+    <SafeAreaView>
+      <ScrollView className='w-full h-full container' >
+              <Text className='text-3xl text-center font-robotobold mt-6'>Qualidade das vias</Text>
+                <Text className='text-base  font-roboto my-4'>
+                  As ciclovias são avaliadas pelos próprios usuários, cujas notas atribuídas influenciam diretamente na classificação da qualidade de cada via.
+                </Text>
+                <Image
+                  style={{ width: '100%' , height: 'auto', aspectRatio: 9/16 }}
+                  resizeMode='contain'
+                  source={require('../assets/img/illustration_help_cycle_lane_portrait_quality.png')}
+                />
+                
+              <Text className='text-base font-roboto my-4'>
+                Existem três cores diferentes para as ciclovias: verde, laranja e vermelho, que auxiliam na identificação do estado das vias e proporcionam uma navegação mais segura pela cidade. Ciclovias que ainda não foram avaliadas recebem, temporariamente, a mesma cor das ciclovias consideradas de boa qualidade.
+              </Text>
+              <Text className='text-base font-roboto my-4'>
+                A cor verde indica que a ciclovia é de alta qualidade, com boa pavimentação e sinalização adequada. 
+              </Text>
+              <Image
+                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                  resizeMode="center"
+                  source={require('../assets/img/illustration_help_good_quality.png')}
+                  />
+              <Text className='text-base font-roboto my-4'>
+                A cor laranja indica uma qualidade média, onde pode haver algumas irregularidades ou falta de sinalização. 
+              </Text>
+              <Image
+                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                  resizeMode="center"
+                  source={require('../assets/img/illustration_help_medium_quality.png')}
+              />
+              <Text className='text-base font-roboto my-4'>
+                A cor vermelha indica baixa qualidade, com problemas significativos na via, como buracos ou falta de manutenção.
+              </Text>
+              <Image
+                  style={{ width: '100%' , height: 'auto', aspectRatio: 21/9 }}
+                resizeMode="center"
+                source={require('../assets/img/illustration_help_bad_quality.png')}
+              />
+      </ScrollView>
+    </SafeAreaView>
   )
 }
