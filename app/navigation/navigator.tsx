@@ -11,7 +11,7 @@ import { distance, lineString, nearestPointOnLine, point } from '@turf/turf'
 
 import { createAudioPlayer } from 'expo-audio'
 import { StatusBar } from 'expo-status-bar'
-import { calculateBearing } from 'util/map-util'
+import { calculateBearing, isPointNearLine } from 'util/map-util'
 import ProblemaView from 'components/ProblemaView'
 import { getProblemaByRadius } from 'api/problema'
 
@@ -78,68 +78,51 @@ export default function Navigator() {
     if (!infraestrutura) return
     const currentLocation = { latitude, longitude }
 
+    
+    
     // Check if the user has moved significantly
     if (lastUserLocation.current) {
       const from = point([lastUserLocation.current.longitude, lastUserLocation.current.latitude])
       const to = point([longitude, latitude])
       const dist = distance(from, to)
-
+      
       if (dist < 0.01) return // Skip if moved less than 10 meters
     }
-
+    
     lastUserLocation.current = currentLocation
-
-    // Detect street
-    const userPoint = point([longitude, latitude])
-    let nearestStreet = null
-    let shortestDistance = Infinity
-
-    for (const feature of infraestrutura?.features) {
+    
+    const matchedFeature = infraestrutura.features.find((feature) => {
       const geometry = feature.geometry
-      let lines: number[][][] = []
-
       if (geometry.type === 'LineString') {
-        lines = [geometry.coordinates as number[][]]
-      } else if (geometry.type === 'MultiLineString') {
-        lines = geometry.coordinates as number[][][]
-      } else if (geometry.type === 'GeometryCollection') {
-        // Optionally handle GeometryCollection if needed
-        continue
-      } else {
-        continue
+        return isPointNearLine(currentLocation, geometry.coordinates as [number, number][])  
       }
-
-      for (const coords of lines) {
-        const line = lineString(coords)
-        const nearest = nearestPointOnLine(line, userPoint)
-        const dist = nearest.properties.distance
-
-        if (dist < shortestDistance) {
-          shortestDistance = dist
-          nearestStreet = feature
-        }
-      }
-    }
-
-    // Avoid redundant updates
-    if (nearestStreet && nearestStreet !== lastStreet.current) {
-      lastStreet.current = nearestStreet
-      getHeading(nearestStreet)
-      console.log('User is now on street:', nearestStreet.properties.name)
-    }
-    if(!nearestStreet) {
-      headingRef.current = null
-    }
-
-    // check if problem is close to the user
-
-    const closeProblems = problemas.filter((problema) => {
-      const problemPoint = point([problema.longitude, problema.latitude])
-      const dist = distance(userPoint, problemPoint)
-      return dist < 0.1 // 100 meters
+      return false
     })
 
-    if (closeProblems.length > 0) {
+    // Avoid redundant updates
+    if (matchedFeature && matchedFeature !== lastStreet.current) {
+      lastStreet.current = matchedFeature
+      getHeading(matchedFeature)
+      console.log('User is now on street:', matchedFeature.properties.name)
+    }
+    if(!matchedFeature) {
+      headingRef.current = null
+      return
+    }
+    
+    var problemsFound : Problema[] = []
+
+    if(matchedFeature.geometry.type === 'LineString') {
+      const geometry = matchedFeature.geometry
+      problemsFound = problemas.filter((problema) => {
+        if(matchedFeature)
+        return isPointNearLine(problema,
+          geometry.coordinates as [number, number][])
+      })
+    }
+
+
+    if (problemsFound.length > 0) {
       player.play()
     }
   }
