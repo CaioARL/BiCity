@@ -11,7 +11,7 @@ import { distance, lineString, nearestPointOnLine, point } from '@turf/turf'
 
 import { createAudioPlayer } from 'expo-audio'
 import { StatusBar } from 'expo-status-bar'
-import { calculateBearing, isPointNearLine } from 'util/map-util'
+import { calculateBearing, isPointNearLine, isPointNearPoint } from 'util/map-util'
 import ProblemaView from 'components/ProblemaView'
 import { getProblemaByRadius } from 'api/problema'
 
@@ -19,6 +19,8 @@ export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
   const [problemas, setProblemas] = useState<Problema[]>([])
+  const [nearProblems, setNearProblems] = useState<Problema[]>([])
+
   const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
   
@@ -110,27 +112,26 @@ export default function Navigator() {
       return
     }
     
-    var problemsFound : Problema[] = []
 
-    if(matchedFeature.geometry.type === 'LineString') {
-      const geometry = matchedFeature.geometry
-      problemsFound = problemas.filter((problema) => {
-        if(matchedFeature)
-        return isPointNearLine(problema,
-          geometry.coordinates as [number, number][])
-      })
+      setNearProblems(
+        problemas.filter((problema) => {
+          if(matchedFeature)
+          return isPointNearPoint(currentLocation, problema)
+        })
+      )
     }
-
-
-    if (problemsFound.length > 0) {
-      player.play()
-    }
-  }
-
+    
   useEffect(() => {
     if (!headingRef.current) return
     headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
   }, [headingRef.current])
+
+  useEffect(() => {
+    if (nearProblems.length <= 0) return
+    // nearProblems.forEach((problema) => {
+    // })
+    player.play()
+  }, [nearProblems])
 
   const changeMapView = (lat: number, long: number, heading: number) => {
     let h

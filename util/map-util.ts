@@ -70,6 +70,33 @@
       return false
     }
 
+    export const isPointNearPoint = (
+      point: { latitude: number, longitude: number },
+      target: { latitude: number, longitude: number },
+      toleranceMeters: number = 5
+    ): boolean => {
+        const earthRadius = 6371000 // Raio da Terra em metros
+
+        const toRadians = (deg: number) => (deg * Math.PI) / 180
+
+        const lat1 = toRadians(point.latitude)
+        const lon1 = toRadians(point.longitude)
+        const lat2 = toRadians(target.latitude)
+        const lon2 = toRadians(target.longitude)
+
+        const dLat = lat2 - lat1
+        const dLon = lon2 - lon1
+
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+        const distance = earthRadius * c
+
+        return distance <= toleranceMeters
+      }
+
     export const calculateBearing = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const toRadians = (deg: any) => (deg * Math.PI) / 180
         const toDegrees = (rad: any) => (rad * 180) / Math.PI
