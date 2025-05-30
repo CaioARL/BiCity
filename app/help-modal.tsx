@@ -1,12 +1,22 @@
-import { View, Text, SafeAreaView, ScrollView, Image } from 'react-native'
+import { Text, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
+import { ArrowLeft } from 'lucide-react-native'
+import { router } from 'expo-router'
 
 
 export default function HelpModal() {
   return (
     <SafeAreaView>
-      <ScrollView className='w-full h-full container' >
-              <Text className='text-3xl text-center font-robotobold mt-6'>Qualidade das vias</Text>
+      <TouchableOpacity
+          style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
+            paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
+            className='bg-primary_green'
+            onPress={() => router.back()}
+          >
+          <ArrowLeft size={24} color="#555"/>
+      </TouchableOpacity>
+      <ScrollView className='w-full h-full container' contentContainerStyle={{paddingBottom:100, paddingTop:100, paddingHorizontal:'5%'}} >
+              <Text className='text-3xl text-center font-robotobold'>Qualidade das vias</Text>
                 <Text className='text-base  font-roboto my-4'>
                   As ciclovias são avaliadas pelos próprios usuários, cujas notas atribuídas influenciam diretamente na classificação da qualidade de cada via.
                 </Text>
@@ -50,7 +60,7 @@ export default function HelpModal() {
                 source={require('../assets/img/illustration_help_evaluate_lane_ratio_1by1_v2.png')}
               />
               <Text className='text-base font-roboto mb-10'>
-                Você pode contribuir para a melhoria das ciclovias avaliando-as. Para isso, basta pressionar a via no mapa, selecionar uma ciclovia e atribuir uma nota de 1 a 5 estrelas, além de deixar um comentário sobre a qualidade da via.
+                Você pode contribuir para a melhoria das ciclovias avaliando-as. Para isso, basta pressionar a ciclovia no mapa e atribuir uma nota de 1 a 5 estrelas, além de deixar um comentário sobre a qualidade da via.
               </Text>
       </ScrollView>
     </SafeAreaView>
