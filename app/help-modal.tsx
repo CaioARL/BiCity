@@ -13,7 +13,7 @@ export default function HelpModal() {
                 <Image
                   style={{ width: '100%' , height: 'auto', aspectRatio: 9/16 }}
                   resizeMode='center'
-                  source={require('../assets/img/illustration_help_cycle_lane_portrait_quality.png')}
+                  source={require('../assets/img/illustration_help_cycle_lane_portrait_quality_v2.png')}
                 />
                 
               <Text className='text-base font-roboto my-4'>
@@ -47,7 +47,7 @@ export default function HelpModal() {
               <Image
                 style={{ width: '100%' , height: 'auto', aspectRatio: 1/1 }}
                 resizeMode="center"
-                source={require('../assets/img/illustration_help_evaluate_lane_ratio_1by1.png')}
+                source={require('../assets/img/illustration_help_evaluate_lane_ratio_1by1_v2.png')}
               />
               <Text className='text-base font-roboto mb-10'>
                 Você pode contribuir para a melhoria das ciclovias avaliando-as. Para isso, basta pressionar a via no mapa, selecionar uma ciclovia e atribuir uma nota de 1 a 5 estrelas, além de deixar um comentário sobre a qualidade da via.
