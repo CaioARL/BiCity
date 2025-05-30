@@ -352,11 +352,10 @@ export default function SignUp() {
       <ArrowLeft size={24} color="white" />
       </TouchableOpacity>
       
-      <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView className='container' contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }} style={{ width: '100%' }}>
      
         {step === 1 && (
               <>  
-              <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}} className="flex-1">
                 <FormField
                   title="Primeiro Nome"
                   value={createUsuarioForms.firstName}
@@ -393,12 +392,10 @@ export default function SignUp() {
                   msg={errorCreateUsuarioForms.nivelHabilidade}
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
-              </View>
               </>
             )}
             {step === 2 && (
               <>
-              <View style={{position: 'absolute', width: '100%', bottom: 0, top: 105}}>
                 <FormField
                   title="CEP"
                   value={createUsuarioForms.cep}
@@ -457,12 +454,10 @@ export default function SignUp() {
                   onFocus={()=>updateCampoErrorForms('bairro', '')}
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
-              </View>
               </>
             )}
             {step === 3 && (
               <>
-               <View style={{position: 'absolute', width: '100%', bottom: 0, top: 170}}>
                   {createUsuarioForms.cpf !== null && (
                     <>
                       <FormField
@@ -532,12 +527,10 @@ export default function SignUp() {
                   maxLength={20}
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
-              </View>
               </>
             )}
             {step === 4 && (
               <>
-               <View style={{position: 'absolute', width: '100%', bottom: 0, top: 250}}>
                 <FormField
                   title="Email"
                   value={createUsuarioForms.email}
@@ -549,12 +542,10 @@ export default function SignUp() {
                   keyboardType="email-address"
                 />
                 <CustomButton title="Próximo" handlePress={nextStep} />
-              </View>
               </>
             )}
             {step === 5 && (
               <>
-              <View style={{position: 'absolute', width: '100%', bottom: 0, top: 260}}>
                 <TokenInput
                   title="Código de confirmação"
                   value={codigo}
@@ -564,7 +555,6 @@ export default function SignUp() {
                   maxLength={4}
                 />
                 <CustomButton title="Confirmar Código" isLoading={isRequesting} handlePress={nextStep} />
-              </View>
               </>
             )}
       </ScrollView>
