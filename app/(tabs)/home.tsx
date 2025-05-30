@@ -521,8 +521,8 @@ export default function Home() {
                   isSameDate(evento.data.split(' ')[0], dateRef.current) ? (
                     <View key={evento.id}>
                       <Circle
-                        fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
-                        strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
+                        fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(255, 193, 7, 0.2)'}
+                        strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(255, 193, 7, 0.5)'}
                         center={evento.endereco}
                         radius={evento.faixaKm*100}
                         strokeWidth={2}
