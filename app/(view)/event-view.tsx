@@ -158,10 +158,10 @@ if(isContentLoading){
         </Animated.View>
 
         {/* Box de informações com gradiente e animação */}
-        <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 18, padding: 20, position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
+        <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 18, paddingHorizontal:20 , position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
           className=" h-[402px] rounded-xl">
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View className="flex-col items-center">
+            <View className="flex-col items-center py-[10px]">
               {evento && (
                 <>
                  <View style={CustomEvents.containerButtonEventView}>
@@ -172,8 +172,9 @@ if(isContentLoading){
                         }}
                       >
                       <Ionicons name="location-outline" size={20} color="white" />
+                      <Text className="text-white font-bold ml-2">Ver no Mapa</Text>
                     </TouchableOpacity>
-                    <Text className="text-matte_gray font-bold w-[80%] align-items-center">
+                    <Text className=" text-matte_gray font-bold text-left w-[50%]">
                     Endereço: {evento.endereco.rua}, {evento.endereco.numero},{' '}
                     {evento.endereco.bairro}, {evento.endereco.cidade} - {evento.endereco.estado}
                   </Text>

@@ -242,6 +242,8 @@ const CustomEvents = StyleSheet.create({
   containerButtonEventView: {
     display: 'flex',
     flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'flex-start',
     alignItems: "center",
     width: '100%',
   },
@@ -251,10 +253,7 @@ const CustomEvents = StyleSheet.create({
     backgroundColor: '#01010154', 
     borderRadius: 30, 
     padding: 15, 
-    marginLeft: 'auto',
     alignItems: 'center', 
-    marginRight: 10,
-    
   },
 
 });
