@@ -146,7 +146,7 @@ export default function SignIn() {
             otherStyles="mb-4"
             keyboardType="default"
             onFocus={()=>{setRequesLoginError(prev=> ({...prev, cnpj:'', cpf:'', email:'', nomeUsuario:''}))}}
-            placeholder="Insira seu nome de usuário ou email/cpf/cnpj"
+            placeholder="Insira seu nome de usuário ou email/CPF/CNPJ"
             msg={requestLoginError.nomeUsuario || requestLoginError.email || requestLoginError.cpf || requestLoginError.cnpj}
           />
 
