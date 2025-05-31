@@ -14,6 +14,7 @@ import ShowAlert from '../../components/ShowAlert'
 import { updateUsuario } from 'util/validationSchemas'
 import SimpleTextInput from 'components/SimpleTextInput'
 import { getHabilidades } from 'storage/nivel-habilidade'
+import { StatusBar } from 'expo-status-bar'
 
 
 
@@ -399,6 +400,11 @@ export default function Profile(){
 
         </View>
       </ScrollView>
+      <StatusBar
+        style="dark"
+        backgroundColor="transparent"
+        translucent={true}
+      />
     </SafeAreaView>
   )
 

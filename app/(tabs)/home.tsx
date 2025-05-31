@@ -19,6 +19,7 @@ import AvaliacaoView from '../../components/AvaliacaoView'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
+import { StatusBar } from 'expo-status-bar'
 
 interface Region {
   latitude: number
@@ -614,15 +615,26 @@ export default function Home() {
               />}
 
                   
-                {isMoved && 
-              (<View className='absolute top-[3%] items-center justify-center h-fit w-full'>
+              <View className='absolute top-[4%] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
+                <View className='w-[34px] h-[34px]'/>
+                {isMoved ? 
                 <ButtonModal
                   title='Buscar nesta localização'
                   handlePress={searchOnViewLocation}
                   textStyles='text-[#000] text-center'
                   customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
                 />
-              </View>)}
+                :
+                <View className='w-[200px] min-h-[50px]'/>  
+                }
+
+                <TouchableOpacity
+                  className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                  onPress={handleMyLocationPress}
+                >
+                <Ionicons name="locate" size={24} color="black" />
+              </TouchableOpacity>
+              </View>
               {isContentLoading && <LoadingActivity/>}
               {successMessage && 
               <ShowAlert
@@ -679,12 +691,6 @@ export default function Home() {
                 />
               }
 
-              <TouchableOpacity
-                className='absolute z-0 top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
-                onPress={handleMyLocationPress}
-              >
-                <Ionicons name="locate" size={24} color="black" />
-              </TouchableOpacity>
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
@@ -699,6 +705,12 @@ export default function Home() {
               >
                 <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
               </TouchableOpacity>
+
+              <StatusBar
+                style="dark"
+                backgroundColor="transparent"
+                translucent={true}
+              />
 
       </SafeAreaView>
     )
