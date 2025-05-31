@@ -10,9 +10,7 @@ import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
-import { set } from 'zod';
 import ScrollUp from '../../components/ScrollUp'; 
-import { StatusBar } from 'expo-status-bar';
 
 // interface EventItem {
 //   id: string;
@@ -450,14 +448,6 @@ export default function Events() {
           }}/>
 
       </View>
-
-      
-      <StatusBar
-        style="dark"
-        backgroundColor="transparent"
-        translucent={true}
-      />
-
     </SafeAreaView>
   );
 }

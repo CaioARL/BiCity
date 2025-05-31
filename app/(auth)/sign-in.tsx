@@ -12,7 +12,6 @@ import ShowAlert from 'components/ShowAlert'
 import { AxiosError } from 'axios'
 import { loginSchema } from 'util/validationSchemas'
 import { isOnboardingVisualized } from 'util/versioning'
-import { StatusBar } from 'expo-status-bar'
 
 export default function SignIn() {
   const { onLogin, errorLoading } = useAuthProvider()
@@ -205,12 +204,6 @@ export default function SignIn() {
         />
       }
 
-      
-      <StatusBar
-        style="dark"
-        backgroundColor="transparent"
-        translucent={true}
-      />
     </SafeAreaView>
   )
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { TabBar } from '../../components/TabBar'; 
+import { StatusBar } from 'expo-status-bar';
 
 export default function TabsLayout() {
   return (
@@ -31,6 +32,8 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
+    <StatusBar style='dark' backgroundColor='#FFFFFF' />
+
     </>
   );
 }

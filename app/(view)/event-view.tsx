@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity, Share } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { getEventoById } from '../../api/evento'
 import { Evento } from '../../types'
 import { Text } from 'react-native'
@@ -11,6 +10,7 @@ import CustomEvents from '../../css/CustomEvents';
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowLeft } from 'lucide-react-native'
 import { useAuthProvider } from 'app/context/AuthProvider'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function EventV() {
 

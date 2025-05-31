@@ -1,7 +1,9 @@
-import { Text, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native'
+import { Text, ScrollView, Image, TouchableOpacity } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import React from 'react'
 import { ArrowLeft } from 'lucide-react-native'
 import { router } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 
 
 export default function HelpModal() {
@@ -63,6 +65,7 @@ export default function HelpModal() {
                 Você pode contribuir para a melhoria das ciclovias avaliando-as. Para isso, basta pressionar a ciclovia no mapa e atribuir uma nota de 1 a 5 estrelas, além de deixar um comentário sobre a qualidade da via.
               </Text>
       </ScrollView>
+      <StatusBar hidden/>
     </SafeAreaView>
   )
 }

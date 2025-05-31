@@ -28,7 +28,7 @@ export default function AuthLayout() {
           />
         </Stack>
 
-      <StatusBar style='light' backgroundColor='#161622'/>
+      <StatusBar hidden/>
     </>
   )
 }

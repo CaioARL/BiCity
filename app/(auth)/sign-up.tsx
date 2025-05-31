@@ -17,7 +17,6 @@ import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from '../../components/ShowAlert'
 import { AxiosError } from 'axios'
 import { getHabilidades } from 'storage/nivel-habilidade'
-import { StatusBar } from 'expo-status-bar'
 
 export default function SignUp() {
   const [createUsuarioRequest, setCreateUsuarioRequest] = useState<CreateUsuarioRequest | null>()
@@ -583,12 +582,6 @@ export default function SignUp() {
         />
       )}
 
-      
-      <StatusBar
-        style="dark"
-        backgroundColor="transparent"
-        translucent={true}
-      />
     </SafeAreaView>
       
   )

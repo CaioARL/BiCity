@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, TouchableOpacity, Image} from 'react-native'
+import { View, Text, TouchableOpacity, Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -19,8 +19,8 @@ import AvaliacaoView from '../../components/AvaliacaoView'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
-import { StatusBar } from 'expo-status-bar'
 import icons from 'constants/icons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface Region {
   latitude: number
@@ -490,7 +490,7 @@ export default function Home() {
       )
     else
       return (   
-        <SafeAreaView >
+        <SafeAreaView>
           <MapView style={{width: '100%', height:'100%'}} 
               ref={mapRef}
               onRegionChange={setCurrentViewLocation}
@@ -706,13 +706,6 @@ export default function Home() {
               >
                 <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
               </TouchableOpacity>
-
-              <StatusBar
-                style="dark"
-                backgroundColor="transparent"
-                translucent={true}
-              />
-
       </SafeAreaView>
     )
   }

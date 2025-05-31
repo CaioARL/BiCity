@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import React, { View , SafeAreaView, FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
+import React, { View , FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -11,6 +11,7 @@ import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
 import { ArrowLeft } from 'lucide-react-native'
 import ScrollUp from '../../components/ScrollUp'; 
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function EventDetail() {
