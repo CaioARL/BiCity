@@ -1,8 +1,8 @@
-import { View, Text, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import MapView, { Circle, Marker, Region } from 'react-native-maps'
-import { set } from 'zod'
+import { View, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
+import MapView, { Marker, Region } from 'react-native-maps'
 import ButtonModal from './ButtonModal'
+import icons from 'constants/icons'
 
 
 interface coordinate {
@@ -61,7 +61,7 @@ export default function MapModalEdit({getRegion, initalRegion}: MapModalEditProp
         
         <Marker
             coordinate={region}
-            image={isSelected ? require('../assets/pins/flag_location.png') : require('../assets/pins/flag_selection.png')}
+            image={isSelected ? icons.mapa_pino_bandeira_selecionado : icons.mapa_pino_bandeira_selecao}
             />
 
     </MapView>

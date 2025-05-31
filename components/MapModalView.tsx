@@ -1,6 +1,7 @@
 import { View, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import MapView, { Marker } from 'react-native-maps'
+import icons from 'constants/icons'
 
 
 interface MapModalViewProps {
@@ -39,13 +40,13 @@ export default function MapModalView({prop, raio}: MapModalViewProps) {
   return  (
     <MapView
         style={{ height: 200, width: '100%', marginBottom: 20 }}
-        className='h-[200px] w-full mb-[20px]'
         showsUserLocation={true}
+        showsMyLocationButton={true}
         initialRegion={{...prop, latitudeDelta: 0.0922, longitudeDelta:0.0421} }
     >
         <Marker
             coordinate={prop}
-                image={require('../assets/pins/flag_location.png')}
+                image={icons.mapa_pino_bandeira_selecao}
             />
     </MapView>
   )
