@@ -67,7 +67,7 @@ export const slides: Slide[] = [
     id: '6',
     media: {
       type: 'video',
-      source: require('../assets/slide/como-usar-pins.mp4'),
+      source: require('../assets/slide/como-usar-pins2.mp4'),
     },
     title: 'Estamos com Novos Ícones',
     description: 'Ícones de Evento: representam os Eventos, com as cores Verde(Gratuitos) e Bronze(Pagos).\n\n  Ícone de Problemas: representam as Ocorrências ou Obstáculos, com cores diversas.\n',
