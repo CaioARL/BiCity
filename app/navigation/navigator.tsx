@@ -14,12 +14,17 @@ import { StatusBar } from 'expo-status-bar'
 import { calculateBearing, isPointNearLine, isPointNearPoint } from 'util/map-util'
 import ProblemaView from 'components/ProblemaView'
 import { getProblemaByRadius } from 'api/problema'
+import { sounds } from 'constants/sounds'
+import { AudioSpeaker } from 'util/audioSpeaker'
+import { prompts } from 'constants/prompts'
 
 export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
   const [problemas, setProblemas] = useState<Problema[]>([])
+
   const [nearProblems, setNearProblems] = useState<Problema[]>([])
+  const [infraProblems, setInfraProblems] = useState<Problema[]>([])
 
   const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
@@ -34,10 +39,18 @@ export default function Navigator() {
   const headingExtremesRef = useRef<[number, number]>([0, 0])
 
   const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
-  const lastStreet = useRef<InfraestruturaGeoJsonFeature | null>(null)
+  const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
 
-  const player = createAudioPlayer(require('../../assets/sounds/horn.mp3'))
+  const speechRef = useRef(new AudioSpeaker())  
 
+  const Play = async (audio: {src: any, duration: number}) => {
+  const player = createAudioPlayer(audio.src)
+  player.play()
+    setTimeout(() => {
+    // this.player.remove()
+    player.release()
+    }, audio.duration * 1000)
+  }
 
   const checkAndRequestStreets = (latitude: number, longitude: number) => {
     const currentLocation = { latitude, longitude }
@@ -102,24 +115,31 @@ export default function Navigator() {
     })
 
     // Avoid redundant updates
-    if (matchedFeature && matchedFeature !== lastStreet.current) {
-      lastStreet.current = matchedFeature
-      getHeading(matchedFeature)
+    if (matchedFeature && matchedFeature !== lastInfra.current) {
       console.log('User is now on street:', matchedFeature.properties.name)
+      lastInfra.current = matchedFeature
+      getHeading(matchedFeature)
+      const geometry = matchedFeature.geometry
+      if (geometry.type === 'LineString') {
+        setInfraProblems(
+          problemas.filter((problema) => {
+            return isPointNearLine(problema, geometry.coordinates as [number, number][])
+          })
+        )
+      }
     }
     if(!matchedFeature) {
       headingRef.current = null
       return
     }
     
-
-      setNearProblems(
-        problemas.filter((problema) => {
-          if(matchedFeature)
-          return isPointNearPoint(currentLocation, problema)
-        })
-      )
-    }
+    setNearProblems(
+      problemas.filter((problema) => {
+        if(matchedFeature)
+        return isPointNearPoint(currentLocation, problema, 20)
+      })
+    )
+  } 
     
   useEffect(() => {
     if (!headingRef.current) return
@@ -128,10 +148,25 @@ export default function Navigator() {
 
   useEffect(() => {
     if (nearProblems.length <= 0) return
-    // nearProblems.forEach((problema) => {
-    // })
-    player.play()
+    Play(sounds.problem_notification)
   }, [nearProblems])
+
+  useEffect(() => {
+    if (!infraProblems || infraProblems.length <= 0) return
+    console.log("Problemas de infraestrutura detectados:")
+      infraProblems.forEach((problema) => {
+          Play(sounds.beep).then(()=>{
+            speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
+          })
+          console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)
+      })
+  }, [infraProblems])
+
+  useEffect(() => {
+    return () => {
+      speechRef.current.stop()
+    }
+  }, [])
 
   const changeMapView = (lat: number, long: number, heading: number) => {
     let h
