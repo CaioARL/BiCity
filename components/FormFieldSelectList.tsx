@@ -55,8 +55,9 @@ export default function FormFieldSelectList({
         if (isValid === false) return  '#E81123';
         return '#ddd';
       })(),
-      borderRadius: 4,
+      borderRadius: 10,
       padding: 12,
+      width: '100%',
       height: 64,
       backgroundColor: '#FFF',
     },

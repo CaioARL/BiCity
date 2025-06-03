@@ -16,7 +16,6 @@ import SimpleTextInput from 'components/SimpleTextInput'
 import { getHabilidades } from 'storage/nivel-habilidade'
 
 
-
 export default function Profile(){
   const { onLogout, authState, fetchUser } = useAuthProvider()
 

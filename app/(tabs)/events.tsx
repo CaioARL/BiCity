@@ -10,7 +10,6 @@ import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
-import { set } from 'zod';
 import ScrollUp from '../../components/ScrollUp'; 
 
 // interface EventItem {
@@ -449,7 +448,6 @@ export default function Events() {
           }}/>
 
       </View>
-
     </SafeAreaView>
   );
 }

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, TouchableOpacity, Image} from 'react-native'
+import { View, Text, TouchableOpacity, Image} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -19,6 +19,8 @@ import AvaliacaoView from '../../components/AvaliacaoView'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
+import icons from 'constants/icons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface Region {
   latitude: number
@@ -488,7 +490,7 @@ export default function Home() {
       )
     else
       return (   
-        <SafeAreaView >
+        <SafeAreaView>
           <MapView style={{width: '100%', height:'100%'}} 
               ref={mapRef}
               onRegionChange={setCurrentViewLocation}
@@ -521,8 +523,8 @@ export default function Home() {
                   isSameDate(evento.data.split(' ')[0], dateRef.current) ? (
                     <View key={evento.id}>
                       <Circle
-                        fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(192, 170, 129, 0.2)'}
-                        strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(192, 170, 129, 0.5)'}
+                        fillColor={evento.gratuito? 'rgba(195, 255, 0, 0.2)' : 'rgba(255, 193, 7, 0.2)'}
+                        strokeColor={evento.gratuito? 'rgba(195, 255, 0, 0.5)' : 'rgba(255, 193, 7, 0.5)'}
                         center={evento.endereco}
                         radius={evento.faixaKm*100}
                         strokeWidth={2}
@@ -533,8 +535,8 @@ export default function Home() {
                         key={evento.id} 
                         coordinate={evento.endereco} 
                         image={evento.gratuito
-                          ? require('../../assets/pins/pin_free_evento.png')
-                          : require('../../assets/pins/pin_paid_evento.png')
+                          ? icons.mapa_pino_evento_gratuito
+                          : icons.mapa_pino_evento_pago
                         }
                         onPress={()=> {
                           setHilightedEvento({evento: evento, interno :true})}}
@@ -546,8 +548,8 @@ export default function Home() {
                         key={evento.id} 
                         coordinate={evento.endereco} 
                         image={evento.gratuito
-                          ? require('../../assets/pins/pin_free_evento.png')
-                          : require('../../assets/pins/pin_paid_evento.png')
+                          ? icons.mapa_pino_evento_gratuito
+                          : icons.mapa_pino_evento_pago
                         }
                         onPress={()=> {
                           setHilightedEvento({evento: evento, interno :true})}}
@@ -562,23 +564,23 @@ export default function Home() {
                         coordinate={problema} 
                         titleVisibility='hidden'
                         image={
-                          problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1_round.png')) 
+                          problema.tipoProblema.id === 1?( icons.mapa_pino_problema_tipo_1_round ) 
                           :
-                          problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2_round.png') )
+                          problema.tipoProblema.id === 2?( icons.mapa_pino_problema_tipo_2_round )
                           : 
-                          problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3_round.png') )
+                          problema.tipoProblema.id === 3?( icons.mapa_pino_problema_tipo_3_round )
                           :
-                          problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4_round.png') ) 
+                          problema.tipoProblema.id === 4?( icons.mapa_pino_problema_tipo_4_round ) 
                           :
-                          problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5_round.png') )   
+                          problema.tipoProblema.id === 5?( icons.mapa_pino_problema_tipo_5_round )   
                           :
-                          problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6_round.png') )   
+                          problema.tipoProblema.id === 6?( icons.mapa_pino_problema_tipo_6_round )   
                           :
-                          problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7_round.png') )   
+                          problema.tipoProblema.id === 7?( icons.mapa_pino_problema_tipo_7_round )   
                           :  
-                          problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8_round.png') )   
+                          problema.tipoProblema.id === 8?( icons.mapa_pino_problema_tipo_8_round )   
                           :  
-                            require('../../assets/pins/pin_problema_tipo_1_round.png')
+                            icons.mapa_pino_problema_tipo_1_round
                             
                         }
                         onPress={()=>setPinProblemaSelector(problema)}
@@ -614,15 +616,26 @@ export default function Home() {
               />}
 
                   
-                {isMoved && 
-              (<View className='absolute top-[3%] items-center justify-center h-fit w-full'>
+              <View className='absolute top-[4%] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
+                <View className='w-[34px] h-[34px]'/>
+                {isMoved ? 
                 <ButtonModal
                   title='Buscar nesta localização'
                   handlePress={searchOnViewLocation}
                   textStyles='text-[#000] text-center'
                   customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
                 />
-              </View>)}
+                :
+                <View className='w-[200px] min-h-[50px]'/>  
+                }
+
+                <TouchableOpacity
+                  className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                  onPress={handleMyLocationPress}
+                >
+                <Ionicons name="locate" size={24} color="black" />
+              </TouchableOpacity>
+              </View>
               {isContentLoading && <LoadingActivity/>}
               {successMessage && 
               <ShowAlert
@@ -679,12 +692,6 @@ export default function Home() {
                 />
               }
 
-              <TouchableOpacity
-                className='absolute z-0 top-[20px] right-[20px] bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
-                onPress={handleMyLocationPress}
-              >
-                <Ionicons name="locate" size={24} color="black" />
-              </TouchableOpacity>
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}

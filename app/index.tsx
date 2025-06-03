@@ -2,7 +2,6 @@ import { View, Text, ScrollView, Image, ActivityIndicator, Alert  } from 'react-
 import React, { useEffect } from 'react'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
 import { useAuthProvider } from './context/AuthProvider'
 
 export default function Index() {
@@ -48,7 +47,6 @@ export default function Index() {
               </View>
             </ScrollView>
           </View>
-        <StatusBar backgroundColor='#161622' style='light' />
       </SafeAreaView>
   )
 }

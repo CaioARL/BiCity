@@ -311,9 +311,8 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
     <>
 
     <Modal visible={visible} animationType="slide" transparent={true} >
-      <View className='flex-row bg-[rgba(0,0,0,0.5)] justify-center'>
-        <ScrollView>
-        <View className='bg-white flex-[1] rounded-[10px] p-[20px] m-[20px]'>
+        <ScrollView className='bg-[rgba(0,0,0,0.5)]'>
+        <View className='bg-white rounded-[10px] p-[20px] m-[20px]'>
             {/* <Animated.View style={{ opacity: fadeAnim }}> */}
 
                <View  className='mb-[2px]'>
@@ -537,7 +536,6 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
             />
           }
 
-      </View>
     </Modal>
 
     <ImageSelectionPopup

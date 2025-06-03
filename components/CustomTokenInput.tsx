@@ -62,6 +62,7 @@ const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText,
           <TextInput
             key={index}
             ref={(ref) => (inputRefs.current[index] = ref)}
+            autoCapitalize='none'
             className={`w-12 h-12 border rounded-lg text-lg text-center ${getBorderColor(index)}`}
             value={digit}
             onChangeText={(text) => handleInputChange(text, index)}

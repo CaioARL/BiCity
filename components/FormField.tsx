@@ -1,6 +1,7 @@
 import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
 
 
 interface FormFieldProps {
@@ -38,7 +39,7 @@ export default function FormField({
     <View className={`space-y-2 ${otherStyles}`}>
       <Text className="text-base color-secondary_black">{title}</Text>
       <View
-        className={`border-2 ${disableEdit ? 'bg-color_lightGray' : ''} ${getBorderColor()} w-full h-16 px-4 rounded-[2px] bg-orange-5001e items-center flex-row`}
+        className={`border-2 ${disableEdit ? 'bg-color_lightGray' : 'bg-[rgba(255,255,255,0.9)]'} ${getBorderColor()} w-full h-16 px-4 rounded-[10px] bg-orange-5001e items-center flex-row`}
       >
         <TextInput
           className="flex-1 text-base w-full"
@@ -54,12 +55,12 @@ export default function FormField({
           onFocus={onFocus}
         />
         {secureTextEntry && (
-          <Text
+          <TouchableOpacity
+            className='flex-row items-center justify-center h-full w-[20%] '
             onPress={() => setShowPassword(!showPassword)}
-            className="text-base"
           >
             <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="#D9D9D9" />
-          </Text>
+          </TouchableOpacity>
         )}
         {isLoading && (
           <ActivityIndicator size="small" color="#0000ff" />
