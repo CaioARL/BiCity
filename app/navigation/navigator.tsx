@@ -7,7 +7,6 @@ import MapView, { Geojson, Marker } from 'react-native-maps'
 import { InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestInfraestruturaByRadius, RequestProblemaByRadius } from 'types'
 import { getInfraestrutura } from 'api/infraestrutura'
 import { mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson } from 'util/mapInfraestrutura'
-import { distance, lineString, nearestPointOnLine, point } from '@turf/turf'
 
 import { createAudioPlayer } from 'expo-audio'
 import { StatusBar } from 'expo-status-bar'
@@ -57,11 +56,8 @@ export default function Navigator() {
 
     // Check if the user has moved significantly
     if (lastRequestLocation.current) {
-      const from = point([lastRequestLocation.current.longitude, lastRequestLocation.current.latitude])
-      const to = point([longitude, latitude])
-      const dist = distance(from, to) // Distance in kilometers
-
-      if (dist < 0.75) return // Skip request if moved less than 750 meters
+      // Skip request if moved less than 750 meters
+      if (isPointNearPoint(currentLocation, lastRequestLocation.current, 750)) return
     }
 
     // Update last request location
@@ -97,11 +93,8 @@ export default function Navigator() {
     
     // Check if the user has moved significantly
     if (lastUserLocation.current) {
-      const from = point([lastUserLocation.current.longitude, lastUserLocation.current.latitude])
-      const to = point([longitude, latitude])
-      const dist = distance(from, to)
-      
-      if (dist < 0.01) return // Skip if moved less than 10 meters
+      // Skip if moved less than 10 meters
+      if (isPointNearPoint(currentLocation, lastUserLocation.current, 10)) return
     }
     
     lastUserLocation.current = currentLocation
