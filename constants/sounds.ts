@@ -1,6 +1,6 @@
 export const sounds = {
     beep: {
-        src: require('../assets/sounds/beep.wave'),
+        src: require('../assets/sounds/beep.wav'),
         duration: 1.5, // seconds
     },
     horn: {
@@ -8,11 +8,11 @@ export const sounds = {
         duration: 1.5, // seconds
     },
     alert: {
-        src: require('../assets/sounds/alert.wave'),
+        src: require('../assets/sounds/alert.wav'),
         duration: 2.0, // seconds
     },
     problem_notification: {
-        src: require('../assets/sounds/problem_notify.wave'),
+        src: require('../assets/sounds/problem_notify.wav'),
         duration: 2.5, // seconds
     },
 }
