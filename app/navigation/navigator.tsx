@@ -27,6 +27,7 @@ export default function Navigator() {
 
   const [pinProblemaSelector, setPinProblemaSelector] = useState<Problema | null>(null)
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
+  const notifiedProblemsId = useRef<number[]>([])
   
   const lastRequestLocation = useRef<{ latitude: number, longitude: number } | null>(null)
   const emptyGeoJson: InfraestruturaGeoJson = {
@@ -141,7 +142,11 @@ export default function Navigator() {
 
   useEffect(() => {
     if (nearProblems.length <= 0) return
-    Play(sounds.problem_notification)
+    nearProblems.forEach((problema) => {
+      if (notifiedProblemsId.current.includes(problema.id)) return
+      notifiedProblemsId.current.push(problema.id)
+      Play(sounds.problem_notification)
+    })
   }, [nearProblems])
 
   useEffect(() => {
