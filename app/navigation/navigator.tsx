@@ -13,9 +13,8 @@ import { StatusBar } from 'expo-status-bar'
 import { calculateBearing, isPointNearLine, isPointNearPoint } from 'util/map-util'
 import ProblemaView from 'components/ProblemaView'
 import { getProblemaByRadius } from 'api/problema'
-import { sounds } from 'constants/sounds'
+import { sounds, prompts } from 'constants/index'
 import { AudioSpeaker } from 'util/audioSpeaker'
-import { prompts } from 'constants/prompts'
 
 export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
