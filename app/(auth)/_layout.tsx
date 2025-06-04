@@ -26,9 +26,8 @@ export default function AuthLayout() {
             headerShown: false,
           }}
           />
-        </Stack>
-
-      <StatusBar hidden/>
+      </Stack>
+      <StatusBar style='dark' backgroundColor='#C3FF00'/>
     </>
   )
 }

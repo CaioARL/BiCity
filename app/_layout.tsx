@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { SplashScreen, Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
 import AuthProvider from "./context/AuthProvider"
+import { StatusBar } from "expo-status-bar"
 
 SplashScreen.preventAutoHideAsync()
 
@@ -34,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="(view)" options={{ headerShown: false }} />
           <Stack.Screen name="(event)" options={{ headerShown: false }} />
         </Stack>
+        <StatusBar style='dark' backgroundColor='#C3FF00' />
       </AuthProvider> 
       )
 }
