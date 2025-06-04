@@ -97,129 +97,134 @@ export default function AvaliacaoView({ onClose, requestPage }: AvaliacaoViewPro
         },[requestPageAvaliacao])
 
     return (
-        <View className="p-[30px] obsolute z-10 bg-white rounded-lg shadow-md h-[80%] w-[94%] top-[3%] left-[3%] absolute justify-center">
-            <FlatList
-                className='relative'
-                ListHeaderComponent={
-                    <View className='justify-center align-center mb-[48px]'>
-                        <Text className='flex-col text-lg font-bold text-center mb-10'>Resumo das avaliações</Text>
-                        <View className='flex-row w-full justify-center items-center'>
-                            <View className='flex-1 flex-col flex-wrap mr-4 w-[70%]'>
-                                <View className='flex-row flex-wrap'>
-                                    {ratings.counts.map((count, index) => (
-                                        <TouchableOpacity
-                                            className='w-1/2 mb-5'
-                                            key={index}
-                                            onPress={() => filterByRating(index + 1)}
-                                            activeOpacity={0.7}
-                                        >
-                                            <View className='flex-row items-center'>
-                                                <Text className='text-sm'>{index + 1}</Text>
-                                                <View className='flex-1 mr-2 h-2 bg-color_light_gray rounded-[5px] ml-2'>
-                                                    <View
-                                                        className='h-2 bg-[#FFD700] rounded-[5px]'
-                                                        style={{ width: `${(count / Math.max(...ratings.counts, 1)) * 100}%` }}
-                                                    />
+        <View className=" absolute top-0 left-0 z-10 flex-col justify-center items-center w-full h-full py-[25%]">
+            <TouchableOpacity className="w-full h-full" onPress={onClose} />
+    
+            <View className=" bg-white rounded-lg shadow-md h-fit w-[94%] p-[30px]">
+                <FlatList
+                    className='relative'
+                    ListHeaderComponent={
+                        <View className='justify-center align-center mb-[48px]'>
+                            <Text className='flex-col text-lg font-bold text-center mb-10'>Resumo das avaliações</Text>
+                            <View className='flex-row w-full justify-center items-center'>
+                                <View className='flex-1 flex-col flex-wrap mr-4 w-[70%]'>
+                                    <View className='flex-row flex-wrap'>
+                                        {ratings.counts.map((count, index) => (
+                                            <TouchableOpacity
+                                                className='w-1/2 mb-5'
+                                                key={index}
+                                                onPress={() => filterByRating(index + 1)}
+                                                activeOpacity={0.7}
+                                            >
+                                                <View className='flex-row items-center'>
+                                                    <Text className='text-sm'>{index + 1}</Text>
+                                                    <View className='flex-1 mr-2 h-2 bg-color_light_gray rounded-[5px] ml-2'>
+                                                        <View
+                                                            className='h-2 bg-[#FFD700] rounded-[5px]'
+                                                            style={{ width: `${(count / Math.max(...ratings.counts, 1)) * 100}%` }}
+                                                        />
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-
-                            <View className='items-center justify-center w-[30%]'>
-                                <Text className='font-bold text-[45px]'>
-                                {ratings && typeof ratings.average === 'number' && !isNaN(ratings.average) ? (ratings.average.toFixed(1).replace('.', ',')) : (
-                                    <Text className='text-xs'>Não há avaliação</Text>
-                                )}
-                                </Text>
-                                <View className='flex-row my-1 gap-x-1'>
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <Ionicons key={i} name="star" size={13} color={i < Math.round(ratings.average) ? '#FFD700' : '#ddd'} />
-                                    ))}
-                                </View>
-                                <Text className='text-[13px] text-matte_gray text-center'>{ratings.total }{'\n'} Avaliações</Text>
-                            </View>
-                        </View>
-                    </View>
-                }
-                data={avaliacoes}
-                refreshing={isContentLoading}
-                onRefresh={onRefresh}
-                ListFooterComponent={
-                    <TouchableOpacity className={`flex-col flex-nowrap my-5 items-center justify-center rounded-full ${loadPageButton? 'visible' : 'hidden'} `} onPress={loadMorePage}>
-                        <Image source={require('../assets/loadMore.png')} style={{ width: 50, height: 50, tintColor: '#555' }} resizeMode="contain" />
-                        <Text className='text-xs text-matte_gray text-center'>Carregar {'\n'} Mais</Text>
-                    </TouchableOpacity>
-                }
-                onEndReachedThreshold={0.1}
-                onEndReached={() => currentPageRef.current < totalPaginas.current && loadMorePage()}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => {
-                    return (
-                        <View key={item.id} className="flex-row border-b-hairline border-color__lightGray der-gray-200 rounded-[10px]">
-                            <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[20px]">
-                                {item.usuario.s3Url ?
-                                    (<Image
-                                        source={{ uri: item.usuario.s3Url }}
-                                        className="w-20 h-20 rounded-full border-color_light_gray"
-                                        style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
-                                    />)
-                                :
-                                <View className='w-20 h-20 rounded-full border-color_light_gray border-[1px] bg-color_light_gray justify-center items-center'>
-                                    <Ionicons name="person" size={30} color="#555" />
-                                </View>
-                                }
-                                <Text className='text-[12px] text-matte_gray '>{item.usuario.nome}</Text>
-                                <Text className='text-[11px] text-matte_gray mb-[5px]'>{item.usuario.nivelHabilidade?.descricao}</Text>
-                            </View>
-
-                            <View className='flex-col flex-grow-[2px] w-[60%] justify-between items-start text-left my-4'>
-                                <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.dtCriacao}</Text>
-                                <View className='max-w-min'>
-                                    <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.comentario || "Usuário optou por não comentar"}</Text>
-                                </View>
-
-                                <View className='flex-row justify-between items-center'>
-                                    <Text className='text-[12px] text-matte_gray mr-2'>Nota: {item.nota}</Text>
-                                    <View className='flex-row'>
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <Text key={star} className='text-[13px] ml-1' style={{ color: star <= item.nota ? '#FFD700' : '#CCC', lineHeight: 13 }} > ★ </Text>
+                                            </TouchableOpacity>
                                         ))}
                                     </View>
                                 </View>
+
+                                <View className='items-center justify-center w-[30%]'>
+                                    <Text className='font-bold text-[45px]'>
+                                    {ratings && typeof ratings.average === 'number' && !isNaN(ratings.average) ? (ratings.average.toFixed(1).replace('.', ',')) : (
+                                        <Text className='text-xs'>Não há avaliação</Text>
+                                    )}
+                                    </Text>
+                                    <View className='flex-row my-1 gap-x-1'>
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <Ionicons key={i} name="star" size={13} color={i < Math.round(ratings.average) ? '#FFD700' : '#ddd'} />
+                                        ))}
+                                    </View>
+                                    <Text className='text-[13px] text-matte_gray text-center'>{ratings.total }{'\n'} Avaliações</Text>
+                                </View>
                             </View>
                         </View>
-                    )
-                }
-                }
-            />
+                    }
+                    data={avaliacoes}
+                    refreshing={isContentLoading}
+                    onRefresh={onRefresh}
+                    ListFooterComponent={
+                        <TouchableOpacity className={`flex-col flex-nowrap my-5 items-center justify-center rounded-full ${loadPageButton? 'visible' : 'hidden'} `} onPress={loadMorePage}>
+                            <Image source={require('../assets/loadMore.png')} style={{ width: 50, height: 50, tintColor: '#555' }} resizeMode="contain" />
+                            <Text className='text-xs text-matte_gray text-center'>Carregar {'\n'} Mais</Text>
+                        </TouchableOpacity>
+                    }
+                    onEndReachedThreshold={0.1}
+                    onEndReached={() => currentPageRef.current < totalPaginas.current && loadMorePage()}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => {
+                        return (
+                            <View key={item.id} className="flex-row border-b-hairline border-color__lightGray der-gray-200 rounded-[10px]">
+                                <View className="flex-col flex-grow-[1px] justify-center items-center my-4 pr-[20px]">
+                                    {item.usuario.s3Url ?
+                                        (<Image
+                                            source={{ uri: item.usuario.s3Url }}
+                                            className="w-20 h-20 rounded-full border-color_light_gray"
+                                            style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
+                                        />)
+                                    :
+                                    <View className='w-20 h-20 rounded-full border-color_light_gray border-[1px] bg-color_light_gray justify-center items-center'>
+                                        <Ionicons name="person" size={30} color="#555" />
+                                    </View>
+                                    }
+                                    <Text className='text-[12px] text-matte_gray '>{item.usuario.nome}</Text>
+                                    <Text className='text-[11px] text-matte_gray mb-[5px]'>{item.usuario.nivelHabilidade?.descricao}</Text>
+                                </View>
 
-            <View className="px-4 py-2">
-                <Text className="text-gray-500">{"Avaliações: " + ratings.total}</Text>
-                <View className="mt-4 mb-2 flex-row justify-between">
-                    <ButtonModal
-                        title="Fechar"
-                        handlePress={onClose}
-                        textStyles="text-black"
-                    />
-                    <ButtonModal
-                        title="Limpar filtro"
-                        handlePress={limparFiltro}
-                        disabled={!filtroAtivo}
-                        textStyles="text-black"
-                    />
-                </View>
-            </View>
-            {errorMessage && (
-                <ShowAlert
-                    message={errorMessage}
-                    onClose={()=>setErrorMessage(null)}
-                    type='error'
+                                <View className='flex-col flex-grow-[2px] w-[60%] justify-between items-start text-left my-4'>
+                                    <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.dtCriacao}</Text>
+                                    <View className='max-w-min'>
+                                        <Text className='text-[12px] text-matte_gray mb-[5px]'>{item.comentario || "Usuário optou por não comentar"}</Text>
+                                    </View>
+
+                                    <View className='flex-row justify-between items-center'>
+                                        <Text className='text-[12px] text-matte_gray mr-2'>Nota: {item.nota}</Text>
+                                        <View className='flex-row'>
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <Text key={star} className='text-[13px] ml-1' style={{ color: star <= item.nota ? '#FFD700' : '#CCC', lineHeight: 13 }} > ★ </Text>
+                                            ))}
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        )
+                    }
+                    }
                 />
-            )}
 
+                <View className="px-4 py-2">
+                    <Text className="text-gray-500">{"Avaliações: " + ratings.total}</Text>
+                    <View className="mt-4 mb-2 flex-row justify-between">
+                        <ButtonModal
+                            title="Fechar"
+                            handlePress={onClose}
+                            textStyles="text-black"
+                        />
+                        <ButtonModal
+                            title="Limpar filtro"
+                            handlePress={limparFiltro}
+                            disabled={!filtroAtivo}
+                            textStyles="text-black"
+                        />
+                    </View>
+                </View>
+                {errorMessage && (
+                    <ShowAlert
+                        message={errorMessage}
+                        onClose={()=>setErrorMessage(null)}
+                        type='error'
+                    />
+                )}
+
+            </View>
+            <TouchableOpacity className="w-full h-full" onPress={onClose} />
         </View>
     )
 }
