@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, Image, BackHandler} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
+import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
@@ -24,6 +24,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { AudioSpeaker } from 'util/audioSpeaker'
 import { createAudioPlayer } from 'expo-audio'
 import { sounds, prompts } from '../../constants'
+import { AxiosError } from 'axios'
 
 interface Region {
   latitude: number
@@ -85,8 +86,7 @@ export default function Home() {
   const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
   const [eventos, setEventos] = useState<Evento[]>([])
 
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [userAlert, setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
   const { eventoId } = useLocalSearchParams<{eventoId: string}>()
 
@@ -118,7 +118,7 @@ export default function Home() {
         }
       })
       .catch((error)=> {
-        setErrorMessage("Error ao checar serviço de localização: "+ error)
+        setUserAlert({ type: 'error', message: "Error ao checar serviço de localização: "+ error})
       })
 
       let {status} = await Location.requestForegroundPermissionsAsync()
@@ -150,7 +150,7 @@ export default function Home() {
     })
     .catch((error) => {
       setCurrentLocationError(locationErrors.ERROR)
-      setErrorMessage("Error ao obter localização: "+ error)
+      setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
     }).finally(() => {
       setInitalLoading(false)
     })
@@ -197,8 +197,8 @@ export default function Home() {
     .then((response) =>{
       setEventos(response)
     })
-    .catch((response)=>{  
-      setErrorMessage("Error ao carregar eventos: "+ response.message)
+    .catch((error: AxiosError<DefaultErrorResponse>)=>{  
+      setUserAlert({type:'error', message: "Error ao carregar eventos: " + error.response?.data.message || error.message})
     })
     .finally(()=>{
       console.log("Teriminou a requisição de eventos")
@@ -214,8 +214,8 @@ export default function Home() {
       .then((response) => {
         setProblemas(response)
       })
-      .catch((response)=>{
-        setErrorMessage("Error ao carregar problemas: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({ type: 'error', message: "Error ao carregar problemas: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         console.log("Teriminou a requisição de problemas")
@@ -230,8 +230,8 @@ export default function Home() {
       .then((response) => {
         setInfraestrutura(mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response))
       })
-      .catch((response)=>{
-        setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+      .catch((error : AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({type:'error', message: "Error ao carregar infraestrutura: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         console.log("Teriminou a requisição de infraestrutura")
@@ -244,7 +244,7 @@ export default function Home() {
 
     useEffect(()=>{
       if(!eventoId) return
-      if(navigation) return setErrorMessage("Não é possível buscar evento quando está em modo de navegação")
+      if(navigation) return setUserAlert({ type: 'error', message: "Não é possível buscar evento quando está em modo de navegação"})
       var attempts = 0
       setIsContentLoading(true)
       const interval = setInterval(async () => {
@@ -258,8 +258,8 @@ export default function Home() {
                 latitudeDelta:0.0043, longitudeDelta:0.0034})
               getEventsOnViewLocation(response.endereco)
             })
-            .catch((error)=>{
-              setErrorMessage('Erro ao carregar Evento' + error.message)
+            .catch((error : AxiosError<DefaultErrorResponse>)=>{
+              setUserAlert({ type: 'error', message: "Erro ao carregar Evento" + error.response?.data.message || error.message})
             })
             .finally(()=>{
               setIsContentLoading(false)
@@ -267,7 +267,7 @@ export default function Home() {
             clearInterval(interval)
           } else if (attempts >= 15){
             setIsContentLoading(false)
-            setErrorMessage("Falha ao encontrar evento, verifique sua localização")
+            setUserAlert({ type: 'error', message: "Falha ao encontrar evento, verifique sua localização"})
             clearInterval(interval)
           }
           attempts++
@@ -325,7 +325,7 @@ export default function Home() {
       setIsContentLoading(true)
       createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
       .then(() => {
-        setSuccessMessage("Avaliação criada com sucesso")
+        setUserAlert({type:'success', message: "Avaliação criada com sucesso"})
         getInfraestruturaById(idInfraAvaliacao!, null)
         .then((response) => {
             setInfraestrutura(prev => {
@@ -339,14 +339,14 @@ export default function Home() {
               }
             })
         })
-        .catch((response)=>{
-          setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+        .catch((error: AxiosError<DefaultErrorResponse>)=>{
+          setUserAlert({ type: 'error', message: "Error ao carregar infraestrutura: "+ error.response?.data || error.message})
         })
     
 
       })
-      .catch((response) => {
-        setErrorMessage("Error ao criar avaliação: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao criar avaliação: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestCreateAvaliacao(null)
@@ -365,7 +365,7 @@ export default function Home() {
       createProblema(requestCreateProblema, abortControllerRef.current)
       .then((response) => {
         setProblemas((prev) => [...prev, response])
-        setSuccessMessage("Problema criado com sucesso")
+        setUserAlert({type:'success', message: "Problema criado com sucesso"})
         if(problemaImage){
           const formData = new FormData()
           formData.append('file', {
@@ -379,8 +379,8 @@ export default function Home() {
           })
         }
       })
-      .catch((response) => {
-        setErrorMessage("Error ao criar problema: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao criar problema: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestCreateProblema(null)
@@ -396,10 +396,10 @@ export default function Home() {
       setIsContentLoading(true)
       createProblemaImage(requestProblemaImage, abortControllerRef.current)
       .then((response) => {
-        setSuccessMessage("Imagem enviada com sucesso" + response)
+        setUserAlert({type:'success', message: "Imagem enviada com sucesso" + response})
       })
-      .catch((response) => {
-        setErrorMessage("Error ao enviar imagem: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao enviar imagem: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestProblemaImage(null)
@@ -474,15 +474,15 @@ export default function Home() {
       .then((reponse) => {
         if(!reponse){
           console.log('REPONSE DO CHECK: ', reponse) 
-          setErrorMessage("Não é possível criar um problema nesse local")
+          setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local"})
           setShowOpsModal(true)
           return
         }
         setProblemaCoords({latitude, longitude})
         setShowOpsModal(true)
       })
-      .catch((response)=>{
-        setErrorMessage("Não é possível criar um problema nesse local: "+ response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         setIsContentLoading(false)
@@ -729,7 +729,7 @@ export default function Home() {
                   isGestureRef.current = false
                   if (!isRegionWithinBounds(region)) {
                     animateToUserLocation(mapRef, currentLocation)
-                    setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.')
+                    setUserAlert({ type: 'error', message: 'Você saiu da área de São Paulo. Retornando à sua localização.'})
                   }
                 }
               }
@@ -841,12 +841,7 @@ export default function Home() {
                 />
               )}
               {isContentLoading && <LoadingActivity/>}
-              {successMessage && 
-              <ShowAlert
-                message={successMessage}
-                type='success'
-                onClose={()=>setSuccessMessage(null)}
-              />}
+
               {showProblemaModal && problemaCoords &&
               <ProblemaModal
                 coords={problemaCoords}
@@ -942,11 +937,11 @@ export default function Home() {
                 }
               </View>
               
-              {errorMessage && 
+              {userAlert && 
               <ShowAlert
-                message={errorMessage}
-                type='error'
-                onClose={()=>setErrorMessage(null)}
+                message={userAlert.message}
+                type={userAlert.type}
+                onClose={()=>setUserAlert(null)}
               />}
 
               <TouchableOpacity
