@@ -15,6 +15,7 @@ import ProblemaView from 'components/ProblemaView'
 import { getProblemaByRadius } from 'api/problema'
 import { sounds, prompts } from 'constants/index'
 import { AudioSpeaker } from 'util/audioSpeaker'
+import icons from 'constants/icons'
 
 export default function Navigator() {
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
@@ -279,23 +280,23 @@ export default function Navigator() {
                         coordinate={problema} 
                         titleVisibility='hidden'
                         image={
-                          problema.tipoProblema.id === 1?( require('../../assets/pins/pin_problema_tipo_1_round.png')) 
+                          problema.tipoProblema.id === 1?(icons.mapa_pino_problema_tipo_1_round) 
                           :
-                          problema.tipoProblema.id === 2?( require('../../assets/pins/pin_problema_tipo_2_round.png') )
+                          problema.tipoProblema.id === 2?(icons.mapa_pino_problema_tipo_2_round )
                           : 
-                          problema.tipoProblema.id === 3?( require('../../assets/pins/pin_problema_tipo_3_round.png') )
+                          problema.tipoProblema.id === 3?(icons.mapa_pino_problema_tipo_3_round )
                           :
-                          problema.tipoProblema.id === 4?( require('../../assets/pins/pin_problema_tipo_4_round.png') ) 
+                          problema.tipoProblema.id === 4?(icons.mapa_pino_problema_tipo_4_round ) 
                           :
-                          problema.tipoProblema.id === 5?( require('../../assets/pins/pin_problema_tipo_5_round.png') )   
+                          problema.tipoProblema.id === 5?(icons.mapa_pino_problema_tipo_5_round )   
                           :
-                          problema.tipoProblema.id === 6?( require('../../assets/pins/pin_problema_tipo_6_round.png') )   
+                          problema.tipoProblema.id === 6?(icons.mapa_pino_problema_tipo_6_round )   
                           :
-                          problema.tipoProblema.id === 7?( require('../../assets/pins/pin_problema_tipo_7_round.png') )   
+                          problema.tipoProblema.id === 7?(icons.mapa_pino_problema_tipo_7_round )   
                           :  
-                          problema.tipoProblema.id === 8?( require('../../assets/pins/pin_problema_tipo_8_round.png') )   
+                          problema.tipoProblema.id === 8?(icons.mapa_pino_problema_tipo_8_round )   
                           :  
-                            require('../../assets/pins/pin_problema_tipo_1_round.png')
+                            icons.mapa_pino_problema_tipo_1_round
                             
                         }
                         onPress={()=>setPinProblemaSelector(problema)}
