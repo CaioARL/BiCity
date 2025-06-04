@@ -56,6 +56,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         photosPermission: "The app accesses your photos to let you share them with your friends."
       }
     ],
+    [
+      'expo-build-properties',
+        {
+            android: {
+                usesCleartextTraffic: true, // ? enable HTTP requests
+            },
+            ios: {
+                flipper: true,
+            },
+        },
+    ],
     "expo-video",
     "expo-audio"
   ],
