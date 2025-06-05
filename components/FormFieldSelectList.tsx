@@ -53,14 +53,15 @@ export default function FormFieldSelectList({
         if (msg) return  '#E81123';
         if (isValid === true) return  '#22c55e';
         if (isValid === false) return  '#E81123';
-        return '#ddd';
+        return '#8e9095';
       })(),
-      borderRadius: 10,
-      padding: 12,
+      borderRadius: 12,
+      padding: 16,
       width: '100%',
-      height: 64,
+      height: 61,
       backgroundColor: '#FFF',
     },
+    
     inputText: {
       flex: 1,
       color:  '#555',
