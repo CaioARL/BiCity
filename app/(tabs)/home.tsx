@@ -25,6 +25,7 @@ import { AudioSpeaker } from 'util/audioSpeaker'
 import { createAudioPlayer } from 'expo-audio'
 import { sounds, prompts } from '../../constants'
 import { AxiosError } from 'axios'
+import ProblemaModalNavigation from 'components/ProblemaModalNavigation'
 
 interface Region {
   latitude: number
@@ -501,7 +502,7 @@ export default function Home() {
       const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
       const headingExtremesRef = useRef<[number, number]>([0, 0])
       const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
-      
+      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
       
       const speechRef = useRef(new AudioSpeaker())  
       
@@ -513,6 +514,22 @@ export default function Home() {
         player.release()
         }, audio.duration * 1000)
       }
+
+      const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
+        abortControllerRef.current?.abort()
+        abortControllerRef.current = new AbortController
+        checkCreateViabilityProblema(userLocation.latitude, userLocation.longitude, null)
+        .then((reponse) => {
+            if(!reponse){
+              setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local. Procure uma ciclovia próxima"})
+              return
+            }
+            setProblemaModalNavigationCoords({latitude, longitude})
+          })
+          .catch((error: AxiosError<DefaultErrorResponse>)=>{
+            setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
+          })
+      } 
 
       useEffect(() => {
         if (!userLocation) return
@@ -943,6 +960,25 @@ export default function Home() {
                 type={userAlert.type}
                 onClose={()=>setUserAlert(null)}
               />}
+
+              {problemaModalNavigationCoords &&
+              <ProblemaModalNavigation
+                onClose={(createProblema) => {
+                  setProblemaModalNavigationCoords(null)
+                  setRequestCreateProblema(createProblema)
+                }}
+                coords={problemaModalNavigationCoords}
+              />}
+
+              {navigation &&
+                <TouchableOpacity
+                    className='absolute bottom-[10%] right-[3%] flex-row bg-primary_green p-[10px] rounded-[37px] justify-center items-center'
+                    onPress={() => checkNavigationViabilityProblema(userLocation.latitude, userLocation.longitude)}
+                    >
+                    <Ionicons name="warning-outline" size={37} color="black" />
+                    <Text className='font-roboto font-bold'>Reportar</Text>
+                </TouchableOpacity>
+              }
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
