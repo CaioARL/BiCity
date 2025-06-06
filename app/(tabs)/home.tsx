@@ -502,19 +502,9 @@ export default function Home() {
       const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
       const headingExtremesRef = useRef<[number, number]>([0, 0])
       const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
-      // const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
-      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>({ latitude: 0, longitude: 0 })
+      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
       
       const speechRef = useRef(new AudioSpeaker())  
-      
-      const Play = async (audio: {src: any, duration: number}) => {
-      const player = createAudioPlayer(audio.src)
-      player.play()
-        setTimeout(() => {
-        // this.player.remove()
-        player.release()
-        }, audio.duration * 1000)
-      }
 
       const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
         abortControllerRef.current?.abort()
@@ -669,7 +659,7 @@ export default function Home() {
         nearProblems.forEach((problema) => {
           if (notifiedProblemsId.current.includes(problema.id)) return
           notifiedProblemsId.current.push(problema.id)
-          Play(sounds.problem_notification)
+          speechRef.current.playSound(sounds.problem_notification)
         })
       }, [nearProblems])
     
@@ -677,7 +667,7 @@ export default function Home() {
         if (!infraProblems || infraProblems.length <= 0) return
         console.log("Problemas de infraestrutura detectados:")
           infraProblems.forEach((problema) => {
-              Play(sounds.beep).then(()=>{
+              speechRef.current.playSound().then(()=>{
                 speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
               })
               console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)

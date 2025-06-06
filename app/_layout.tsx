@@ -35,7 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="(view)" options={{ headerShown: false }} />
           <Stack.Screen name="(event)" options={{ headerShown: false }} />
         </Stack>
-        <StatusBar style='dark' backgroundColor='#C3FF00' />
+        <StatusBar style='dark' backgroundColor='#9ccb00' />
       </AuthProvider> 
       )
 }
