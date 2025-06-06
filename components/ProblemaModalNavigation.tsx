@@ -15,7 +15,6 @@ export default function ProblemaModalNavigation({ onClose , coords } : ProblemaM
     const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>(null)
     const [ListTipoProblema, setListTipoProblema] = useState<TipoProblema[]>([])
     const [countDown, setCountDown] = useState<number>(10)
-    const canceledRef = useRef<boolean>(false)
 
     useEffect(()=> {
         getTipoProblema().then((data) => {
@@ -26,11 +25,9 @@ export default function ProblemaModalNavigation({ onClose , coords } : ProblemaM
                 if (prev > 1) {
                     return prev - 1
                 } else {
-                    clearInterval(interval); // Clear interval when countdown reaches 0
-                    if (!canceledRef.current) {
-                        onClose(null) // Perform the action when countdown finishes
-                    }
-                    return 0 // Set countdown to 0
+                    clearInterval(interval)
+                    onClose(null)
+                    return 0
                 }
             })
             }, 1000)
@@ -51,7 +48,8 @@ export default function ProblemaModalNavigation({ onClose , coords } : ProblemaM
         return (
             <View className=" absolute top-0 left-0 z-10 flex-col justify-center items-center w-full h-full py-[20%]">
                         <TouchableOpacity className="w-full h-full" onPress={()=>onClose(null)} />
-                <View className="px-[10px] bg-white rounded-lg shadow-md h-fit w-[94%] justify-start">
+                <View className="px-[10px] bg-white rounded-lg shadow
+                -md h-fit w-[94%] justify-start">
                     <ScrollView showsVerticalScrollIndicator={false}>
                         {ListTipoProblema?.map((tipoProblema) => (
                             <TouchableOpacity
@@ -98,12 +96,9 @@ export default function ProblemaModalNavigation({ onClose , coords } : ProblemaM
                                 onClose(null)
                             }}
                         />
-                            {/* Report countdown animation for 6 seconds */}
-                            <View className='flex-col items-center'>
-                                <View className='flex-row items-center bg-primary_green rounded-full h-[50px] w-[50px] p-2'>
-                                    <Text className='text-center text-lg font-bold text-color_black'>{countDown}</Text>
-                                </View>
-                            </View>
+                        <View className='flex-row items-center justify-center bg-primary_green rounded-full h-[50px] w-[50px] p-2'>
+                            <Text className='text-center text-lg font-bold text-color_black'>{countDown}</Text>
+                        </View>
                     </View>
                 </View>
                 <TouchableOpacity className="w-full h-full" onPress={()=>onClose(null)} />

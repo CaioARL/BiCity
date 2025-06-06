@@ -502,7 +502,8 @@ export default function Home() {
       const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
       const headingExtremesRef = useRef<[number, number]>([0, 0])
       const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
-      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
+      // const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
+      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>({ latitude: 0, longitude: 0 })
       
       const speechRef = useRef(new AudioSpeaker())  
       
@@ -921,7 +922,7 @@ export default function Home() {
                 />}
 
                   
-              <View className='absolute top-[4%] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
+              <View className='absolute top-[40px] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
                   <TouchableOpacity
                     className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
                     onPress={()=>{

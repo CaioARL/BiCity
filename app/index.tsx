@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthProvider } from './context/AuthProvider'
-// import { Video, ResizeMode } from 'expo-av';
 
 export default function Index() {
     const { authState, isLoading } = useAuthProvider();
@@ -103,16 +102,6 @@ export default function Index() {
                           </View>
                       </View> 
                       
-                      {/* Comentário do vídeo mantido */}
-                      {/* <Video
-                        source={require('../assets/img/Slides - BiCity (39).mp4')}
-                        style={{ width: 210, height: 230, alignSelf: 'center', top: -35, opacity: 0.81, }}
-                        className="position-fixed"
-                        resizeMode={ResizeMode.COVER}
-                        isLooping
-                        isMuted
-                        shouldPlay
-                      /> */}
 
                       {isLoading && (
                           <View>

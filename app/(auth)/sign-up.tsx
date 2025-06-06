@@ -349,7 +349,7 @@ export default function SignUp() {
         className='bg-primary_green'
         onPress={prevStep}
       >
-      <ArrowLeft size={24} color="white" />
+      <ArrowLeft size={24} color="#555" />
       </TouchableOpacity>
       
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }} style={{ width: '100%' }}>
