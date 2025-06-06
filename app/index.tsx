@@ -6,33 +6,31 @@ import { useAuthProvider } from './context/AuthProvider'
 
 export default function Index() {
     const { authState, isLoading } = useAuthProvider()
-    const [isVisible, setIsVisible] = useState(false)
 
+    const fadeAnim = useRef(new Animated.Value(0)).current
     const spinValue = useRef(new Animated.Value(0)).current
     const translateY = useRef(new Animated.Value(-30)).current
 
     useEffect(() => {
-        const loading = async () => {
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-            if (authState?.authenticated) {
-                router.replace('/events')
-            } else {
-                router.replace('/sign-in')
-            }
-        }
-        loading()
-
-        const timer = setTimeout(() => {
-            setIsVisible(true)
-        }, 200)
-
         const spinAnimation = Animated.loop(
             Animated.timing(spinValue, {
                 toValue: 1,
                 duration: 2000,
                 useNativeDriver: true,
             })
-        )
+        )    
+        spinAnimation.start()
+
+        return () => {
+            spinAnimation.stop()
+        }
+    }, [])
+
+    
+    
+    useEffect(() => {
+    
+        if (!isLoading) return
 
         const fallAnimation = Animated.timing(translateY, {
             toValue: 0,
@@ -41,15 +39,30 @@ export default function Index() {
             useNativeDriver: true,
         })
 
-        spinAnimation.start()
-        fallAnimation.start()
+        const fadeIn = Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1500,
+            delay: 500,
+            useNativeDriver: true,
+        })
 
-        return () => {
-            clearTimeout(timer)
-            spinAnimation.stop()
+        const loading = async () => {
+            if (authState?.authenticated) {
+                fadeIn.start()
+                fallAnimation.start(()=>{
+                    router.replace('/events')
+                })
+            } else {
+                fadeIn.start()
+                fallAnimation.start(()=>{
+                    router.replace('/sign-in')
+                })
+            }
         }
-    }, [authState])
+        loading()
 
+    }, [isLoading])
+    
     const spin = spinValue.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
@@ -67,19 +80,17 @@ export default function Index() {
         <SafeAreaView className="h-full bg-[#9ccb00]">
                 <ScrollView contentContainerStyle={{ height: '100%' }}>
                     <View className="flex-1 items-center justify-center">
-                        <Text
-                            className={`text-[32px] text-white font-robotobold mb-[54px] ${
-                                isVisible ? 'opacity-100' : 'opacity-0'
-                            } transition-opacity duration-1000`}
-                        >
-                            BICITY
-                        </Text>
 
-                        <View className="items-center justify-between mb-[54px]">
+                        <Animated.View className="items-center justify-between mb-[54px]" style={{opacity: fadeAnim}}>
+                            <Text
+                                className={`text-[32px] text-white font-robotobold mb-[54px]`}
+                            >
+                                BICITY
+                            </Text>
                             <Animated.Image
                                 source={require('../assets/img/corpo.png')}
                                 resizeMode="contain"
-                                className="h-[100px] w-[100px]"
+                                className={`h-[100px] w-[100px]`}
                                 style={[imageStyle, { top: 35, left: 10 }]}
                             />
 
@@ -87,17 +98,17 @@ export default function Index() {
                                 <Animated.Image
                                     source={require('../assets/img/roda.png')}
                                     resizeMode="contain"
-                                    className="h-[60px] w-[100px]"
+                                    className={`h-[60px] w-[100px]`}
                                     style={wheelStyle}
-                                />
+                                        />
                                 <Animated.Image
                                     source={require('../assets/img/roda.png')}
                                     resizeMode="contain"
-                                    className="h-[60px] w-[100px]"
+                                    className={`h-[60px] w-[100px]`}
                                     style={wheelStyle}
                                 />
                             </View>
-                        </View>
+                        </Animated.View>
 
                         {isLoading && (
                             <View>
