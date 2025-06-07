@@ -30,15 +30,14 @@ export default function Index() {
     
     useEffect(() => {
     
-        if (!isLoading) return
-
+        
         const fallAnimation = Animated.timing(translateY, {
             toValue: 0,
             duration: 1500,
             delay: 500,
             useNativeDriver: true,
         })
-
+        
         const fadeIn = Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 1500,
@@ -46,7 +45,12 @@ export default function Index() {
             useNativeDriver: true,
         })
 
+        if (isLoading) return
+        
         const loading = async () => {
+            console.log('isLoading: ', isLoading)
+            console.log('authState: ', authState?.authenticated)
+
             if (authState?.authenticated) {
                 fadeIn.start()
                 fallAnimation.start(()=>{
