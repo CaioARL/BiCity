@@ -42,7 +42,7 @@ export default function FormField({
         className={`border-2 ${disableEdit ? 'bg-color_lightGray' : 'bg-[rgba(255,255,255,0.9)]'} ${getBorderColor()} w-full h-16 px-4 rounded-[10px] bg-orange-5001e items-center flex-row`}
       >
         <TextInput
-          className="flex-1 text-base w-full"
+          className="flex-1 text-base w-full text-black"
           value={value}
           placeholder={placeholder}
           placeholderTextColor='rgba(0,0,0,0.4)'

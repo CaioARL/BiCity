@@ -30,7 +30,7 @@ export default function FormFieldModal({ title, value, placeholder, handleChange
   return (
     <View className={`mb-[10px] ${otherStyles}`}>
       {title && <Text className='text-[16px] text-matte_gray mb-[5px]'>{title}</Text>}
-      <View className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8px] p-[10px] ${disableEdit==true &&  'bg-color_lightGray' } ${msg? 'border-color_red_error': isValid && 'border-color_green_success'} `}>
+      <View className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8px] ${disableEdit==true &&  'bg-color_lightGray' } ${msg? 'border-color_red_error': isValid && 'border-color_green_success'} `}>
         <TextInput
           className={`flex-1 w-full ${multiline && 'h-[120px] align-top'}`}
           value={value}
