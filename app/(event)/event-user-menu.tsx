@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import React, { View , FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View , FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -9,7 +9,6 @@ import ShowAlert from "../../components/ShowAlert";
 import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
-import { ArrowLeft } from 'lucide-react-native'
 import ScrollUp from '../../components/ScrollUp'; 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -21,7 +20,7 @@ export default function EventDetail() {
   const [eventos, setEventos] = useState<Evento[] | null>()
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
   
-  const abortControllerRef = useRef<AbortController>()
+  const abortControllerRef = useRef<AbortController>(null)
   const currentPageRef = useRef<number>(1)
   const totalPagesRef = useRef<number>(1)
   const totalRegistrosRef = useRef<number>(1)
@@ -178,7 +177,7 @@ export default function EventDetail() {
           className='bg-primary_green'
            onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555" />
+        <Ionicons name="arrow-back" size={24} color="#555" />
       </TouchableOpacity>
       
       {isContentLoading && <LoadingActivity/>}

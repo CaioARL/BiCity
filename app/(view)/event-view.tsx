@@ -8,7 +8,6 @@ import ShowAlert from '../../components/ShowAlert'
 import LoadingActivity from '../../components/LoadingActivity'
 import CustomEvents from '../../css/CustomEvents';
 import { Ionicons } from "@expo/vector-icons";
-import { ArrowLeft } from 'lucide-react-native'
 import { useAuthProvider } from 'app/context/AuthProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -109,7 +108,7 @@ if(isContentLoading){
           className='bg-primary_green'
           onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555"/>
+        <Ionicons name='arrow-back' size={24} color="#555"/>
         </TouchableOpacity>
       <Text className="text-center text-red-500 mt-4">
         Algo deu errado ao carregar o evento. Tente novamente mais tarde.
@@ -125,7 +124,7 @@ if(isContentLoading){
           className='bg-primary_green'
           onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555"/>
+        <Ionicons name='arrow-back' size={24} color="#555"/>
         </TouchableOpacity>
 
       {errorMessage && (

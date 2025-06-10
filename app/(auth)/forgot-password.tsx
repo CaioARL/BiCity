@@ -6,12 +6,13 @@ import TokenInput from '../../components/CustomTokenInput'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { checkTokenRecuperacao, sendTokenRecuperacao } from '../../api/token'
 import { router } from 'expo-router'
-import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
 import { recoverPassword } from 'api/usuario'
 import { validationSchemas } from 'util/validationSchemas'
 import { DefaultErrorResponse } from 'types'
 import { AxiosError } from 'axios'
+import { Ionicons } from "@expo/vector-icons"
+
 
 
 export default function ResetPassword() {
@@ -174,7 +175,7 @@ export default function ResetPassword() {
         className='bg-primary_green'
         onPress={prevStep}
       >
-        <ArrowLeft size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
 
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>

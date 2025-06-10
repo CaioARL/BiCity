@@ -13,9 +13,10 @@ import { CreateUsuarioForms, CreateUsuarioRequest, DefaultErrorResponse, ErrorCr
 import { checkToken, sendToken } from '../../api/token'
 import { useAuthProvider } from '../context/AuthProvider'
 import { router } from 'expo-router'
-import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from '../../components/ShowAlert'
 import { AxiosError } from 'axios'
+import { Ionicons } from "@expo/vector-icons"
+
 import { getHabilidades } from 'storage/nivel-habilidade'
 
 export default function SignUp() {
@@ -349,7 +350,8 @@ export default function SignUp() {
         className='bg-primary_green'
         onPress={prevStep}
       >
-      <ArrowLeft size={24} color="#555" />
+        
+      <Ionicons name="arrow-back" size={24} color="#555" />
       </TouchableOpacity>
       
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }} style={{ width: '100%' }}>

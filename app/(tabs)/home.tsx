@@ -22,7 +22,7 @@ import EventCardCarousel from 'components/EventCardCarousel'
 import icons from 'constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AudioSpeaker } from 'util/audioSpeaker'
-import { createAudioPlayer } from 'expo-audio'
+import { AudioPlayer, useAudioPlayer } from 'expo-audio'
 import { sounds, prompts } from '../../constants'
 import { AxiosError } from 'axios'
 import ProblemaModalNavigation from 'components/ProblemaModalNavigation'
@@ -77,7 +77,7 @@ export default function Home() {
 
   const [hilightedEvento, setHilightedEvento] = useState<{evento :Evento, interno: boolean} | null>(null)
 
-  const abortControllerRef = useRef<AbortController>()
+  const abortControllerRef = useRef<AbortController>(null)
   const [initalLoading, setInitalLoading] = useState<boolean>(true)
   
   // const [isRequestInProgress, setIsRequestInProgress] = useState(false)
@@ -503,8 +503,20 @@ export default function Home() {
       const headingExtremesRef = useRef<[number, number]>([0, 0])
       const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
       const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
-      
+        
       const speechRef = useRef(new AudioSpeaker())  
+
+      const beepPlayer = useAudioPlayer(require('../../assets/sounds/beep.wav'))
+      const problemPlayer = useAudioPlayer(require('../../assets/sounds/problem_notify.wav'))
+      const playSound = async (player : AudioPlayer, duration: number ) => {
+          await new Promise<void>((resolve) => {
+              player.play()
+              setTimeout(() => {
+                  player.seekTo(0)
+                  resolve()
+              }, duration * 1000)
+          })
+      }
 
       const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
         abortControllerRef.current?.abort()
@@ -659,7 +671,7 @@ export default function Home() {
         nearProblems.forEach((problema) => {
           if (notifiedProblemsId.current.includes(problema.id)) return
           notifiedProblemsId.current.push(problema.id)
-          speechRef.current.playSound(sounds.problem_notification)
+          playSound(problemPlayer,2.5)//2.5
         })
       }, [nearProblems])
     
@@ -667,7 +679,7 @@ export default function Home() {
         if (!infraProblems || infraProblems.length <= 0) return
         console.log("Problemas de infraestrutura detectados:")
           infraProblems.forEach((problema) => {
-              speechRef.current.playSound().then(()=>{
+              playSound(beepPlayer, 1.5).then(()=>{ //1.5
                 speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
               })
               console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)
@@ -736,7 +748,7 @@ export default function Home() {
                   setIsMoved(isGestureRef.current)
                   isGestureRef.current = false
                   if (!isRegionWithinBounds(region)) {
-                    animateToUserLocation(mapRef, currentLocation)
+                    animateToUserLocation(mapRef.current , currentLocation)
                     setUserAlert({ type: 'error', message: 'Você saiu da área de São Paulo. Retornando à sua localização.'})
                   }
                 }

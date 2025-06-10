@@ -1,8 +1,8 @@
 import { Text, ScrollView, Image, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React from 'react'
-import { ArrowLeft } from 'lucide-react-native'
 import { router } from 'expo-router'
+import { Ionicons } from "@expo/vector-icons"
 import { StatusBar } from 'expo-status-bar'
 
 
@@ -15,7 +15,7 @@ export default function HelpModal() {
             className='bg-primary_green'
             onPress={() => router.back()}
           >
-          <ArrowLeft size={24} color="#555"/>
+          <Ionicons name="arrow-back" size={24} color="#555"/>
       </TouchableOpacity>
       <ScrollView className='w-full h-full container' contentContainerStyle={{paddingBottom:100, paddingTop:100, paddingHorizontal:'5%'}} >
               <Text className='text-3xl text-center font-robotobold'>Qualidade das vias</Text>

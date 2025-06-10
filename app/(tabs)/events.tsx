@@ -44,10 +44,10 @@ export default function Events() {
   const [eventos, setEventos] = useState<Evento[] | null>(null)
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
   const totalPagesRef = useRef<number>(2)
-  const totalRegistrosRef = useRef<number>()
+  const totalRegistrosRef = useRef<number>(0)
   const currentPageRef = useRef<number>(0)
   const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
-  const abortControllerRef = useRef<AbortController>()
+  const abortControllerRef = useRef<AbortController>(null)
   const [scrollY, setScrolly] = useState<number>(0)
   
 
@@ -69,8 +69,6 @@ export default function Events() {
       {id:2, name: 'Pago', isActive: false , campo: 'gratuito', value: false},
     ]
   )
-  
-
 
 
 
@@ -265,6 +263,7 @@ export default function Events() {
               placeholder="Digite o nome do evento"
               style={CustomEvents.input}
               value={searchText}
+              placeholderTextColor='rgba(0,0,0,0.4)'
               onChangeText={setSearchText}
               onEndEditing={() => searchName()}
             />
