@@ -284,16 +284,16 @@ export default function Home() {
           longitude: longitude,
           raio: 750
         })
-        setRequestProblemas({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 750
-        })
-        setRequestEventos({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 7000
-        })
+      setRequestProblemas({
+        latitude: latitude,
+        longitude: longitude,
+        raio: 750
+      })
+      setRequestEventos({
+        latitude: latitude,
+        longitude: longitude,
+        raio: 7000
+      })
     }
 
     const searchOnViewLocation = () => {
@@ -301,20 +301,20 @@ export default function Home() {
       if(!currentViewLocation){return}
       setIsContentLoading(true)
       setRequestInfraestrutura({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 750
-        })
-        setRequestProblemas({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 750
-        })
-        setRequestEventos({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 7000
-        })
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 750
+      })
+      setRequestProblemas({
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 750
+      })
+      setRequestEventos({
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 7000
+      })
     }
 
     // --------------------------------------- create avaliacao  ---------------------------------------
@@ -535,6 +535,7 @@ export default function Home() {
       } 
 
       useEffect(() => {
+        if (!navigation) return
         if (!userLocation) return
         // Check if the user has moved significantly
         if (lastRequestLocation.current) {
@@ -559,6 +560,7 @@ export default function Home() {
       },[userLocation])
 
       useEffect(() => {
+        if (!navigation) return
         if (!infraestrutura) return
         if (!userLocation) return
         const currentLocation = { latitude: userLocation.latitude, longitude: userLocation.longitude }
@@ -641,6 +643,7 @@ export default function Home() {
 
        useEffect(() => {
         // console.log("User location changed:", userLocation)
+        if (!navigation) return
         if (!userLocation) return
         let h
         if (!headingRef.current) {
