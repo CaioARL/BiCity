@@ -48,7 +48,7 @@ export default function Events() {
   const currentPageRef = useRef<number>(0)
   const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null })
   const abortControllerRef = useRef<AbortController>(null)
-  const [scrollY, setScrolly] = useState<number>(0)
+  const scrollY = useRef<number>(0)
   
 
 
@@ -71,20 +71,16 @@ export default function Events() {
   )
 
 
-
-  useEffect(()=>{
-    scrollY > 50 ? 
-      router.setParams({tabBarVisible: 'no'})
-    :
+  const toogleTabBar = (yScroll : number) => {
+    if(yScroll < 50 || yScroll < scrollY.current){
       router.setParams({tabBarVisible: 'yes'})
-    
-    scrollY > 100 ? 
-      setShowScrollUpButton(true)
-    :
       setShowScrollUpButton(false)
-  },[scrollY])
-
-
+    } else {
+      router.setParams({tabBarVisible: 'no'})
+      setShowScrollUpButton(true)
+    }
+      scrollY.current = yScroll
+  }
 
   
   const  { authState }  = useAuthProvider()
@@ -304,7 +300,7 @@ export default function Events() {
            {eventos && (
             <FlatList
               ref={flatListRef}
-              onScroll={e=>setScrolly(e.nativeEvent.contentOffset.y)}
+              onScroll={e=>{toogleTabBar(e.nativeEvent.contentOffset.y)}}
               contentContainerStyle={{ paddingBottom: '100%'}}
               onEndReached={loadMorePage}
               onEndReachedThreshold={0.1}
