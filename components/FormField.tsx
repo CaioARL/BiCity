@@ -45,6 +45,7 @@ export default function FormField({
           className="flex-1 text-base w-full"
           value={value}
           placeholder={placeholder}
+          placeholderTextColor='rgba(0,0,0,0.4)'
           autoCapitalize='none'
           onChangeText={handleChangeText}
           keyboardType={keyboardType}

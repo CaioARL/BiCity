@@ -1,6 +1,6 @@
 import { View, Text, Animated, Modal, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { AlertCircle, CheckCircle, XCircle } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons'
 
 
 
@@ -58,9 +58,9 @@ useEffect(() => {
 
   const getIcon = () => {
     switch (type) {
-      case 'success': return <CheckCircle size={24} color="white" />
-      case 'error': return <XCircle size={24} color="white" />
-      case 'loading': return <AlertCircle size={24} color="white" />
+      case 'success': return <Ionicons name="checkmark-circle" size={24} color="white" />
+      case 'error': return <Ionicons name="close-circle" size={24} color="white" />
+      case 'loading': return <Ionicons name="reload" size={24} color="white" />
       default: return null
     }
   }

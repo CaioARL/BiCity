@@ -38,6 +38,7 @@ export default function FormFieldModal({ title, value, placeholder, handleChange
           onFocus={onFocus}
           placeholder={placeholder}
           onChangeText={handleChangeText}
+          placeholderTextColor='rgba(0,0,0,0.4)'
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry && !showPassword}
           editable={!disableEdit}
