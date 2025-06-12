@@ -41,6 +41,7 @@ todo-list.md
 
 # local images
 production-images/
+voice-prompts.ts
 
 #build 
 eas.json

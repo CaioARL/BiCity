@@ -379,7 +379,7 @@ export default function Profile(){
               style={{ ...CustomProfile.iconButton, backgroundColor: '#C3FF00' }}
               onPress={toggleEdit}
             >
-               <Ionicons name={`chevron-${isEditing ? 'up': 'down'}`} size={24} color="white" />
+               <Ionicons name={`chevron-${isEditing ? 'up': 'down'}`} size={24} color="#555" />
             </TouchableOpacity>
           </View>
 

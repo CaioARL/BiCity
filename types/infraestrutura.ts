@@ -1,7 +1,14 @@
-import { FeatureCollection, Geometry } from "geojson"
+import { Feature, FeatureCollection, Geometry } from "geojson"
 import { Problema } from "./problema"
 
 export interface InfraestruturaGeoJson extends FeatureCollection<Geometry, {
+    name: string
+    id: string
+    type: string
+    stroke: string
+}> {}
+
+export interface InfraestruturaGeoJsonFeature extends Feature<Geometry, {
     name: string
     id: string
     type: string

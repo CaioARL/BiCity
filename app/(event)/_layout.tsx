@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 
 export default function EventLayout() {
@@ -9,6 +10,7 @@ export default function EventLayout() {
                 headerShown: false,
               }}
             />
+            <StatusBar style='dark' backgroundColor='#C3FF00' />
     </Stack>
   )
 }

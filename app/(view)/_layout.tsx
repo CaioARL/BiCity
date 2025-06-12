@@ -12,7 +12,7 @@ export default function ViewLayout() {
                 }}
                 />
       </Stack>
-      <StatusBar hidden />
+      <StatusBar style='dark' backgroundColor='#C3FF00' />
     </>
   )
 }

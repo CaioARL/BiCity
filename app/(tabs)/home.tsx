@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, Image} from 'react-native'
+import { View, Text, TouchableOpacity, Image, BackHandler} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Evento, InfraestruturaGeoJson, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
+import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
@@ -12,7 +12,7 @@ import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
-import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate} from '../../util'
+import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate, calculateBearing, isPointNearPoint} from '../../util'
 import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
@@ -21,6 +21,11 @@ import { Ionicons } from '@expo/vector-icons';
 import EventCardCarousel from 'components/EventCardCarousel'
 import icons from 'constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { AudioSpeaker } from 'util/audioSpeaker'
+import { createAudioPlayer } from 'expo-audio'
+import { sounds, prompts } from '../../constants'
+import { AxiosError } from 'axios'
+import ProblemaModalNavigation from 'components/ProblemaModalNavigation'
 
 interface Region {
   latitude: number
@@ -82,10 +87,11 @@ export default function Home() {
   const [requestEventos, setRequestEventos] = useState<RequestEventoByRadius>()
   const [eventos, setEventos] = useState<Evento[]>([])
 
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [userAlert, setUserAlert] = useState<{type: 'error'|'loading'|'success', message: string} | null>(null)
 
   const { eventoId } = useLocalSearchParams<{eventoId: string}>()
+
+  const [navigation, setNavigation] = useState<boolean>(false)
   
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const locationErrors = {
@@ -113,7 +119,7 @@ export default function Home() {
         }
       })
       .catch((error)=> {
-        setErrorMessage("Error ao checar serviço de localização: "+ error)
+        setUserAlert({ type: 'error', message: "Error ao checar serviço de localização: "+ error})
       })
 
       let {status} = await Location.requestForegroundPermissionsAsync()
@@ -145,13 +151,10 @@ export default function Home() {
     })
     .catch((error) => {
       setCurrentLocationError(locationErrors.ERROR)
-      setErrorMessage("Error ao obter localização: "+ error)
+      setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
     }).finally(() => {
       setInitalLoading(false)
     })
-
-
-
   }
 
   useEffect(()=>{
@@ -164,22 +167,29 @@ export default function Home() {
 
   }, [])
 
-  const handleMyLocationPress = () => {
-    if(!mapRef.current) return
-    if(!currentLocation) return
-    mapRef.current.animateToRegion({
-      latitude: currentLocation.coords.latitude,
-      longitude: currentLocation.coords.longitude,
-      latitudeDelta:0.0043, longitudeDelta:0.0034
-    })
-  }
-
   useEffect(() => {
     menuVisible ? 
       router.setParams({tabBarVisible: 'yes'})
     :
       router.setParams({tabBarVisible: 'no'})
   }, [menuVisible])
+
+  //  useEffect(() => {
+  //     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+  //       if (navigation) {
+  //         setNavigation(false)
+  //         return true // Prevent default back action
+  //       }
+  //       if (menuVisible) {
+  //         setMenuVisible(false)
+  //         return true // Prevent default back action
+  //       }
+  //       return false // Allow default back action
+  //     })
+  //       return () => backHandler.remove()
+  //   }, [])
+
+  // --------------------------------------- get infraestrutura, problemas and eventos ---------------------------------------
 
   useEffect( () => {
     if (!requestEventos) {return}
@@ -188,8 +198,8 @@ export default function Home() {
     .then((response) =>{
       setEventos(response)
     })
-    .catch((response)=>{  
-      setErrorMessage("Error ao carregar eventos: "+ response.message)
+    .catch((error: AxiosError<DefaultErrorResponse>)=>{  
+      setUserAlert({type:'error', message: "Error ao carregar eventos: " + error.response?.data.message || error.message})
     })
     .finally(()=>{
       console.log("Teriminou a requisição de eventos")
@@ -205,8 +215,8 @@ export default function Home() {
       .then((response) => {
         setProblemas(response)
       })
-      .catch((response)=>{
-        setErrorMessage("Error ao carregar problemas: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({ type: 'error', message: "Error ao carregar problemas: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         console.log("Teriminou a requisição de problemas")
@@ -221,8 +231,8 @@ export default function Home() {
       .then((response) => {
         setInfraestrutura(mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response))
       })
-      .catch((response)=>{
-        setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+      .catch((error : AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({type:'error', message: "Error ao carregar infraestrutura: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         console.log("Teriminou a requisição de infraestrutura")
@@ -230,9 +240,12 @@ export default function Home() {
       })
     }, [requestInfraestrutura])
 
+  // --------------------------------------- get evento by id ---------------------------------------
+  // Caso o usuário tenha clicado em um evento, vai buscar o evento pelo id e centralizar o mapa nele
 
     useEffect(()=>{
       if(!eventoId) return
+      if(navigation) return setUserAlert({ type: 'error', message: "Não é possível buscar evento quando está em modo de navegação"})
       var attempts = 0
       setIsContentLoading(true)
       const interval = setInterval(async () => {
@@ -246,8 +259,8 @@ export default function Home() {
                 latitudeDelta:0.0043, longitudeDelta:0.0034})
               getEventsOnViewLocation(response.endereco)
             })
-            .catch((error)=>{
-              setErrorMessage('Erro ao carregar Evento' + error.message)
+            .catch((error : AxiosError<DefaultErrorResponse>)=>{
+              setUserAlert({ type: 'error', message: "Erro ao carregar Evento" + error.response?.data.message || error.message})
             })
             .finally(()=>{
               setIsContentLoading(false)
@@ -255,12 +268,14 @@ export default function Home() {
             clearInterval(interval)
           } else if (attempts >= 15){
             setIsContentLoading(false)
-            setErrorMessage("Falha ao encontrar evento, verifique sua localização")
+            setUserAlert({ type: 'error', message: "Falha ao encontrar evento, verifique sua localização"})
             clearInterval(interval)
           }
           attempts++
         }, 3000)
     },[eventoId])
+
+    // --------------------------------------- get things around the map ---------------------------------------
 
     const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
       abortControllerRef.current?.abort()
@@ -302,6 +317,8 @@ export default function Home() {
         })
     }
 
+    // --------------------------------------- create avaliacao  ---------------------------------------
+
     useEffect(()=>{
       if(!requestCreateAvaliacao){return}
       abortControllerRef.current?.abort()
@@ -309,7 +326,7 @@ export default function Home() {
       setIsContentLoading(true)
       createAvaliacao(requestCreateAvaliacao, abortControllerRef.current)
       .then(() => {
-        setSuccessMessage("Avaliação criada com sucesso")
+        setUserAlert({type:'success', message: "Avaliação criada com sucesso"})
         getInfraestruturaById(idInfraAvaliacao!, null)
         .then((response) => {
             setInfraestrutura(prev => {
@@ -323,14 +340,14 @@ export default function Home() {
               }
             })
         })
-        .catch((response)=>{
-          setErrorMessage("Error ao carregar infraestrutura: " + response.message)
+        .catch((error: AxiosError<DefaultErrorResponse>)=>{
+          setUserAlert({ type: 'error', message: "Error ao carregar infraestrutura: "+ error.response?.data || error.message})
         })
     
 
       })
-      .catch((response) => {
-        setErrorMessage("Error ao criar avaliação: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao criar avaliação: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestCreateAvaliacao(null)
@@ -338,6 +355,8 @@ export default function Home() {
       })
 
     },[requestCreateAvaliacao])
+
+    // --------------------------------------- create problema ---------------------------------------
 
     useEffect(()=>{
       if(!requestCreateProblema){return}
@@ -347,7 +366,7 @@ export default function Home() {
       createProblema(requestCreateProblema, abortControllerRef.current)
       .then((response) => {
         setProblemas((prev) => [...prev, response])
-        setSuccessMessage("Problema criado com sucesso")
+        setUserAlert({type:'success', message: "Problema criado com sucesso"})
         if(problemaImage){
           const formData = new FormData()
           formData.append('file', {
@@ -361,8 +380,8 @@ export default function Home() {
           })
         }
       })
-      .catch((response) => {
-        setErrorMessage("Error ao criar problema: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao criar problema: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestCreateProblema(null)
@@ -378,22 +397,35 @@ export default function Home() {
       setIsContentLoading(true)
       createProblemaImage(requestProblemaImage, abortControllerRef.current)
       .then((response) => {
-        setSuccessMessage("Imagem enviada com sucesso" + response)
+        setUserAlert({type:'success', message: "Imagem enviada com sucesso" + response})
       })
-      .catch((response) => {
-        setErrorMessage("Error ao enviar imagem: " + response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>) => {
+        setUserAlert({ type: 'error', message: "Error ao enviar imagem: " + error.response?.data.message || error.message})
       }).finally(() => {
         setIsContentLoading(false)
         setRequestProblemaImage(null)
       })
     }, [requestProblemaImage])
 
+    // --------------------------------------- map interactions ---------------------------------------
+
+    const handleMyLocationPress = () => {
+      if(navigation) return
+      if(!mapRef.current) return
+      if(!currentLocation) return
+      mapRef.current.animateToRegion({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+        latitudeDelta:0.0043, longitudeDelta:0.0034
+      })
+    }
+
     useEffect(() => {
+      if(navigation) return
       if(!hilightedEvento) return
       if(hilightedEvento.interno) return
       if(!hilightedEvento.evento.endereco) return
       const region : Region = { ...hilightedEvento.evento.endereco ,latitudeDelta:0.0043, longitudeDelta:0.0034 } 
-      isGestureRef.current=true
       mapRef.current?.animateToRegion(region)
     }, [hilightedEvento])
 
@@ -443,21 +475,206 @@ export default function Home() {
       .then((reponse) => {
         if(!reponse){
           console.log('REPONSE DO CHECK: ', reponse) 
-          setErrorMessage("Não é possível criar um problema nesse local")
+          setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local"})
           setShowOpsModal(true)
           return
         }
         setProblemaCoords({latitude, longitude})
         setShowOpsModal(true)
       })
-      .catch((response)=>{
-        setErrorMessage("Não é possível criar um problema nesse local: "+ response.message)
+      .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
         setIsContentLoading(false)
       })
 
     }
+
+    // --------------------------------------- map city navigation ---------------------------------------
+    
+      const headingRef = useRef<number | null>(null)
+      const [nearProblems, setNearProblems] = useState<Problema[]>([])
+      const [infraProblems, setInfraProblems] = useState<Problema[]>([])
+      const notifiedProblemsId = useRef<number[]>([])
+      const lastRequestLocation = useRef<{ latitude: number, longitude: number } | null>(null)
+      const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
+      const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
+      const headingExtremesRef = useRef<[number, number]>([0, 0])
+      const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
+      const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
+      
+      const speechRef = useRef(new AudioSpeaker())  
+
+      const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
+        abortControllerRef.current?.abort()
+        abortControllerRef.current = new AbortController
+        checkCreateViabilityProblema(userLocation.latitude, userLocation.longitude, null)
+        .then((reponse) => {
+            if(!reponse){
+              setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local. Procure uma ciclovia próxima"})
+              return
+            }
+            setProblemaModalNavigationCoords({latitude, longitude})
+          })
+          .catch((error: AxiosError<DefaultErrorResponse>)=>{
+            setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
+          })
+      } 
+
+      useEffect(() => {
+        if (!userLocation) return
+        // Check if the user has moved significantly
+        if (lastRequestLocation.current) {
+          // Skip request if moved less than 750 meters
+          if (isPointNearPoint(userLocation, lastRequestLocation.current, 750)) return
+        }
+    
+        // Update last request location
+        lastRequestLocation.current = userLocation
+
+        // Fetch streets around the new location
+        setRequestInfraestrutura({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          raio: 750,
+        })
+        setRequestProblemas({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          raio: 750,
+        })
+      },[userLocation])
+
+      useEffect(() => {
+        if (!infraestrutura) return
+        if (!userLocation) return
+        const currentLocation = { latitude: userLocation.latitude, longitude: userLocation.longitude }
+        // Check if the user has moved significantly
+        if (lastUserLocation.current) {
+          // Skip if moved less than 10 meters
+          if (isPointNearPoint(currentLocation, lastUserLocation.current, 10)) return
+        }
+        
+        lastUserLocation.current = currentLocation
+        
+        const matchedFeature = infraestrutura.features.find((feature) => {
+          const geometry = feature.geometry
+          if (geometry.type === 'LineString') {
+            return isPointNearLine(currentLocation, geometry.coordinates as [number, number][])  
+          }
+          return false
+        })
+    
+        // Avoid redundant updates
+        if (matchedFeature && matchedFeature !== lastInfra.current) {
+          console.log('User is now on street:', matchedFeature.properties.name)
+          lastInfra.current = matchedFeature
+          getHeading(matchedFeature)
+          const geometry = matchedFeature.geometry
+          if (geometry.type === 'LineString') {
+            setInfraProblems(
+              problemas.filter((problema) => {
+                return isPointNearLine(problema, geometry.coordinates as [number, number][])
+              })
+            )
+          }
+        }
+        if(!matchedFeature) {
+          headingRef.current = null
+          return
+        }
+        
+        setNearProblems(
+          problemas.filter((problema) => {
+            if(matchedFeature)
+            return isPointNearPoint(currentLocation, problema, 20)
+          })
+        )
+      },[userLocation] )
+
+      const extremesOfOneDirection = (direction: number): [number, number] => {
+        let left = direction - 90
+        let right = direction + 90
+        if (left < 0) left = 360 + left
+        if (right > 360) right = right - 360
+        return [left, right]
+      }
+      
+      const getHeading = (feature: InfraestruturaGeoJsonFeature) => {
+        if (!feature) return
+        const geometry = feature.geometry
+        let coords: number[][] = []
+    
+        if (geometry.type === 'LineString') {
+          coords = geometry.coordinates as number[][]
+        } else if (geometry.type === 'MultiLineString') {
+          coords = (geometry.coordinates as number[][][])[0] || []
+        } else {
+          // GeometryCollection or other types are not handled
+          return
+        }
+    
+        if (coords.length > 1) {
+          const [start, next] = coords
+          const bearing = calculateBearing(
+            start[1],
+            start[0],
+            next[1],
+            next[0],
+          )
+          headingRef.current = bearing
+        }
+      }
+
+       useEffect(() => {
+        // console.log("User location changed:", userLocation)
+        if (!userLocation) return
+        let h
+        if (!headingRef.current) {
+          h = userLocation.heading
+        } else {
+          const [left, right] = headingExtremesRef.current
+          h = (userLocation.heading >= left && userLocation.heading <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+        }
+        if (!mapRef.current) return
+        mapRef.current.animateCamera({
+          center: {
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+          },
+          pitch: 50, // Lays the map down
+          heading: h,
+          zoom: 18,
+        })
+      },[userLocation])
+
+      useEffect(() => {
+        if (!headingRef.current) return
+        headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
+      }, [headingRef.current])
+    
+      useEffect(() => {
+        if (nearProblems.length <= 0) return
+        nearProblems.forEach((problema) => {
+          if (notifiedProblemsId.current.includes(problema.id)) return
+          notifiedProblemsId.current.push(problema.id)
+          speechRef.current.playSound(sounds.problem_notification)
+        })
+      }, [nearProblems])
+    
+      useEffect(() => {
+        if (!infraProblems || infraProblems.length <= 0) return
+        console.log("Problemas de infraestrutura detectados:")
+          infraProblems.forEach((problema) => {
+              speechRef.current.playSound().then(()=>{
+                speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
+              })
+              console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)
+          })
+      }, [infraProblems])
+
+    // --------------------------------------- component ---------------------------------------
 
     if(initalLoading)
       return (
@@ -494,21 +711,33 @@ export default function Home() {
           <MapView style={{width: '100%', height:'100%'}} 
               ref={mapRef}
               onRegionChange={setCurrentViewLocation}
-              mapPadding={{top: 0, right: 0, bottom: 0, left: 0}}
+              mapPadding={{top: 60, right: 0, bottom: 0, left: 0}}
               initialRegion={initialRegion}
-              showsUserLocation={true}
               showsMyLocationButton={false} 
-              zoomEnabled={true}
+              showsUserLocation={true}
+              onUserLocationChange={(e) => {
+                if (navigation && e.nativeEvent.coordinate) {
+                  const { latitude, longitude , heading} = e.nativeEvent.coordinate
+                  if (latitude && longitude) {
+                    setUserLocation( { latitude, longitude, heading: heading || 0 })
+                  }
+                }
+              }}
+              zoomEnabled={!navigation}
+              scrollEnabled={!navigation}
+              rotateEnabled={true}
+              pitchEnabled={false}
               googleMapId={process.env.EXPO_PUBLIC_MAP_STYLE_ID}
-              onPress={e=> clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
-              onLongPress={e=> { pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
+              onPress={e=> !navigation && clicado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
+              onLongPress={e=> { !navigation && pressionado(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude) }}
               onRegionChangeComplete={(region) => {
+                  if(navigation) return
                   menuVisible && setMenuVisible(false)
-                  setIsMoved(isGestureRef.current);
-                  isGestureRef.current = false;
+                  setIsMoved(isGestureRef.current)
+                  isGestureRef.current = false
                   if (!isRegionWithinBounds(region)) {
-                    animateToUserLocation(mapRef, currentLocation);
-                    setErrorMessage('Você saiu da área de São Paulo. Retornando à sua localização.');
+                    animateToUserLocation(mapRef, currentLocation)
+                    setUserAlert({ type: 'error', message: 'Você saiu da área de São Paulo. Retornando à sua localização.'})
                   }
                 }
               }
@@ -589,66 +818,38 @@ export default function Home() {
                   ))}
 
             
-              
+                
           
 
-            <Geojson
-              geojson={infraestrutura || emptyGeoJson}
-              strokeWidth={10}
-            />
+              <Geojson
+                geojson={infraestrutura || emptyGeoJson}
+                strokeWidth={10}
+              />
               
-
+              {navigation && 
+                <Marker
+                  // icon={icons.mapa_bike_pino}
+                  tracksViewChanges={false}
+                  coordinate={userLocation}
+                  focusable={false}
+                  titleVisibility='hidden'
+                  image={icons.mapa_bike_pino}
+                />
+              }
     
             </MapView>
-            
-            {eventos && (
-              <EventCardCarousel
-                data={eventos}
-                hilightedEvento={hilightedEvento? hilightedEvento.evento : null}
-                handleChangeEvento={setHilightedEvento}
-              />
-            )}
 
-            {pinProblemaSelector &&
-              <ProblemaView
-                problema={pinProblemaSelector}
-                onClose={() => setPinProblemaSelector(null)}
-              />}
-
-                  
-              <View className='absolute top-[4%] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
-                <View className='w-[34px] h-[34px]'/>
-                {isMoved ? 
-                <ButtonModal
-                  title='Buscar nesta localização'
-                  handlePress={searchOnViewLocation}
-                  textStyles='text-[#000] text-center'
-                  customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
+            {!navigation && 
+              <>
+              {eventos && (
+                <EventCardCarousel
+                  data={eventos}
+                  hilightedEvento={hilightedEvento? hilightedEvento.evento : null}
+                  handleChangeEvento={setHilightedEvento}
                 />
-                :
-                <View className='w-[200px] min-h-[50px]'/>  
-                }
-
-                <TouchableOpacity
-                  className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
-                  onPress={handleMyLocationPress}
-                >
-                <Ionicons name="locate" size={24} color="black" />
-              </TouchableOpacity>
-              </View>
+              )}
               {isContentLoading && <LoadingActivity/>}
-              {successMessage && 
-              <ShowAlert
-                message={successMessage}
-                type='success'
-                onClose={()=>setSuccessMessage(null)}
-              />}
-              {errorMessage && 
-              <ShowAlert
-                message={errorMessage}
-                type='error'
-                onClose={()=>setErrorMessage(null)}
-              />}
+
               {showProblemaModal && problemaCoords &&
               <ProblemaModal
                 coords={problemaCoords}
@@ -692,13 +893,83 @@ export default function Home() {
                 />
               }
 
+                <TouchableOpacity
+                  className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
+                  onPress={()=>setMenuVisible(!menuVisible)}
+                >
+                  <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
-                onPress={()=>setMenuVisible(!menuVisible)}
-              >
-                <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
-              </TouchableOpacity>
+              
+              </>
+            }
+
+
+              {pinProblemaSelector &&
+                <ProblemaView
+                  problema={pinProblemaSelector}
+                  onClose={() => setPinProblemaSelector(null)}
+                />}
+
+                  
+              <View className='absolute top-[40px] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
+                  <TouchableOpacity
+                    className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                    onPress={()=>{
+                      !navigation && setMenuVisible(false) 
+                      setNavigation(!navigation)
+                    }}
+                  >
+                    <Ionicons name={`${navigation ? 'arrow-back' : 'navigate' }`} size={24} color="black" />
+                  </TouchableOpacity>
+                {isMoved && !navigation ? 
+                <ButtonModal
+                  title='Buscar nesta localização'
+                  handlePress={searchOnViewLocation}
+                  textStyles='text-[#000] text-center'
+                  customStyles='min-w-[200px] min-h-[50px] px-4 py-2'
+                />
+                :
+                <View className='w-[200px] min-h-[50px]'/>  
+                }
+
+                {!navigation ?
+                  <TouchableOpacity
+                    className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
+                    onPress={handleMyLocationPress}
+                    >
+                    <Ionicons name="locate" size={24} color="black" />
+                  </TouchableOpacity>
+                  :
+                  <View className='w-[34px] h-[34px]'/> 
+                }
+              </View>
+              
+              {userAlert && 
+              <ShowAlert
+                message={userAlert.message}
+                type={userAlert.type}
+                onClose={()=>setUserAlert(null)}
+              />}
+
+              {problemaModalNavigationCoords &&
+              <ProblemaModalNavigation
+                onClose={(createProblema) => {
+                  setProblemaModalNavigationCoords(null)
+                  setRequestCreateProblema(createProblema)
+                }}
+                coords={problemaModalNavigationCoords}
+              />}
+
+              {navigation &&
+                <TouchableOpacity
+                    className='absolute bottom-[10%] right-[3%] flex-row bg-primary_green p-[10px] rounded-[37px] justify-center items-center'
+                    onPress={() => checkNavigationViabilityProblema(userLocation.latitude, userLocation.longitude)}
+                    >
+                    <Ionicons name="warning-outline" size={37} color="black" />
+                    <Text className='font-roboto font-bold'>Reportar</Text>
+                </TouchableOpacity>
+              }
 
               <TouchableOpacity
                 className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
@@ -706,6 +977,8 @@ export default function Home() {
               >
                 <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
               </TouchableOpacity>
+              
+
       </SafeAreaView>
     )
   }

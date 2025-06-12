@@ -44,7 +44,7 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         <Text className="text-[18px] text-matte_gray mb-3 mt-3 text-center font-bold capitalize">
           {item.title}
         </Text>
-        <Text className="text-[12px] text-matte_gray px-10 text-center">
+        <Text className="text-[16px] text-matte_gray px-10 text-center">
           {item.description}
         </Text>
       </View>
