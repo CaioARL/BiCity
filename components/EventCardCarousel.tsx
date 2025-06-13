@@ -134,7 +134,7 @@ export default function EventCardCarousel({
                   <View className='flex-row justify-around w-full'>
 
                     <View>
-                      <Text className='text-center text-color__text__light font-[12px]'>{item.data.split(' ')[1]}</Text>
+                      <Text className='text-center text-color__text__light font-[12px]'>{item.data.split(' ')[1].slice(0, 5)}</Text>
                       <Text className='text-center text-color__text__light font-bold'>{item.data.split(' ')[0]}</Text>
                     </View>
 

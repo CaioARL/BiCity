@@ -203,7 +203,7 @@ if(isContentLoading){
                   <View className='flex-row justify-around mt-4 w-full'>
                     
                     <View>
-                      <Text className='text-center text-matte_gray font-[12px]'>{evento.data.split(' ')[1]}</Text>
+                      <Text className='text-center text-matte_gray font-[12px]'>{evento.data.split(' ')[1].slice(0, 5)}</Text>
                       <Text className='text-center text-matte_gray font-bold'>{evento.data.split(' ')[0]}</Text>
                     </View>
 
@@ -221,7 +221,7 @@ if(isContentLoading){
               
                   {evento.urlSite && (
                   <View className="flex-row items-center justify-center mt-3">
-                    <Text className="text-color__text__link text-[12px]">
+                    <Text className="text-color__text__link text-[14px]">
                       Site:{' '}
                       <Text onPress={() => Linking.openURL(evento.urlSite)}>
                         {evento.urlSite}
