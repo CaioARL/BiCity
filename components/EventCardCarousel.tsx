@@ -110,7 +110,8 @@ export default function EventCardCarousel({
                 <View className="pt-6 pb-[22px] px-6 flex-col justify-around items-center">
 
                   <View className='w-full mt-1 mb-[8px] h-[70px]'>
-                    <Text className="text-[18px] text-color__text__light font-bold text-center mb-4 capitalize">{item.nome}</Text>
+                    <Text className="text-[18px] text-color__text__light font-bold text-center mb-4 capitalize" numberOfLines={1}
+                      ellipsizeMode="tail">{item.nome}</Text>
                     <Text className="text-color__text__light text-[12px]" numberOfLines={2}
                       ellipsizeMode="tail">{item.descricao}</Text>
                   </View>
