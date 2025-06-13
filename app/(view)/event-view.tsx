@@ -10,6 +10,7 @@ import CustomEvents from '../../css/CustomEvents';
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthProvider } from 'app/context/AuthProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import icons from 'constants/icons'
 
 export default function EventV() {
 
@@ -219,9 +220,29 @@ if(isContentLoading){
                   </View>
                  
               
+
+                 <View className="flex-row items-center justify-between mt-3 px-4">
+                    <View className="w-[90px] flex-row items-center">
+                      <Image
+                        source={evento.gratuito ? icons.mapa_pino_evento_gratuito : icons.mapa_pino_evento_pago}
+                        style={{ width: 55, height: 55, marginRight: 8 }}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <View className="w-[100] flex-col items-center justify-end">
+                      <View className="flex-row items-center justify-center">
+                        <Ionicons name="cash-outline" size={20} color="#555" style={{ marginRight: 8 }} />
+                        <Text className="text-color_light_gray_2 text-[12px]">
+                          R$: 10
+                        </Text>
+                      </View>
+                      <Text className="text-color_light_gray_2 text-[12px] mt-1">{evento.gratuito ? 'Gratuito' : 'Pago'}</Text>
+                    </View>
+                  </View>
+
                   {evento.urlSite && (
                   <View className="flex-row items-center justify-center mt-3">
-                    <Text className="text-color__text__link text-[14px]">
+                    <Text className="text-color__text__link text-[14.5px]">
                       Site:{' '}
                       <Text onPress={() => Linking.openURL(evento.urlSite)}>
                         {evento.urlSite}
@@ -243,6 +264,7 @@ if(isContentLoading){
                 </Text> 
               )}
             </View>
+            
           </ScrollView>
         </Animated.View>
       </View>

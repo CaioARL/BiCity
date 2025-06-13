@@ -70,18 +70,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-video",
     "expo-audio"
   ],
-  extra: {
-    router: {
-      origin: false
-    },
-    eas: {
-      projectId: "7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
-    }
-  },
-  runtimeVersion: {
-    policy: "appVersion"
-  },
-  updates: {
-    url: "https://u.expo.dev/7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
-  }
+  // extra: {
+  //   router: {
+  //     origin: false
+  //   },
+  //   eas: {
+  //     projectId: "7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
+  //   }
+  // },
+  // runtimeVersion: {
+  //   policy: "appVersion"
+  // },
+  // updates: {
+  //   url: "https://u.expo.dev/7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
+  // }
 });
