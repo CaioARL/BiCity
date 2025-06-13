@@ -909,10 +909,10 @@ export default function Home() {
               }
 
                 <TouchableOpacity
-                  className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
+                  className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-primary_green max-w-fit rounded-r-[30px] items-start p-2 opacity-[0.7] justify-center ${menuVisible? 'hidden': ''}`}
                   onPress={()=>setMenuVisible(!menuVisible)}
                 >
-                  <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
+                  <Ionicons name="return-up-back-outline" size={30} color="#555"/>
                 </TouchableOpacity>
 
               
@@ -987,10 +987,11 @@ export default function Home() {
               }
 
               <TouchableOpacity
-                className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
+                className={`absolute z-0 bottom-[35px] right-[1px] transparent max-h-fit max-w-fit  items-center justify-center bg-primary_green p-[3px] rounded-[30px] opacity-[0.7]`}
                 onPress={()=>{router.push('/help-modal')}}
               >
-                <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
+                <Ionicons name="help-outline" size={30} color="#555"/>
+                
               </TouchableOpacity>
               
 
