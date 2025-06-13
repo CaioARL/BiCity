@@ -27,13 +27,15 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         {item.media.type === 'image' ? (
           <Image
             source={item.media.source}
-            style={{ width: 230,  height:'80%'}}
-            resizeMode="cover"
+            style={{ width: 630,  height:'85%', }}
+            resizeMode="contain"
           />
         ) : (
           <VideoView
             player={player}
-            style={{ width: 500, height: '90%', flex: item.id === '5' || item.id === '4' ? 0.8 : 0.8 }}
+            style={{ width: 500, height: '90%', flex: item.id === '5' || item.id === '4' ? 0.79 : 0.79,
+              marginBottom: item.id === '3' || item.id === '5' || item.id === '6' || item.id === '4' ? 5 : 0
+             }}
             allowsFullscreen={false}
             nativeControls={false}
           />
@@ -44,7 +46,7 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         <Text className="text-[18px] text-matte_gray mb-3 mt-3 text-center font-bold capitalize">
           {item.title}
         </Text>
-        <Text className="text-[16px] text-matte_gray px-10 text-center">
+        <Text className={`text-${item.id === '7' ? '[12px]' : '[14.5px]'} text-matte_gray px-10 text-center`}>
           {item.description}
         </Text>
       </View>

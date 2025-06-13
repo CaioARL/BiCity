@@ -61,7 +61,7 @@ export const slides: Slide[] = [
       source: require('../assets/slide/como-usar-evento.mp4'),
     },
     title: 'Como usar?',
-    description: 'Tela de Eventos:\n Você visualiza todos os eventos disponíveis.\n Clicar em um evento para ver todas as informações. \n Precisa saber a localização? toque em qualquer ícone de localização para ser redirecionado automaticamente ao mapa.',
+    description: 'Tela de Eventos:\n Você visualiza todos os eventos disponíveis. Clicar em um evento para ver todas as informações. Precisa saber a localização? toque em qualquer ícone de localização para ser redirecionado automaticamente ao mapa.',
   },
   {
     id: '6',
@@ -70,7 +70,7 @@ export const slides: Slide[] = [
       source: require('../assets/slide/como-usar-pins2.mp4'),
     },
     title: 'Estamos com Novos Ícones',
-    description: 'Ícones de Evento: representam os Eventos, com as cores Verde(Gratuitos) e Bronze(Pagos).\n\n  Ícone de Problemas: representam as Ocorrências ou Obstáculos, com cores diversas.\n',
+    description: 'Ícones de Evento: representam os Eventos, com as cores Verde(Gratuitos) e Laranja(Pagos).\n\n  Ícone de Problemas: representam as Ocorrências ou Obstáculos, com cores diversas.\n',
   },
   {
     id: '7',
