@@ -43,7 +43,7 @@ export default function OnBoardingItem({ item }: OnBoardingItemProps) {
         
       </View>
       <View className="flex-[0.4] px-4">
-        <Text className="text-[18px] text-matte_gray mb-3 mt-3 text-center font-bold capitalize">
+        <Text className="text-lg text-matte_gray mb-3 mt-3 text-center font-bold capitalize">
           {item.title}
         </Text>
         <Text className={`text-${item.id === '7' ? '[12px]' : '[14.5px]'} text-matte_gray px-10 text-center`}>

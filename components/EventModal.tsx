@@ -41,15 +41,25 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
   const [isCepLoading, setIsCepLoading] = useState<boolean>()
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, valor: evento?.valor || 0 , urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
-  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: {data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
+  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: {data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '',valor: '', urlSite: '' , tipoEvento: ''})
 
   const [showImagePopup, setShowImagePopup] = useState(false)
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
 
   const [showTimePicker, setShowTimePicker] = useState<boolean>()
+
+  /**
+   * NUMBER FIELDS
+   */
+  const [valor, setValor] = useState<string>('')
+  const [faixaKm, setFaixaKm] = useState<string>('')
+
+  useEffect(()=>{
+    requestCreateEvento.gratuito && setValor('')
+  },[requestCreateEvento.gratuito])
   // useEffect(() => {
   //   if (visible) {
   //     Animated.timing(fadeAnim, {
@@ -130,7 +140,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
 
   const validateEventAndClose = () => {
-    setNovoEventoError({ nome: '', descricao: '', data: { data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
+    setNovoEventoError({ nome: '', descricao: '', data: { data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', valor: '', urlSite: '', tipoEvento: ''})
     const result = createEventSchema.safeParse(requestCreateEvento)
     if(!result.success){
       result.error.issues.forEach((issue) => {
@@ -244,6 +254,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
   }, [mapRegion])
 
   const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
+    // console.log(requestCreateEvento.valor)
     setRequestCreateEvento(prev => ({
       ...prev,
       [campo]: valor
@@ -352,7 +363,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.cep}
                 otherStyles='mt-[2px]'
                 handleChangeText={text => updateCampoNovoEventoEndereco('cep', text )}
-                validantionCheck={ e=> {
+                endEditing={ e=> {
                   if (requestCreateEvento.endereco.cep.length === 8) {
                     checkCep(requestCreateEvento.endereco.cep);
                     updateCampoNovoEventoEndereco('cep', e.nativeEvent.text)
@@ -452,9 +463,11 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
               <FormFieldModal
                 title="Tamanho do Percurso"
                 placeholder="Tamanho do percurso (km)"
-                value={requestCreateEvento.faixaKm === 0? '' : requestCreateEvento.faixaKm.toString()}
-                handleChangeText={text => {updateCampoNovoEvento('faixaKm', parseInt(text || '0', 10))}}
+                value={faixaKm}
+                handleChangeText={setFaixaKm}
+                mode='numeric'
                 onFocus={()=>updateCampoNovoEventoError('faixaKm','')}
+                endEditing={()=>updateCampoNovoEvento('faixaKm', parseInt(faixaKm))}
                 msg={novoEventoError.faixaKm}
                 keyboardType="number-pad"
               />
@@ -466,6 +479,19 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 option_1='Gratuito'
                 option_2='Pago'
               />
+
+             {!requestCreateEvento.gratuito &&
+                <FormFieldModal
+                  title="Valor"
+                  placeholder="R$ 00,00"
+                  value={valor}
+                  handleChangeText={setValor}
+                  mode='decimal'
+                  onFocus={()=>updateCampoNovoEventoError('valor','')}
+                  msg={novoEventoError.valor}
+                  endEditing={()=>updateCampoNovoEvento('valor', parseFloat(valor))}
+                  keyboardType="number-pad"
+                />}
 
               <TouchableOpacity     
                   className='border-[1px] mt-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 

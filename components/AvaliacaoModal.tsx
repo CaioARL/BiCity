@@ -128,7 +128,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
               handleChangeText={e=> updateCampoAvaliacao("comentario",e)}
               value={requestCreateAvaliacao.comentario}
               msg={requestCreateAvaliacaoError.comentario}
-              validantionCheck={() => {}}
+              endEditing={() => {}}
             />
 
             <View className="flex-row justify-between mt-4">

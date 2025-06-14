@@ -10,7 +10,7 @@ interface FormFieldProps <T>{
     isValid?: boolean
     placeholder?: string
     handleChangeText: (e : string) => void
-    validantionCheck?: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
+    endEditing?: ( evento : NativeSyntheticEvent<TextInputEndEditingEventData> ) => void
     onFocus?: () => void
     otherStyles?: string
     keyboardType?: 'email-address' | 'default' | 'numeric' | 'number-pad' | 'url' | 'ascii-capable'
@@ -19,11 +19,12 @@ interface FormFieldProps <T>{
     isLoading?: boolean;
     maxLength?: number;
     multiline?: boolean;
+    mode? :  | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
   }
 
 
 
-export default function FormFieldModal({ title, value, placeholder, handleChangeText, validantionCheck, onFocus , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline} : FormFieldProps<any>) {
+export default function FormFieldModal({ title, value, placeholder, handleChangeText, endEditing, onFocus , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline, mode } : FormFieldProps<any>) {
   const [showPassword, setShowPassword] = useState(false)
 
 
@@ -36,13 +37,14 @@ export default function FormFieldModal({ title, value, placeholder, handleChange
           value={value}
           autoCapitalize='none'
           onFocus={onFocus}
+          inputMode={mode}
           placeholder={placeholder}
           onChangeText={handleChangeText}
           placeholderTextColor='rgba(0,0,0,0.4)'
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry && !showPassword}
           editable={!disableEdit}
-          onEndEditing={validantionCheck}
+          onEndEditing={endEditing}
           maxLength={maxLength}
           multiline={multiline}
         />
