@@ -482,7 +482,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
              {!requestCreateEvento.gratuito &&
                 <FormFieldModal
-                  title="Valor"
+                  title="Valor mínimo do ingresso"
                   placeholder="R$ 00,00"
                   value={valor}
                   handleChangeText={setValor}
