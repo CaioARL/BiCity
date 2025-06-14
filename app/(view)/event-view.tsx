@@ -65,7 +65,7 @@ export default function EventV() {
       const title = `Evento: ${item.nome}`;
       
       // Conteúdo
-      const shareMessage = `🎉 *${item.nome}*\n\n${item.descricao}\n\n📍 *Local:* ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.cidade} - ${item.endereco.estado}\n\n📆 *Data:* ${item.data}\n🏃 *Distância:* ${item.faixaKm} km\n💰 *Tipo:* ${item.gratuito ? 'Gratuito' : 'Pago'}\n\n [©] 2025 BiCity`;
+      const shareMessage = `🎉 *${item.nome}*\n\n${item.descricao}\n\n📍 *Local:* ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.cidade} - ${item.endereco.estado}\n\n📆 *Data:* ${item.data}\n🏃 *Distância:* ${item.faixaKm} km\n🚴‍♀️ *Tipo:* ${item.tipoEvento.nome}\n\n${item.gratuito ? '💰 *Gratuito*' : '💰 *A partir de:* R$ ' + item.valor }\n\n Compartilhado usando o app BiCity`
       
       // Construir opções de compartilhamento
       const shareOptions = {
@@ -198,7 +198,7 @@ if(isContentLoading){
 
                   <View className='w-full mt-1'>
                     <Text className="text-[31px] font-bold text-matte_gray text-center">{evento.nome}</Text>
-                    <Text className="text-matte_gray text-[12px]">{evento.descricao}</Text>
+                    <Text className="text-matte_gray text-base">{evento.descricao}</Text>
                   </View>
                   
                   <View className='flex-row justify-around mt-4 w-full'>
@@ -213,10 +213,6 @@ if(isContentLoading){
                       <Text className='text-center text-matte_gray font-bold'>Faixa</Text>
                     </View>
 
-                    {/* <View>
-                      <Text className='text-center text-matte_gray font-[12px]'>{evento.gratuito ? 'Gratuito' : 'Pago'} </Text>
-                      <Text className='text-center text-matte_gray font-bold'>Tipo</Text>
-                    </View> */}
                   </View>
                  
               
@@ -231,13 +227,13 @@ if(isContentLoading){
                     </View>
                     <View className="w-[100] flex-col items-center justify-end">
                       <View className="flex-row items-center justify-center">
-                        <Ionicons name="cash-outline" size={20} color="#555" style={{ marginRight: 8 }} />
+                        <Ionicons name="cash-outline" size={20} color="#555" style={{ marginRight: evento.gratuito? 0:8 }} />
                         {!evento.gratuito &&
-                          <Text className="text-color_light_gray_2 text-[12px]">
+                          <Text className="text-color_light_gray_2 text-base">
                             R$: {evento.valor}
                           </Text>}
                       </View>
-                      <Text className="text-color_light_gray_2 text-[12px] mt-1">{evento.gratuito ? 'Gratuito' : 'Pago'}</Text>
+                      <Text className="text-color_light_gray_2 text-[12px] mt-1">{evento.gratuito ? 'Gratuito' : 'A partir de'}</Text>
                     </View>
                   </View>
 
