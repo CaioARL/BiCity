@@ -213,10 +213,10 @@ if(isContentLoading){
                       <Text className='text-center text-matte_gray font-bold'>Faixa</Text>
                     </View>
 
-                    <View>
+                    {/* <View>
                       <Text className='text-center text-matte_gray font-[12px]'>{evento.gratuito ? 'Gratuito' : 'Pago'} </Text>
                       <Text className='text-center text-matte_gray font-bold'>Tipo</Text>
-                    </View>
+                    </View> */}
                   </View>
                  
               
@@ -232,9 +232,10 @@ if(isContentLoading){
                     <View className="w-[100] flex-col items-center justify-end">
                       <View className="flex-row items-center justify-center">
                         <Ionicons name="cash-outline" size={20} color="#555" style={{ marginRight: 8 }} />
-                        <Text className="text-color_light_gray_2 text-[12px]">
-                          R$: 10
-                        </Text>
+                        {!evento.gratuito &&
+                          <Text className="text-color_light_gray_2 text-[12px]">
+                            R$: {evento.valor}
+                          </Text>}
                       </View>
                       <Text className="text-color_light_gray_2 text-[12px] mt-1">{evento.gratuito ? 'Gratuito' : 'Pago'}</Text>
                     </View>
