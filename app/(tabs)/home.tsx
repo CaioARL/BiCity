@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, Image, BackHandler} from 'react-native'
+import { View, Text, TouchableOpacity, Image, Alert} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
+import * as TaskManager from 'expo-task-manager'
 import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
@@ -22,10 +23,10 @@ import EventCardCarousel from 'components/EventCardCarousel'
 import icons from 'constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AudioSpeaker } from 'util/audioSpeaker'
-import { AudioPlayer, useAudioPlayer } from 'expo-audio'
 import { sounds, prompts } from '../../constants'
 import { AxiosError } from 'axios'
 import ProblemaModalNavigation from 'components/ProblemaModalNavigation'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 
 interface Region {
   latitude: number
@@ -41,10 +42,32 @@ interface LocationError {
 }
 
 export default function Home() {
+  const LOCATION_TASK = 'background-location-task'
+
+  TaskManager.defineTask(LOCATION_TASK, async ({ data , error }) => {
+    if (error) {
+      Alert.alert("Background location task error " + error.message || "An error occurred while tracking location in the background.")
+      return
+    }
+
+    if (data) {
+      const { locations } = data as { locations : Location.LocationObject[] }
+      console.log("here I am")
+      setUserLocation({
+        latitude: locations[0].coords.latitude,
+        longitude: locations[0].coords.longitude,
+        heading: locations[0].coords.heading || null
+      })
+      await sound.current.playSound(sounds.beep)
+      // Save locations to state or send to server
+    }
+  })
+
+
   const dateRef = useRef(new Date())
   const [menuVisible, setMenuVisible] = useState<boolean>(false)
   
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
+  const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number | null }  |  null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
@@ -105,8 +128,6 @@ export default function Home() {
     features: [],
   }
 
-  
-
     const getCurrentLocation = async (): Promise<void>  => {
       setInitalLoading(true)
       await Location.hasServicesEnabledAsync()
@@ -127,38 +148,48 @@ export default function Home() {
         setCurrentLocationError(locationErrors.PERMISSION)
         setInitalLoading(false)
         return
-    }
+      }
     
-    await Location.getCurrentPositionAsync({})
-    .then((response) => {
-      setCurrentLocation(response)
+      Location.getCurrentPositionAsync()
+      .then((location) => { 
+        // setUserLocation(location.coords)
+        startBackgroundLocationTracking()
+        }
+      )
+      .catch((error) => {setCurrentLocationError(locationErrors.ERROR)})
+      .finally(()=>{setInitalLoading(false)})
+
+    
+  }
+
+      //   setCurrentLocationError(locationErrors.ERROR)
+      // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
+
+  useEffect(() => {
+    if(!initalLoading) return
+    if(!userLocation) return
       setRequestInfraestrutura({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         raio: 750
       })
       setRequestProblemas({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         raio: 750
       })   
       setRequestEventos({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         raio: 7000
       })
-      setInitialRegion({latitude: response.coords.latitude, longitude: response.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
-    })
-    .catch((error) => {
-      setCurrentLocationError(locationErrors.ERROR)
-      setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
-    }).finally(() => {
+      setInitialRegion({latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
       setInitalLoading(false)
-    })
-  }
+  }, [userLocation])
+
 
   useEffect(()=>{
-    if(!currentLocation){
+    if(!userLocation){
       getCurrentLocation()
     }
   // setInterval(
@@ -412,10 +443,10 @@ export default function Home() {
     const handleMyLocationPress = () => {
       if(navigation) return
       if(!mapRef.current) return
-      if(!currentLocation) return
+      if(!userLocation) return
       mapRef.current.animateToRegion({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         latitudeDelta:0.0043, longitudeDelta:0.0034
       })
     }
@@ -483,6 +514,7 @@ export default function Home() {
         setShowOpsModal(true)
       })
       .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        console.log("")
         setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
@@ -493,6 +525,8 @@ export default function Home() {
 
     // --------------------------------------- map city navigation ---------------------------------------
     
+      
+
       const headingRef = useRef<number | null>(null)
       const [nearProblems, setNearProblems] = useState<Problema[]>([])
       const [infraProblems, setInfraProblems] = useState<Problema[]>([])
@@ -501,27 +535,15 @@ export default function Home() {
       const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
       const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
       const headingExtremesRef = useRef<[number, number]>([0, 0])
-      const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
       const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
         
-      const speechRef = useRef(new AudioSpeaker())  
+      const sound = useRef(new AudioSpeaker())  
 
-      const beepPlayer = useAudioPlayer(require('../../assets/sounds/beep.wav'))
-      const problemPlayer = useAudioPlayer(require('../../assets/sounds/problem_notify.wav'))
-      const playSound = async (player : AudioPlayer, duration: number ) => {
-          await new Promise<void>((resolve) => {
-              player.play()
-              setTimeout(() => {
-                  player.seekTo(0)
-                  resolve()
-              }, duration * 1000)
-          })
-      }
 
       const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
         abortControllerRef.current?.abort()
         abortControllerRef.current = new AbortController
-        checkCreateViabilityProblema(userLocation.latitude, userLocation.longitude, null)
+        checkCreateViabilityProblema(userLocation?.latitude || 0 , userLocation?.longitude || 0, null)
         .then((reponse) => {
             if(!reponse){
               setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local. Procure uma ciclovia próxima"})
@@ -533,6 +555,29 @@ export default function Home() {
             setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
           })
       } 
+
+      const startBackgroundLocationTracking = async () => { 
+        console.log("Starting background location tracking")
+        const { status } = await Location.requestBackgroundPermissionsAsync()
+        console.log("Background location permission status: ", status)
+        if (status === 'granted') {
+          await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 1000,
+          }).catch((error)=>{
+            console.log("Error starting background location tracking: ", error)
+          })
+          .finally(()=>{
+            setInitalLoading(false)
+          })
+        } else {
+          Alert.alert("Permissão de localização em segundo plano negada", "Para usar o rastreamento de localização em segundo plano, você precisa conceder permissão nas configurações do aplicativo.")
+        }
+      }
+
+      const stopBackgroundLocationTracking = async () => {
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK)
+      }
 
       useEffect(() => {
         if (!navigation) return
@@ -650,7 +695,7 @@ export default function Home() {
           h = userLocation.heading
         } else {
           const [left, right] = headingExtremesRef.current
-          h = (userLocation.heading >= left && userLocation.heading <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+          h = (userLocation.heading || 0 >= left && userLocation.heading || 0 <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
         }
         if (!mapRef.current) return
         mapRef.current.animateCamera({
@@ -659,7 +704,7 @@ export default function Home() {
             longitude: userLocation.longitude,
           },
           pitch: 50, // Lays the map down
-          heading: h,
+          heading: h || undefined,
           zoom: 18,
         })
       },[userLocation])
@@ -669,25 +714,46 @@ export default function Home() {
         headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
       }, [headingRef.current])
     
-      useEffect(() => {
-        if (nearProblems.length <= 0) return
+      const playNearProblemsSounds = async () => {
+        for (const problema of nearProblems){
+          if(notifiedProblemsId.current.includes(problema.id)) return
+          notifiedProblemsId.current.push(problema.id)
+          await sound.current.playSound(sounds.problem_notification)          
+        }
+        
         nearProblems.forEach((problema) => {
           if (notifiedProblemsId.current.includes(problema.id)) return
           notifiedProblemsId.current.push(problema.id)
-          playSound(problemPlayer,2.5)//2.5
+          sound.current.playSound(sounds.problem_notification)
         })
+      }
+
+      const playInfraProblemsSounds = async () => {
+        for (const problema of infraProblems) {
+          await sound.current.playSound(sounds.beep)
+          await sound.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || "Problema detectado próximo a você")
+        }
+      }
+      
+      useEffect(() => {
+        if (nearProblems.length <= 0) return
+        playNearProblemsSounds()
       }, [nearProblems])
-    
+      
       useEffect(() => {
         if (!infraProblems || infraProblems.length <= 0) return
         console.log("Problemas de infraestrutura detectados:")
-          infraProblems.forEach((problema) => {
-              playSound(beepPlayer, 1.5).then(()=>{ //1.5
-                speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
-              })
-              console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)
-          })
+        playInfraProblemsSounds()
       }, [infraProblems])
+
+
+      useEffect(() => {
+        if(navigation) {
+          activateKeepAwakeAsync()
+        }else {
+          deactivateKeepAwake()
+        }
+      }, [navigation])
 
     // --------------------------------------- component ---------------------------------------
 
@@ -695,7 +761,7 @@ export default function Home() {
       return (
         <LoadingActivity/>
       )
-    else if (!currentLocation)
+    else if (!userLocation)
       return (
         <SafeAreaView>
           <View className='flex-col h-full w-full justify-center items-center'>
@@ -729,15 +795,15 @@ export default function Home() {
               mapPadding={{top: 60, right: 0, bottom: 0, left: 0}}
               initialRegion={initialRegion}
               showsMyLocationButton={false} 
-              showsUserLocation={true}
-              onUserLocationChange={(e) => {
-                if (navigation && e.nativeEvent.coordinate) {
-                  const { latitude, longitude , heading} = e.nativeEvent.coordinate
-                  if (latitude && longitude) {
-                    setUserLocation( { latitude, longitude, heading: heading || 0 })
-                  }
-                }
-              }}
+              // showsUserLocation={true}
+              // onUserLocationChange={(e) => {
+              //   if (navigation && e.nativeEvent.coordinate) {
+              //     const { latitude, longitude , heading} = e.nativeEvent.coordinate
+              //     if (latitude && longitude) {
+              //       setUserLocation( { latitude, longitude, heading: heading || 0 })
+              //     }
+              //   }
+              // }}
               zoomEnabled={!navigation}
               scrollEnabled={!navigation}
               rotateEnabled={true}
@@ -751,7 +817,7 @@ export default function Home() {
                   setIsMoved(isGestureRef.current)
                   isGestureRef.current = false
                   if (!isRegionWithinBounds(region)) {
-                    animateToUserLocation(mapRef.current , currentLocation)
+                    animateToUserLocation(mapRef.current , userLocation)
                     setUserAlert({ type: 'error', message: 'Você saiu da área de São Paulo. Retornando à sua localização.'})
                   }
                 }
@@ -841,16 +907,16 @@ export default function Home() {
                 strokeWidth={10}
               />
               
-              {navigation && 
-                <Marker
-                  // icon={icons.mapa_bike_pino}
-                  tracksViewChanges={false}
-                  coordinate={userLocation}
-                  focusable={false}
-                  titleVisibility='hidden'
-                  image={icons.mapa_bike_pino}
-                />
-              }
+               
+              <Marker
+                // icon={icons.mapa_bike_pino}
+                tracksViewChanges={false}
+                coordinate={userLocation || { latitude: 0, longitude: 0, heading: null }}
+                focusable={false}
+                titleVisibility='hidden'
+                image={icons.mapa_bike_pino}
+              />
+              
     
             </MapView>
 
@@ -979,7 +1045,7 @@ export default function Home() {
               {navigation &&
                 <TouchableOpacity
                     className='absolute bottom-[10%] right-[3%] flex-row bg-primary_green p-[10px] rounded-[37px] justify-center items-center'
-                    onPress={() => checkNavigationViabilityProblema(userLocation.latitude, userLocation.longitude)}
+                    onPress={() => checkNavigationViabilityProblema(userLocation?.latitude || 0 , userLocation?.longitude || 0)}
                     >
                     <Ionicons name="warning-outline" size={37} color="black" />
                     <Text className='font-roboto font-bold'>Reportar</Text>

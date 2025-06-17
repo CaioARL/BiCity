@@ -1,16 +1,18 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterModal from '../../components/FilterModal';
 import { useAuthProvider } from '../context/AuthProvider';
-import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
+import { Evento, Problema, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
 import { router } from 'expo-router';
 import ScrollUp from '../../components/ScrollUp'; 
+import { sounds, prompts } from '../../constants'
+import { AudioSpeaker } from 'util/audioSpeaker';
 
 // interface EventItem {
 //   id: string;
@@ -193,6 +195,28 @@ export default function Events() {
   };
 
 
+  const speech = useRef(new AudioSpeaker())
+
+  const problemas : Problema[] = [
+    {id: 1, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 2, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 3, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 4, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 5, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 6, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 7, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+    {id: 8, ativo: true, descricao: "Buraco", dtCriacao: '2023-10-01T12:00:00Z', latitude: -23.5505, longitude: -46.6333, reportCount:0, s3Url:'', tipoProblema: {id: 1, descricao: 'Buraco na via'}},
+  ]
+  const handlePress = async ()  => {
+    for (const problema of problemas) {
+      console.log('EACH ' + problema.id)
+      await speech.current.playSound(sounds.beep)
+      console.log('beep finished ' + problema.id)
+      await speech.current.speak(prompts.problema.find(p => (problema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
+    }
+  }
+
+
   return (
   <SafeAreaView>
       <View className='container h-full' style={{ backgroundColor: 'white' }}>
@@ -250,7 +274,9 @@ export default function Events() {
                       <Text className='text-xs text-matte_gray text-center'>Meus {'\n'} Eventos</Text>
                   </TouchableOpacity>
                 </View>}
-
+                 {authState?.user?.role === 'ADMIN' && <TouchableOpacity onPress={handlePress}>
+                    <Ionicons name="musical-note" size={20} color="#555" />
+                  </TouchableOpacity>}
           </View>
 
           <View style={{ ...CustomEvents.searchBox, }}>

@@ -59,14 +59,14 @@ export const isRegionWithinBounds = (
 // Animar o mapa para a localização atual do usuário
 export const animateToUserLocation = (
   mapRef: MapView | null,
-  currentLocation: Location.LocationObject | null,
+  currentLocation: {latitude: number, longitude: number} | null,
   zoomLevel?: { latitudeDelta: number; longitudeDelta: number }
 ): void => {
   if (!mapRef || !currentLocation) return;
   
   mapRef.animateToRegion({
-    latitude: currentLocation.coords.latitude,
-    longitude: currentLocation.coords.longitude,
+    latitude: currentLocation.latitude,
+    longitude: currentLocation.longitude,
     latitudeDelta: zoomLevel?.latitudeDelta || 0.0043,
     longitudeDelta: zoomLevel?.longitudeDelta || 0.0034,
   });
