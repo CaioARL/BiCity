@@ -1,8 +1,7 @@
-import { View, Text, TouchableOpacity, Image, Alert} from 'react-native'
+import { View, Text, TouchableOpacity, Image, Alert, Linking} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
-import * as TaskManager from 'expo-task-manager'
 import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
@@ -157,11 +156,17 @@ export default function Home() {
     
       Location.getCurrentPositionAsync()
       .then((location) => { 
-        // setUserLocation(location.coords)
-        startBackgroundLocationTracking()
-        }
-      )
-      .catch((error) => {setCurrentLocationError(locationErrors.ERROR)})
+        setUserLocation(location.coords)
+        setInitialRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0043,
+          longitudeDelta: 0.0034
+        })
+          startBackgroundLocationTracking()
+          
+      })
+      .catch(() => {setCurrentLocationError(locationErrors.ERROR)})
       .finally(()=>{setInitalLoading(false)})
 
     
@@ -169,13 +174,17 @@ export default function Home() {
 
   useEffect(() => {
     // Set the callback for updating user location
-    setUpdateLocationCallback((location) => {
-      setUserLocation({ ...location, heading: location.heading ?? null });
+    setUpdateLocationCallback(async (location) => {
+      setUserLocation({ ...location, heading: location.heading ?? null })
     })
 
     // Cleanup callback on unmount
-    return () => setUpdateLocationCallback(()=>{});
-  }, []);
+    return () =>{ 
+      setUpdateLocationCallback(()=>{})
+      stopBackgroundLocationTracking()
+      sound.current?.stop()
+    }
+  }, [])
 
       //   setCurrentLocationError(locationErrors.ERROR)
       // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
@@ -578,12 +587,11 @@ export default function Home() {
         if (status === 'granted') {
           await Location.startLocationUpdatesAsync(LOCATION_TASK, {
             accuracy: Location.Accuracy.High,
-            timeInterval: 1000,
+            timeInterval: 700,
             showsBackgroundLocationIndicator: true,
              foregroundService: {
-              notificationTitle: "Location Tracking",
-              notificationBody: "Your location is being tracked.",
-              notificationColor: "#FF0000", // Optional
+              notificationTitle: "Rastreamento de Localização",
+              notificationBody: "Rastreamento de localização em segundo plano ativo",
             },
           }).catch((error)=>{
             console.log("Error starting background location tracking: ", error)
@@ -591,8 +599,14 @@ export default function Home() {
           .finally(()=>{
             setInitalLoading(false)
           })
+          setNavigation(true) //----------------------------------------------------------------------------------------------IMPORTANT
         } else {
-          Alert.alert("Permissão de localização em segundo plano negada", "Para usar o rastreamento de localização em segundo plano, você precisa conceder permissão nas configurações do aplicativo.")
+          Alert.alert("Permissão de localização em segundo plano negada", "Para usar o rastreamento de localização em segundo plano, você precisa conceder permissão nas configurações do aplicativo. Selecione a opção: PERMITIR O TEMPO TODO",
+            [
+              { text: "Tentar Novamente", onPress: async () => await Location.requestBackgroundPermissionsAsync().then((response) => {response.status === 'granted' ? startBackgroundLocationTracking(): Linking.openSettings()}) },
+              { text: "Cancelar", style: "cancel" },
+            ]
+          )
         }
       }
 
@@ -741,17 +755,11 @@ export default function Home() {
           notifiedProblemsId.current.push(problema.id)
           await sound.current.playSound(sounds.problem_notification)          
         }
-        
-        nearProblems.forEach((problema) => {
-          if (notifiedProblemsId.current.includes(problema.id)) return
-          notifiedProblemsId.current.push(problema.id)
-          sound.current.playSound(sounds.problem_notification)
-        })
       }
 
       const playInfraProblemsSounds = async () => {
+        sound.current.playSound(sounds.beep)
         for (const problema of infraProblems) {
-          await sound.current.playSound(sounds.beep)
           await sound.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || "Problema detectado próximo a você")
         }
       }
@@ -771,6 +779,7 @@ export default function Home() {
       useEffect(() => {
         if(navigation) {
           activateKeepAwakeAsync()
+          
         }else {
           deactivateKeepAwake()
         }
@@ -1017,9 +1026,27 @@ export default function Home() {
               <View className='absolute top-[40px] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
                   <TouchableOpacity
                     className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
-                    onPress={()=>{
-                      !navigation && setMenuVisible(false) 
-                      setNavigation(!navigation)
+                    onPress={async () =>{
+                      if(navigation) {
+                        await stopBackgroundLocationTracking()
+                        setMenuVisible(false)
+                        setNavigation(false)
+                      } else {
+                        Alert.alert("Navegação", "Você vai entrar em modo navegação, o que significa que o aplicativo continuará rodando em segundo plano para te guiar. Você pode desativar a navegação a qualquer momento clicando no botão de navegação novamente.",
+                          [
+                            {
+                              text: "Ir para Navegação",
+                              onPress: () => {
+                                startBackgroundLocationTracking()
+                              },
+                              style: "default"
+                            },
+                            {
+                              text: "Cancelar",
+                              style: "cancel",
+                            },
+                          ])
+                      }
                     }}
                   >
                     <Ionicons name={`${navigation ? 'arrow-back' : 'navigate' }`} size={24} color="black" />

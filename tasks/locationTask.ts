@@ -15,7 +15,7 @@ TaskManager.defineTask(LOCATION_TASK, async ({ data, error }) => {
     const { locations } = data as { locations: Location.LocationObject[] };
     if (locations && locations.length > 0) {
       const location = locations[0];
-      console.log('New background location:', location);
+      console.log('New background location:');
 
       // Invoke the global callback
       invokeUpdateLocationCallback({
