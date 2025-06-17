@@ -41,33 +41,38 @@ interface LocationError {
   message: string
 }
 
+import { useLocation } from '../context/LocationProvider'
+import { LOCATION_TASK } from '../../tasks/locationTask'
+import { setUpdateLocationCallback } from 'util/locationFallBack'
+
+//   TaskManager.defineTask(LOCATION_TASK, async ({ data , error }) => {
+//     if (error) {
+//       Alert.alert("Background location task error " + error.message || "An error occurred while tracking location in the background.")
+//       return
+//     }
+
+//     if (data) {
+//       const { locations } = data as { locations : Location.LocationObject[] }
+//       console.log("here I am")
+//       setUserLocation({
+//         latitude: locations[0].coords.latitude,
+//         longitude: locations[0].coords.longitude,
+//         heading: locations[0].coords.heading || null
+//       })
+//       await sound.current.playSound(sounds.beep)
+//       // Save locations to state or send to server
+//     }
+//   })
+  
+  
 export default function Home() {
-  const LOCATION_TASK = 'background-location-task'
-
-  TaskManager.defineTask(LOCATION_TASK, async ({ data , error }) => {
-    if (error) {
-      Alert.alert("Background location task error " + error.message || "An error occurred while tracking location in the background.")
-      return
-    }
-
-    if (data) {
-      const { locations } = data as { locations : Location.LocationObject[] }
-      console.log("here I am")
-      setUserLocation({
-        latitude: locations[0].coords.latitude,
-        longitude: locations[0].coords.longitude,
-        heading: locations[0].coords.heading || null
-      })
-      await sound.current.playSound(sounds.beep)
-      // Save locations to state or send to server
-    }
-  })
-
-
+  
+  
   const dateRef = useRef(new Date())
   const [menuVisible, setMenuVisible] = useState<boolean>(false)
   
   const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number | null }  |  null>(null)
+  // const { userLocation } = useLocation() 
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
@@ -161,6 +166,16 @@ export default function Home() {
 
     
   }
+
+  useEffect(() => {
+    // Set the callback for updating user location
+    setUpdateLocationCallback((location) => {
+      setUserLocation({ ...location, heading: location.heading ?? null });
+    })
+
+    // Cleanup callback on unmount
+    return () => setUpdateLocationCallback(()=>{});
+  }, []);
 
       //   setCurrentLocationError(locationErrors.ERROR)
       // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
@@ -564,6 +579,12 @@ export default function Home() {
           await Location.startLocationUpdatesAsync(LOCATION_TASK, {
             accuracy: Location.Accuracy.High,
             timeInterval: 1000,
+            showsBackgroundLocationIndicator: true,
+             foregroundService: {
+              notificationTitle: "Location Tracking",
+              notificationBody: "Your location is being tracked.",
+              notificationColor: "#FF0000", // Optional
+            },
           }).catch((error)=>{
             console.log("Error starting background location tracking: ", error)
           })
