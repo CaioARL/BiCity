@@ -524,7 +524,7 @@ export default function Home() {
     
       
 
-      const headingRef = useRef<number | null>(null)
+      const [infraHeading, setInfraHeading] = useState<number | null>(null)
       const [nearProblems, setNearProblems] = useState<Problema[]>([])
       const [infraProblems, setInfraProblems] = useState<Problema[]>([])
       const notifiedProblemsId = useRef<number[]>([])
@@ -649,8 +649,9 @@ export default function Home() {
             )
           }
         }
+
         if(!matchedFeature) {
-          headingRef.current = null
+          setInfraHeading(null)
           return
         }
         
@@ -692,7 +693,7 @@ export default function Home() {
             next[1],
             next[0],
           )
-          headingRef.current = bearing
+          setInfraHeading(bearing)
         }
       }
 
@@ -701,11 +702,11 @@ export default function Home() {
         if (!navigation) return
         if (!userLocation) return
         let h
-        if (!headingRef.current) {
+        if (!infraHeading) {
           h = userLocation.heading
         } else {
           const [left, right] = headingExtremesRef.current
-          h = (userLocation.heading || 0 >= left && userLocation.heading || 0 <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+          h = (userLocation.heading || 0 >= left && userLocation.heading || 0 <= right) ? infraHeading : infraHeading - 180 >= 0 ? infraHeading - 180 : infraHeading + 180
         }
         if (!mapRef.current) return
         mapRef.current.animateCamera({
@@ -720,9 +721,9 @@ export default function Home() {
       },[userLocation])
 
       useEffect(() => {
-        if (!headingRef.current) return
-        headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
-      }, [headingRef.current])
+        if (!infraHeading) return
+        headingExtremesRef.current = extremesOfOneDirection(infraHeading)
+      }, [infraHeading])
     
       const playNearProblemsSounds = async () => {
         for (const problema of nearProblems){
