@@ -19,21 +19,20 @@ export default function TabsLayout() {
             title: 'Eventos',
           }}
         />
-        <Tabs.Screen 
-          name="home" 
-          options={{
-            title: 'Mapa',
-          }}
-        />
+          <Tabs.Screen 
+            name="home" 
+            options={{
+              title: 'Mapa',
+            }}
+          />
         <Tabs.Screen 
           name="profile" 
           options={{
             title: 'Perfil',
           }}
-        />
+          />
       </Tabs>
     <StatusBar style='dark' backgroundColor='#C3FF00' />
-
     </>
   );
 }
