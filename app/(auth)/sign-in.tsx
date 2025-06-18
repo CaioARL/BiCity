@@ -136,7 +136,7 @@ export default function SignIn() {
           </View>
           
           <Text className="text-2xl font-bold text-center text-secondary_black mb-4">
-            BICITY
+            BiCity
           </Text>
 
           <FormField
