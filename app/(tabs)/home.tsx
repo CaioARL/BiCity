@@ -12,7 +12,7 @@ import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
-import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate, calculateBearing, isPointNearPoint} from '../../util'
+import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate, calculateBearing, isPointNearPoint, calculateStrokeWidth} from '../../util'
 import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
@@ -40,29 +40,8 @@ interface LocationError {
   message: string
 }
 
-import { useLocation } from '../context/LocationProvider'
 import { LOCATION_TASK } from '../../tasks/locationTask'
 import { setUpdateLocationCallback } from 'util/locationFallBack'
-
-//   TaskManager.defineTask(LOCATION_TASK, async ({ data , error }) => {
-//     if (error) {
-//       Alert.alert("Background location task error " + error.message || "An error occurred while tracking location in the background.")
-//       return
-//     }
-
-//     if (data) {
-//       const { locations } = data as { locations : Location.LocationObject[] }
-//       console.log("here I am")
-//       setUserLocation({
-//         latitude: locations[0].coords.latitude,
-//         longitude: locations[0].coords.longitude,
-//         heading: locations[0].coords.heading || null
-//       })
-//       await sound.current.playSound(sounds.beep)
-//       // Save locations to state or send to server
-//     }
-//   })
-  
   
 export default function Home() {
   
@@ -82,7 +61,7 @@ export default function Home() {
 
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
-
+  // const [strokeWidth, setStrokeWidth] = useState<number>(10)
 
   const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>()
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
@@ -163,7 +142,23 @@ export default function Home() {
           latitudeDelta: 0.0043,
           longitudeDelta: 0.0034
         })
-          startBackgroundLocationTracking()
+          //startBackgroundLocationTracking()
+        setRequestInfraestrutura({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 1200
+        })
+        setRequestProblemas({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 1200
+        })   
+        setRequestEventos({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 7000
+        })
+        setInitialRegion({latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
           
       })
       .catch(() => {setCurrentLocationError(locationErrors.ERROR)})
@@ -178,7 +173,7 @@ export default function Home() {
       setUserLocation({ ...location, heading: location.heading ?? null })
     })
 
-    // Cleanup callback on unmount
+    // Cleanup on unmount
     return () =>{ 
       setUpdateLocationCallback(()=>{})
       stopBackgroundLocationTracking()
@@ -187,29 +182,7 @@ export default function Home() {
   }, [])
 
       //   setCurrentLocationError(locationErrors.ERROR)
-      // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
-
-  useEffect(() => {
-    if(!initalLoading) return
-    if(!userLocation) return
-      setRequestInfraestrutura({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        raio: 750
-      })
-      setRequestProblemas({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        raio: 750
-      })   
-      setRequestEventos({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        raio: 7000
-      })
-      setInitialRegion({latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
-      setInitalLoading(false)
-  }, [userLocation])
+      // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error}
 
 
   useEffect(()=>{
@@ -335,14 +308,14 @@ export default function Home() {
     const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
       abortControllerRef.current?.abort()
       setRequestInfraestrutura({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 750
-        })
+        latitude: latitude,
+        longitude: longitude,
+        raio: 1200
+      })
       setRequestProblemas({
         latitude: latitude,
         longitude: longitude,
-        raio: 750
+        raio: 1200
       })
       setRequestEventos({
         latitude: latitude,
@@ -358,12 +331,12 @@ export default function Home() {
       setRequestInfraestrutura({
         latitude: currentViewLocation.latitude,
         longitude: currentViewLocation.longitude,
-        raio: 750
+        raio: 1200
       })
       setRequestProblemas({
         latitude: currentViewLocation.latitude,
         longitude: currentViewLocation.longitude,
-        raio: 750
+        raio: 1200
       })
       setRequestEventos({
         latitude: currentViewLocation.latitude,
@@ -585,6 +558,7 @@ export default function Home() {
         const { status } = await Location.requestBackgroundPermissionsAsync()
         console.log("Background location permission status: ", status)
         if (status === 'granted') {
+          setIsContentLoading(true)
           await Location.startLocationUpdatesAsync(LOCATION_TASK, {
             accuracy: Location.Accuracy.High,
             timeInterval: 700,
@@ -597,7 +571,7 @@ export default function Home() {
             console.log("Error starting background location tracking: ", error)
           })
           .finally(()=>{
-            setInitalLoading(false)
+            setIsContentLoading(false)
           })
           setNavigation(true) //----------------------------------------------------------------------------------------------IMPORTANT
         } else {
@@ -611,7 +585,8 @@ export default function Home() {
       }
 
       const stopBackgroundLocationTracking = async () => {
-        await Location.stopLocationUpdatesAsync(LOCATION_TASK)
+        setIsContentLoading(true)
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK).finally(()=>setIsContentLoading(false))
       }
 
       useEffect(() => {
@@ -630,12 +605,12 @@ export default function Home() {
         setRequestInfraestrutura({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          raio: 750,
+          raio: 1200,
         })
         setRequestProblemas({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          raio: 750,
+          raio: 1200,
         })
       },[userLocation])
 
@@ -779,7 +754,7 @@ export default function Home() {
       useEffect(() => {
         if(navigation) {
           activateKeepAwakeAsync()
-          
+          setMenuVisible(false)
         }else {
           deactivateKeepAwake()
         }
@@ -934,7 +909,10 @@ export default function Home() {
 
               <Geojson
                 geojson={infraestrutura || emptyGeoJson}
-                strokeWidth={10}
+                // strokeWidth={strokeWidth}
+                strokeWidth={8}
+                tracksViewChanges={false}
+                tappable={false}
               />
               
                
@@ -1029,7 +1007,6 @@ export default function Home() {
                     onPress={async () =>{
                       if(navigation) {
                         await stopBackgroundLocationTracking()
-                        setMenuVisible(false)
                         setNavigation(false)
                       } else {
                         Alert.alert("Navegação", "Você vai entrar em modo navegação, o que significa que o aplicativo continuará rodando em segundo plano para te guiar. Você pode desativar a navegação a qualquer momento clicando no botão de navegação novamente.",
