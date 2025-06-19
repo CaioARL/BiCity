@@ -262,8 +262,8 @@ export default function EventDetail() {
                   )
                   :
                   <View className="flex-1 justify-center items-center">
-                    <Text className="text-lg font-bold text-center">Nenhum evento encontrado</Text>
-                    <Text className="text-sm text-gray-500">Crie um evento</Text>
+                    <Text className={`text-lg font-bold text-center ${theme==='light'?'text-black':'text-white'}`}>Nenhum evento encontrado</Text>
+                    <Text className={`text-sm ${theme==='light'?'text-matte_gray':'text-white'}`}>Crie um evento</Text>
                   </View>
                 }
 
