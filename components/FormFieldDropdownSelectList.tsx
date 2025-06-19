@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue, Appearance } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons } from "@expo/vector-icons";
 
@@ -25,23 +25,22 @@ interface FormFieldDropdownSelectList<T> {
 
 export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, onFocus, msg, isValid, otherStyles, disableEdit, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
 
-
   const [eventTypeOptionsVisible, setEventTypeOptionsVisible] = useState<boolean> (false)
-
+  const theme = Appearance.getColorScheme()
 
   return (
     <>
         {/* Event Type Filter */}
         <View className={`mb-[10] ${otherStyles} `}>
-        <Text className='text-[16px] text-matte_gray mb-[5px]'>{title}</Text>
+        <Text className={`text-[16px] ${theme==='light'?'text-matte_gray':'text-white'} mb-[5px]`}>{title}</Text>
         <TouchableOpacity 
-              className='flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px]'
+              className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px] ${theme==='light'?'bg-white':'bg-secondary_black'}`}
               onPress={() => {setEventTypeOptionsVisible(prev => !prev)}}
               onPressIn={onFocus}
               disabled={disableEdit}
               >
   
-            <Text className={`capitalize flex-1 `}>
+            <Text className={`capitalize flex-1 ${theme==='light'?'text-matte_gray':'text-white'} `}>
             {selectedValue?.nome ? selectedValue.nome : 'Selecione uma opção'}
             
             </Text>
@@ -51,7 +50,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
                       color='#0000ff'
                     />
                   ): (
-                    <Ionicons name="chevron-down" size={20} color="#555" />
+                    <Ionicons name="chevron-down" size={20} color={theme==='light'?'#555':'#FFF'} />
                   )}
         </TouchableOpacity>
         {msg && (<Text className='text-color_red_error'>{msg}</Text>)}
@@ -60,7 +59,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
           {/* Dropdown Menu */}
           {eventTypeOptionsVisible && (
             <ScrollView
-            className={`border-[1px] border-color_light_gray rounded-[8] shadow-[2px]`}
+            className={`border-[1px] border-color_light_gray rounded-[8] shadow-[2px] ${theme==='light'?'bg-white':'bg-matte_gray'} `}
             style={{ maxHeight: dropDownSize || '100%' }}
           >
             {options.map((item, index) => (
@@ -74,7 +73,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
                       index !== options.length - 1 ? 'border-b-[1px] border-color_light_gray' : ''
                     }`}
                   >
-                    <Text className={`capitalize md:uppercase`}>{item.nome}</Text>
+                    <Text className={`capitalize md:uppercase ${theme==='light'?'':'text-white'}`}>{item.nome}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>

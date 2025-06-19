@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData, useColorScheme } from 'react-native'
+import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData, Appearance } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { TouchableOpacity } from 'react-native'
@@ -26,7 +26,7 @@ export default function FormField({
   keyboardType, secureTextEntry, msg, disableEdit, isLoading, isValid, maxLength, handleEndEditing
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const theme = useColorScheme()
+  const theme = Appearance.getColorScheme()
 
   const getBorderColor = () => {
     if (disableEdit) return 'border-color_lightGray'
@@ -38,7 +38,7 @@ export default function FormField({
 
   return (
     <View className={`space-y-2 ${otherStyles}`}>
-      <Text className="text-base color-secondary_black">{title}</Text>
+      <Text className={`text-base ${theme==='light'? 'color-secondary_black':'text-white'}`}>{title}</Text>
       <View
         className={`border-2 
           ${disableEdit ? 'bg-color_lightGray' : 

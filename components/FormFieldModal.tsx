@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData, useColorScheme } from 'react-native'
+import { View, Text, TextInput, ActivityIndicator, NativeSyntheticEvent, TextInputEndEditingEventData, Appearance } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import React, {useState} from 'react'
 
@@ -26,11 +26,11 @@ interface FormFieldProps <T>{
 
 export default function FormFieldModal({ title, value, placeholder, handleChangeText, endEditing, onFocus , otherStyles, keyboardType, secureTextEntry, msg, disableEdit, isLoading , isValid, maxLength, multiline, mode } : FormFieldProps<any>) {
   const [showPassword, setShowPassword] = useState(false)
-  const theme = useColorScheme()
+  const theme = Appearance.getColorScheme()
 
   return (
     <View className={`mb-[10px] ${otherStyles}`}>
-      {title && <Text className='text-[16px] text-matte_gray mb-[5px]'>{title}</Text>}
+      {title && <Text className={`text-[16px] ${theme==='light'? 'text-matte_gray' : 'text-white'} mb-[5px]`}>{title}</Text>}
       <View className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8px] 
         ${disableEdit ?  'bg-color_lightGray':
           theme === 'light'? 'bg-[rgba(255,255,255,0.9)]'

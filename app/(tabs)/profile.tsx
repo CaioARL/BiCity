@@ -14,10 +14,13 @@ import ShowAlert from '../../components/ShowAlert'
 import { updateUsuario } from 'util/validationSchemas'
 import SimpleTextInput from 'components/SimpleTextInput'
 import { getHabilidades } from 'storage/nivel-habilidade'
+import { Appearance } from 'react-native'
 
 
 export default function Profile(){
   const { onLogout, authState, fetchUser } = useAuthProvider()
+  
+  const theme = Appearance.getColorScheme()
 
   const [updateImage, setUpdateImage] = useState<string | null>(null)
 
@@ -212,13 +215,14 @@ export default function Profile(){
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView 
+      className={`${theme==='light'?'bg-white':'bg-secondary_black'}`}
       scrollEventThrottle={16} 
       contentContainerStyle={{ paddingBottom: 107 }}
       >
       
-        <View style={{...CustomProfile.profileCard, backgroundColor: 'white', shadowColor: '#000'}}>
+        <View style={{...CustomProfile.profileCard, backgroundColor: theme==='light'?'white':'#1f2937', shadowColor: '#000'}}>
 
 
           {isLoading && <LoadingActivity></LoadingActivity>}
@@ -227,17 +231,17 @@ export default function Profile(){
             <View style={CustomProfile.imageContainer}>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
 
-              <View className='w-[350px] h-[350px] rounded-[350px] border-[3px] border-[white] bg-[white] mr-[10px] items-center'>
+              <View className={`w-[350px] h-[350px] rounded-[350px] border-[3px] mr-[10px] items-center ${theme === 'dark' ? 'bg-[#1f2937] border-[black] ' : 'bg-white border-[white]'}`}>
            
                 {authState?.user?.s3Url ?
                 (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
                 :
-                (<Text className='text-[245px]'>
+                (<Text className={`text-[245px] ${theme==='light'?'text-black':'text-white'}`}>
                   {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
                 </Text>)}
             
 
-                {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor : '#C3FF00'}} onPress={pickImage} >
+                {isEditing && <TouchableOpacity style={{...CustomProfile.editButton, backgroundColor : '#C3FF00', borderColor: theme==='light'?'white':'black'}} onPress={pickImage} >
                  <Ionicons name="pencil" size={16} style={{marginLeft: 2, color: '#1f2937' }} />
                 </TouchableOpacity>}
               </View>
@@ -248,7 +252,7 @@ export default function Profile(){
           <View style={CustomProfile.bottomSection}>
             {isEditing ? (
               <>
-                <Text className='text-[16px] text-black mb-[5px]'>Nome</Text>
+                <Text className={`text-[16px] ${theme==='light'?'text-matte_gray':'text-white'} mb-[5px]`}>Nome</Text>
                 {authState?.user?.nome && <SimpleTextInput
                   errorMessage={updateUsuarioError.nome}
                   value={usuario.nome}
@@ -263,7 +267,7 @@ export default function Profile(){
                   handleChange={text => updateCampoUsuario('nomeUsuario', text)}
                 />}
 
-                <Text className='text-[16px] text-matte_gray mb-[5px]'>Endereço</Text>
+                <Text className={`text-[16px] ${theme==='light'?'text-matte_gray':'text-white'} mb-[5px]`}>Endereço</Text>
                 {authState?.user?.endereco?.cep && <SimpleTextInput
                   errorMessage={updateUsuarioError.cep}
                   value={usuario.endereco.cep}
@@ -303,7 +307,7 @@ export default function Profile(){
                   handleChange={(text) => updateCampoUsuarioEndereco("numero",Number(text.replace(/\D/g, '')))} // Ensure only numbers are set
                 />}
 
-                <Text className='text-[16px] text-matte_gray mb-[5px]'>Email</Text>
+                <Text className={`text-[16px] ${theme==='light'?'text-matte_gray':'text-white'} mb-[5px]`}>Email</Text>
                 {authState?.user?.email && <SimpleTextInput
                   errorMessage={updateUsuarioError.email}
                   value={usuario.email}
@@ -329,7 +333,7 @@ export default function Profile(){
             ) : (
               <>
                 <Text style={{...CustomProfile.name}}>{authState?.user?.nome}</Text>
-                <Text className='text-[14px] text-secondary_black_sub_title mb-[5px] mt-[5px]'>@{authState?.user?.nomeUsuario}</Text>
+                <Text className={`text-[14px] ${theme==='light'?'text-secondary_black_sub_title':'text-white'} mb-[5px] mt-[5px]`}>@{authState?.user?.nomeUsuario}</Text>
               </>
             )}
            
@@ -337,7 +341,7 @@ export default function Profile(){
               <View className="flex-row items-center justify-between mr-[10px]">
               {authState?.user?.nivelHabilidade &&
                 <View className='flex-row my-1 gap-x-1'>
-                <Text className="text-[14px] text-secondary_black_sub_title mr-2">
+                <Text className={`text-[14px] ${theme==='light'?'text-secondary_black_sub_title':'text-white'} mr-2`}>
                   Nível {authState.user.nivelHabilidade.nome}
                 </Text>
                 
@@ -369,7 +373,7 @@ export default function Profile(){
               </View>
             
            
-            {authState && <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>Data de Criação: {authState.user?.dtCriacao.split(' ')[0]}</Text>}
+            {authState && <Text className={`text-[14px] ${theme==='light'?'text-secondary_black_sub_title':'text-white'} mb-[5px]`}>Data de Criação: {authState.user?.dtCriacao.split(' ')[0]}</Text>}
 
           </View>
 

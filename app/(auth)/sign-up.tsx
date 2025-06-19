@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ScrollView, View, Text, TouchableOpacity, ImageBackground, BackHandler } from 'react-native'
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground, BackHandler, Appearance } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
@@ -23,6 +23,8 @@ export default function SignUp() {
   const [createUsuarioRequest, setCreateUsuarioRequest] = useState<CreateUsuarioRequest | null>()
   const [createUsuarioForms, setCreateUsuarioForms] = useState<CreateUsuarioForms>({ firstName: '', secondName: '', nomeUsuario: '', cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: '', email: '', senha: '', confirmaSenha: '', cpf: '', cnpj: null, nivelHabilidade: { id: 0, nome: '', descricao: '' } })	
   const [errorCreateUsuarioForms, setErrorCreateUsuarioForms] = useState<ErrorCreateUsuarioForms>({ bairro: '', cep: '', cidade: '', cnpj: '', cpf: '', email: '', estado: '', nivelHabilidade: '', firstName: '' , secondName: '', nomeUsuario: '', numero: '', rua: '',  senha: '', confirmaSenha: ''})
+
+  const theme = Appearance.getColorScheme()
 
   const [codigo, setCodigo] = useState('')
   const [createCodigoRequest, setCreateCodigoRequest] = useState<string>()
@@ -337,7 +339,7 @@ export default function SignUp() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme==='light'?'white':'#1f2937', justifyContent: 'center', alignItems: 'center' }}>
     <ImageBackground
       source={require('../../assets/img/background-fundo-figura.png')}
       style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -347,11 +349,11 @@ export default function SignUp() {
     <TouchableOpacity
       style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
         paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-        className='bg-primary_green'
+        className={theme === 'dark' ? 'bg-secondary_black' : 'bg-primary_green'}
         onPress={prevStep}
       >
         
-      <Ionicons name="arrow-back" size={24} color="#555" />
+      <Ionicons name="arrow-back" size={24} color={theme==='light'?'#555':'white'} />
       </TouchableOpacity>
       
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }} style={{ width: '100%' }}>

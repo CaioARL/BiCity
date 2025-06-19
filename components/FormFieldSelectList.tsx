@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, FlatList, ActivityIndicator, Appearance } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 
@@ -22,125 +22,29 @@ export default function FormFieldSelectList({
   handleChange,
   msg,
   isValid,
-  otherStyles,
   disableEdit,
   isLoading,
 }: FormFieldSelectListProps<any>) {
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const getBorderColor = () => {
-    if (disableEdit) return 'border-color_lightGray';
-    if (msg) return 'border-color_red_error';
-    if (isValid === true) return 'border-color_green_success';
-    if (isValid === false) return 'border-color_red_error';
-    return 'border-[#ddd]'; 
-  };
-
-  const styles = StyleSheet.create({
-    container: {
-      marginVertical: 8, 
-    },
-    title: {
-      fontSize: 16,
-      color:  '#1f2937',
-    },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: (() => {
-        if (disableEdit) return '#D1D5DB';
-        if (msg) return  '#E81123';
-        if (isValid === true) return  '#22c55e';
-        if (isValid === false) return  '#E81123';
-        return '#8e9095';
-      })(),
-      borderRadius: 12,
-      padding: 16,
-      width: '100%',
-      height: 61,
-      backgroundColor: '#FFF',
-    },
-    
-    inputText: {
-      flex: 1,
-      color:  '#555',
-      fontSize: 16, // `text-base`
-    },
-    icon: {
-      color: '#555',
-    },
-    errorText: {
-      fontSize: 14, 
-      color: '#E81123',
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    modalContent: {
-      width: '80%',
-      backgroundColor: '#C3FF00',
-      borderRadius: 10,
-      padding: 16,
-      elevation: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-    },
-    optionItem: {
-      padding: 12,
-      borderBottomWidth: 1,
-      borderBottomColor:'#E5E7EB',
-      borderRadius: 8,
-      marginVertical: 2,
-    },
-    optionText: {
-      fontSize: 18,
-      color:  '#333',
-    },
-    closeButton: {
-      marginTop: 10,
-      padding: 10,
-      backgroundColor: '#E5E7EB',
-      borderRadius: 12,
-      alignItems: 'center',
-    },
-    closeButtonText: {
-      fontSize: 18, 
-      color:  '#555',
-      fontWeight: '500', 
-    },
-    modalShadow: {
-      elevation: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-    },
-  });
-
+  const [modalVisible, setModalVisible] = useState(false)
+  const theme = Appearance.getColorScheme()
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+    <View className={`my-[8px]`}>
+      <Text className={`text-base ${theme==='light'?'text-black':'text-white'}`}>{title}</Text>
       <TouchableOpacity
-        style={styles.inputContainer}
+        className={`flex-row items-center justify-between border-[2px] rounded-[12px] p-[16px] w-full h-[61px]  ${disableEdit ? 'bg-gray-200' : theme === 'light'? 'bg-white': 'bg-secondary_black'} border-color__lightGray`}
         onPress={() => !disableEdit && setModalVisible(true)}
         disabled={disableEdit}
       >
-        <Text style={styles.inputText}>
+        <Text className={`text-base ${theme === 'light'? 'color-black': 'color-white'} flex-1`}>
           {options.find(option => option.value === selectedValue)?.nome || 'Selecione uma opção'}
         </Text>
         {isLoading ? (
           <ActivityIndicator size="small" color={'#0000ff'} />
         ) : (
-          <Ionicons name="chevron-down" size={20} style={styles.icon} />
+          <Ionicons name="chevron-down" size={20} color={theme === 'light'? '#555':'#FFF'} />
         )}
       </TouchableOpacity>
-      {msg && <Text style={styles.errorText}>{msg}</Text>}
+      {msg && <Text className={`color-color_red_error text-sm`}>{msg}</Text>}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -150,7 +54,11 @@ export default function FormFieldSelectList({
         <View className='flex-1 justify-center items-center bg-gray-900 bg-opacity-50 bg-[rgba(0,0,0,0.5)]'>
           <View
             className="w-[80%] bg-primary_green rounded-[10px] p-4 "
-            style={styles.modalShadow}
+            style={{ elevation: 10,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 8, }}
           >
             <FlatList
               data={options}

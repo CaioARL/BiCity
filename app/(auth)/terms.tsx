@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Linking, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Linking, ScrollView, Appearance } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import ButtonModal from '../../components/ButtonModal';
@@ -12,6 +12,7 @@ type TermsProps = {
 
 export default function Terms({ visible, onClose }: TermsProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const theme = Appearance.getColorScheme()
 
   React.useEffect(() => {
     if (visible) {
@@ -39,16 +40,16 @@ export default function Terms({ visible, onClose }: TermsProps) {
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim, justifyContent: 'flex-end' }}>
     <View className='flex-[1] justify-end bg-[rgba(0,0,0,0.5)]'>
-      <View className='bg-white rounded-t-3xl h-[300] p-[20px]'>
+      <View className={`rounded-t-3xl h-[300] p-[20px] ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
         <View className='flex-row justify-between mb-[20px]'>
-          <Text className='text-[18px] font-bold'>Política de Privacidade</Text>
+          <Text className={`text-[18px] font-bold ${theme==='light'?'text-black':'text-white'}`}>Política de Privacidade</Text>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={24} color="#555" />
           </TouchableOpacity>
         </View>
 
           <ScrollView>
-            <Text className='mb-[20px]'>
+            <Text className={`mb-[20px] ${theme==='light'?'text-black':'text-white'}`}>
               Prezado Usuário,{"\n\n"}
               Antes de prosseguir com o uso do aplicativo BiCity:{"\n"}
               Ao clicar em "Aceitar", você concorda com o armazenamento de cookies do seu dispositivo para melhorar a navegação no aplicativo e experiência.{"\n\n"}
