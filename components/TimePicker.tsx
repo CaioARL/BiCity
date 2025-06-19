@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Appearance } from 'react-native'
 import NumberSelection from './NumberSelection'
 
 
@@ -8,6 +8,7 @@ interface TimePickerProps {
 }
 
 export default function TimePicker ({ onClose } : TimePickerProps) {
+  const theme = Appearance.getColorScheme()
   const [hour, setHour] = useState<string>('00')
   const [minute, setMinute] = useState<string>('00')
   const [listSelector, setListSelector] = useState<string[] | null>(null)
@@ -16,7 +17,7 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
   return (
     <>
     <View  className='absolute flex-row items-center h-full w-full bg-[rgba(0,0,0,0.5)]'>
-      <View className='bg-white left-[5%] h-fit w-[90%] rounded-lg p-5'>
+      <View className={`left-[5%] h-fit w-[90%] rounded-lg p-5 ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
 
         <View className='flex-row items-center justify-end'>
           <TouchableOpacity
@@ -28,8 +29,8 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
         </View>
 
         <View className='w-full flex-row justify-center'>
-            <Text className='w-[48%] text-center'>hora</Text>
-            <Text className='w-[48%] text-center'>minuto</Text>
+            <Text className={`w-[48%] text-center ${theme==='light'?'text-black':'text-white'}`}>hora</Text>
+            <Text className={`w-[48%] text-center ${theme==='light'?'text-black':'text-white'}`}>minuto</Text>
         </View>
 
         <View className='flex-row items-end h-[70px]'> 
@@ -39,13 +40,13 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
                 setListSelector(Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')))
                 triggerRef.current = 'hour'
               }}>
-                <Text className=' color-[#000] font-bold text-[24px] ' >{hour}</Text>
+                <Text className={`font-bold text-[24px] ${theme==='light'?'text-black':'text-white'} `} >{hour}</Text>
               </TouchableOpacity>
               <TouchableOpacity className='w-[48%] h-full items-center justify-center' onPress={() => {
                 setListSelector(Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')))
                 triggerRef.current = 'minute'
               }}>
-                <Text className='color-[#000] font-bold text-[24px]'>{minute}</Text>
+                <Text className={`font-bold text-[24px] ${theme==='light'?'text-black':'text-white'}`}>{minute}</Text>
               </TouchableOpacity>
             </View>
            
@@ -53,7 +54,7 @@ export default function TimePicker ({ onClose } : TimePickerProps) {
 
           
         </View>
-        <Text className='text-base text-center'>Clique para selecionar</Text>
+        <Text className={`text-base text-center ${theme==='light'?'text-black':'text-white'}`}>Clique para selecionar</Text>
 
           <TouchableOpacity
               onPress={()=> onClose(`${hour}:${minute}:00`) }
