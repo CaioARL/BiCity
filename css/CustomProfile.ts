@@ -50,7 +50,6 @@ const CustomProfile = StyleSheet.create({
     borderRadius: 50,
     padding: 8,
     borderWidth: 2,
-    borderColor: 'white',
   },
   bottomSection: {
     paddingTop: 60,

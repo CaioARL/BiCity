@@ -7,7 +7,6 @@ const CustomTabBar = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
     marginHorizontal: 25,
     paddingVertical: 15,
     borderRadius: 35,

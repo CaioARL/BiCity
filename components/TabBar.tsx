@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, LayoutChangeEvent} from 'react-native';
+import { Appearance, Keyboard, LayoutChangeEvent} from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import CustomTabBar from '../css/CustomTabBar';
 import TabBarButton from './TabBarButton';
@@ -59,9 +59,10 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   if (!isVisible) return null
 
   const buttonWidth = dimensions.width / visibleRoutes.length;
+  const theme = Appearance.getColorScheme()
 
   return (
-    <Animated.View style={[CustomTabBar.tabbar]} onLayout={onTabLayout}>
+    <Animated.View style={{...CustomTabBar.tabbar, backgroundColor: theme==='light'?'white':'#1f2937'}} onLayout={onTabLayout}>
       <Animated.View
         className={`absolute bg-primary_green rounded-[30] mx-[12px]`}
         style={[animatedStyle, {
@@ -108,7 +109,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             onLongPress={onLongPress}
             isFocused={isFocused}
             routeName={route.name}
-            color={isFocused ? '#333' : '#333'}
+            color={theme==='light'? '#333' : 'white'}
             label={label}
           />
         );

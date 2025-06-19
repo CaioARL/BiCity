@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, FlatList, Image, Dimensions, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native'
+import { View, Text, FlatList, Image, Dimensions, StyleSheet, TouchableOpacity, ImageBackground, Appearance } from 'react-native'
 import { Evento } from 'types'
 
 const { width } = Dimensions.get('window')
@@ -23,6 +23,7 @@ export default function EventCardCarousel({
 }: EventCardCarouselProps) {
   const flatListRef = useRef<FlatList>(null)
   const [activeTab, setActiveTab] = useState<'eventos' | 'problemas'>('eventos')
+  const theme = Appearance.getColorScheme()
 
   useEffect(() => {
     if (flatListRef.current && hilightedEvento) {
@@ -53,7 +54,7 @@ export default function EventCardCarousel({
   }
 
   return (
-    <View className={`absolute z-20 bottom-[-1%] left-0 w-full bg-white ${!hilightedEvento ? 'hidden' : ''}`}>
+    <View className={`absolute z-20 bottom-[-1%] left-0 w-full ${theme==='light'?'bg-white':'bg-secondary_black'} ${!hilightedEvento ? 'hidden' : ''}`}>
       <View className="flex-row mb-2 mt-1">
         <TouchableOpacity className={`px-6 py-3 items-center`} onPress={() => setActiveTab('eventos')}>
           <Text className={`text-[16px] font-bold ${activeTab === 'eventos' ? 'text-secondary_black_sub_title' : 'text-black'}`}>

@@ -1,4 +1,4 @@
-import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Appearance } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
@@ -39,6 +39,7 @@ export default function Events() {
   const [usuario, setUsuario] = useState<Usuario>({ id: 0, nome: '', nomeUsuario: '', endereco: { cep: '', estado: '', cidade: '', bairro: '', rua: '', numero: 0, }, email: '', role: '', senha: '', hash: '', cpf: '', cnpj: '', dtCriacao: '', nivelHabilidade: { id: 0, nome: '', descricao: '' }, sessao: {id:0, token:''}, s3Url:'' });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
+  const theme = Appearance.getColorScheme()
   
   //requests - api
   const [eventos, setEventos] = useState<Evento[] | null>(null)
@@ -195,7 +196,7 @@ export default function Events() {
 
   return (
   <SafeAreaView>
-      <View className='container h-full' style={{ backgroundColor: 'white' }}>
+      <View className={`container h-full ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
 
         {/* Perfil, busca e filtro */}
         <View style={CustomEvents.evento}>
@@ -216,22 +217,22 @@ export default function Events() {
                 />
                 :
                 <View className='w-[65px] h-[65px] rounded-[50px] border-[1px] border-[#EAEAEC] mr-[10px] items-center'>
-                  <Text className='text-[45px]'>{usuario && usuario.nome[0]}</Text>
+                  <Text className={`text-[45px] ${theme==='light'?'text-black':'text-white'}`}>{usuario && usuario.nome[0]}</Text>
                 </View>
                 
                 }
               <View style={{ flexDirection: 'column' }}>
-                <Text style={{ ...CustomEvents.locationText}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
+                <Text style={{ ...CustomEvents.locationText, color: theme==='light'?'black':'white'}}>{usuario && usuario?.nomeUsuario?.replace(/\b\w/, (c) => c.toUpperCase())}</Text>
                 <View style={{ flexDirection: 'row' }}>
                   <Feather name="map-pin" size={18} color="#555" style={{marginLeft: 2}}/>
-                  {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText}}>{authState.user.endereco.cidade}</Text> }
+                  {authState?.user?.endereco && <Text style={{ ...CustomEvents.locationText, color: theme==='light'?'black':'white'}}>{authState.user.endereco.cidade}</Text> }
                   {/* <Feather name="chevron-down" size={18} color="#555" /> */} 
                 </View>
                 <View style={{ flexDirection: 'row' }}>
                   <Ionicons name="star-half-outline" size={18} color="#ffcc00" style={{marginLeft: 2}}/> 
                   
                   {authState?.user?.nivelHabilidade && (
-                    <Text style={{ ...CustomEvents.nivelText}}>{authState.user.nivelHabilidade.nome}</Text>)  
+                    <Text style={{ ...CustomEvents.nivelText, color: theme==='light'?'#555555':'white'}}>{authState.user.nivelHabilidade.nome}</Text>)  
                   }
 
                 </View>
@@ -245,26 +246,28 @@ export default function Events() {
                   onPress={()=>{
                           router.push('event-user-menu')
                   }}>
-                      <Image source={require('../../assets/img/1581943.png')} style={{ width: 25, height: 25, tintColor: '#555' }} resizeMode="contain" />
-
-                      <Text className='text-xs text-matte_gray text-center'>Meus {'\n'} Eventos</Text>
+                      {/* <Image source={require('../../assets/img/1581943.png')} style={{ width: 25, height: 25, tintColor: '#555' }} resizeMode="contain" /> */}
+                      <Ionicons name='calendar-outline' size={25} color={theme==='light'?'#555':'white'}/>
+                      <Text className={`text-xs text-center ${theme==='light'?'text-matte_gray':'text-white'}`}>Meus {'\n'} Eventos</Text>
                   </TouchableOpacity>
                 </View>}
 
           </View>
 
-          <View style={{ ...CustomEvents.searchBox, }}>
-            <Ionicons name="search-outline" size={20} color="#555"/>
+          <View 
+            className={`flex-row items-center rounded-[100px] px-[10px] h-[50px] elevation-[3px] border-[1px] border-color__lightGray ${theme==='light'?'bg-white ':'bg-matte_gray'}`}
+          > 
+            <Ionicons name="search-outline" size={20} color={theme==='light'?'#555':'white'}/>
             <TextInput
               placeholder="Digite o nome do evento"
-              style={CustomEvents.input}
+              style={{...CustomEvents.input, color: theme==='light'?'black':'white'}}
               value={searchText}
-              placeholderTextColor='rgba(0,0,0,0.4)'
+              placeholderTextColor={theme==='light'?'rgba(0,0,0,0.4)':'rgba(255,255,255,0.4)'}
               onChangeText={setSearchText}
               onEndEditing={() => searchName()}
             />
             <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
-                <Ionicons name="options-outline" size={20} color="#555" />
+                <Ionicons name="options-outline" size={20} color={theme==='light'?'#555':'white'} />
               </TouchableOpacity>
           </View>
 
@@ -279,9 +282,9 @@ export default function Events() {
                     CustomEvents.filterText,
                     item.isActive && {
                       ...CustomEvents.filterText,fontWeight: "bold",
-                      color: "#555",
+                      color: theme==='light'?'white':'#555',
                       backgroundColor: "#C3FF00",
-                      borderColor: "white" 
+                      borderColor: "#555" 
                     }
                   ]}
                 >
@@ -295,7 +298,7 @@ export default function Events() {
         {/* Box - Eventos */}
         <View>
       
-        <Text style={CustomEvents.placesContainer}>Eventos</Text>
+        <Text style={{...CustomEvents.placesContainer, color: theme==='light'?'#555':'white'}}>Eventos</Text>
 
            {eventos && (
             <FlatList

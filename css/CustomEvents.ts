@@ -6,7 +6,7 @@ const CustomEvents = StyleSheet.create({
   location: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
   
   locationText: { fontSize: 15.5, fontWeight: "500", marginHorizontal: 5},
-  nivelText: { fontSize: 14, fontWeight: "500", marginHorizontal: 5, color: "#555", opacity: 0.8 },
+  nivelText: { fontSize: 14, fontWeight: "500", marginHorizontal: 5, opacity: 0.8 },
   // SearchBox
   searchBox: {
     flexDirection: "row",
@@ -39,13 +39,12 @@ const CustomEvents = StyleSheet.create({
   filterText: { 
     fontSize: 14, 
     fontWeight: "500", 
-    color: "#555", paddingTop:5, 
+    paddingTop:5, 
     paddingBottom:6, paddingLeft:13, 
     paddingRight:13, 
     borderRadius: 20, 
     backgroundColor: "#f0f0f0", 
     borderWidth: 0.2, 
-    borderColor: "#555", 
     marginRight: 14, 
     marginLeft: -9
   },
@@ -54,7 +53,6 @@ const CustomEvents = StyleSheet.create({
   placesContainer: {
     fontSize: 23, 
     fontWeight: "700", 
-    color: "#555", 
     marginTop: 20, 
     marginBottom: 10
   },

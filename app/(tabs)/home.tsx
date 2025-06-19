@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, Alert, Linking} from 'react-native'
+import { View, Text, TouchableOpacity, Image, Alert, Linking, Appearance} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
@@ -44,9 +44,8 @@ import { LOCATION_TASK } from '../../tasks/locationTask'
 import { setUpdateLocationCallback } from 'util/locationFallBack'
   
 export default function Home() {
-  
-  
   const dateRef = useRef(new Date())
+  const theme = Appearance.getColorScheme()
   const [menuVisible, setMenuVisible] = useState<boolean>(false)
   
   const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number | null }  |  null>(null)
@@ -770,7 +769,7 @@ export default function Home() {
     else if (!userLocation)
       return (
         <SafeAreaView>
-          <View className='flex-col h-full w-full justify-center items-center'>
+          <View className={`flex-col h-full w-full justify-center items-center ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
  
               <Image
                 source={require('../../assets/notificacoesErro/localização.webp')}
@@ -778,14 +777,14 @@ export default function Home() {
                 resizeMode="cover"
               />
 
-              <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>
+              <Text className={`text-[14px] ${theme==='light'?'text-secondary_black_sub_title':'text-white'} mb-[5px]`}>
                 {currentLocationError && currentLocationError.message}
               </Text>
               <TouchableOpacity 
               className='bg-primary_green mt-4 p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center'
               onPress={()=>getCurrentLocation()}
               >
-                <Text className='text-[14px] text-black mb-[5px]'>
+                <Text className={`text-[14px] text-black mb-[5px]`}>
                   Tentar Novamente
                 </Text>
               </TouchableOpacity>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native'
+import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity, Appearance} from 'react-native'
 import { Region } from 'react-native-maps'
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
@@ -28,6 +28,8 @@ interface EventModalProps {
 export default function EventModal({ visible, closeModal, evento }: EventModalProps) {
 
   const { authState } = useAuthProvider()
+
+  const theme = Appearance.getColorScheme()
 
   // const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -323,7 +325,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
     <Modal visible={visible} animationType="slide" transparent={true} >
         <ScrollView className='bg-[rgba(0,0,0,0.5)]'>
-        <View className='bg-white rounded-[10px] p-[20px] m-[20px]'>
+        <View className={`${theme ==='light'? 'bg-white':'bg-secondary_black'} rounded-[10px] p-[20px] m-[20px]`}>
             {/* <Animated.View style={{ opacity: fadeAnim }}> */}
 
                <View  className='mb-[2px]'>
@@ -353,9 +355,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                     <Text className='text-color_red_error  my-2'>{'*'+mapPlotError}</Text>
                   )}
                     
-                  <Text>Selecione o local do evento:</Text> 
-                  <Text>1. Clique no mapa para selecionar o local, ou</Text>
-                  <Text>2. Digite o CEP abaixo:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>Selecione o local do evento:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>1. Clique no mapa para selecionar o local, ou</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>2. Digite o CEP abaixo:</Text>
                 </View>
                
               <FormFieldModal
@@ -498,10 +500,10 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                   onPress={() => setShowTimePicker(!showTimePicker )}
                   onPressIn={()=>{updateCampoNovoEventoErrorData('horario','')}}
               >
-                <Text className='text-matte_gray'>
+                <Text className={`${theme==='light'?'text-matte_gray':'text-white'}`}>
                 {requestCreateEvento.data.horario.replace(':00', '') || 'Selecione a hora do evento'}
                 </Text>
-                <Ionicons name="time-outline" size={24} color="#666" />
+                <Ionicons name="time-outline" size={24} color={theme==='light'?'#666':'#FFF'} />
               </TouchableOpacity>
               {novoEventoError.data.horario && (<Text className='text-color_red_error'>*{novoEventoError.data.horario}</Text>)}
               
@@ -525,9 +527,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                         </Text>
                       </View>
                     ) : (
-                      <View className="h-[120px] w-[100%] mb-4 bg-[#f0f0f0] rounded-[10px] items-center justify-center">
-                        <Text className="text-gray-500 mb-2">Toque para adicionar uma imagem</Text>
-                        <Text className="text-xs text-gray-400">Você pode tirar uma foto ou escolher da galeria</Text>
+                      <View className={`h-[120px] w-[100%] mb-4 rounded-[10px] items-center justify-center ${theme==='light'?'bg-[#f0f0f0]':'bg-[#131212a4]'}`}>
+                        <Text className={`text-gray-500 mb-2 ${theme==='light'?'text-black':'text-white'}`}>Toque para adicionar uma imagem</Text>
+                        <Text className={`text-xs text-gray-400 ${theme==='light'?'text-black':'text-white'}`}>Você pode tirar uma foto ou escolher da galeria</Text>
                       </View>
                     )}
               </TouchableOpacity>

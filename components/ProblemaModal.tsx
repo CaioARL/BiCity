@@ -1,4 +1,4 @@
-import { View, Text, Animated, Modal, ScrollView, Image, TouchableOpacity } from 'react-native'
+import { View, Text, Animated, Modal, ScrollView, Image, TouchableOpacity, Appearance } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
@@ -16,6 +16,7 @@ interface ModalProps {
 }
 
 export default function ProblemaModal({ visible, closeModal, coords }: ModalProps) {
+  const theme = Appearance.getColorScheme()
   const [listTipoProblema, setListTipoProblema] = useState<ListTipoProblema[]>([])
   const [image, setImage] = useState<string | null>(null)
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -151,8 +152,8 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
       <Modal visible={visible} animationType="slide" transparent={true}>
         <Animated.View style={{ opacity: fadeAnim }}>
           <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
-            <ScrollView className={'rounded-[10px] p-[20px] m-[20px] bg-white w-[90%] h-auto'}>
-              <Text className='flex-col text-lg font-bold text-center mb-10' >
+            <ScrollView className={`rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
+              <Text className={`flex-col text-lg font-bold text-center mb-10 ${theme==='light'?'text-black':'text-white'}`} >
                 Reportar Problema
               </Text>
 
@@ -189,9 +190,9 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
                     </Text>
                   </View>
                 ) : (
-                  <View className="h-[120px] w-[100%] mb-4 bg-[#f0f0f0] rounded-[10px] items-center justify-center">
-                    <Text className="text-gray-500 mb-2">Toque para adicionar uma imagem</Text>
-                    <Text className="text-xs text-gray-400">Você pode tirar uma foto ou escolher da galeria</Text>
+                  <View className={`h-[120px] w-[100%] mb-4 rounded-[10px] items-center justify-center ${theme==='light'?'bg-[#f0f0f0]':'bg-[#131212a4]'}`}>
+                    <Text className={`text-gray-500 mb-2 ${theme==='light'?'text-black':'text-white'}`}>Toque para adicionar uma imagem</Text>
+                    <Text className={`text-xs text-gray-400 ${theme==='light'?'text-black':'text-white'}`}>Você pode tirar uma foto ou escolher da galeria</Text>
                   </View>
                 )}
               </TouchableOpacity>   

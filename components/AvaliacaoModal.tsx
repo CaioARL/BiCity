@@ -1,4 +1,4 @@
-import { View, Text, Modal, TouchableOpacity } from 'react-native'
+import { View, Text, Modal, TouchableOpacity, Appearance } from 'react-native'
 import React, { useState } from 'react'
 import ButtonModal from './ButtonModal'
 import FormFieldModal from './FormFieldModal'
@@ -16,6 +16,7 @@ interface AvalicaoModalProps {
 
 export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCicloviaria}: AvalicaoModalProps) {
   const { authState } = useAuthProvider()
+  const theme = Appearance.getColorScheme()
 
   const [requestCreateAvaliacao, setRequestCreateAvaliacao] = useState({
     idUsuario: authState?.user?.id || 0,
@@ -78,7 +79,7 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
             className="mx-1"
           >
             <Text
-              className={`text-3xl color-black}`}
+              className={`text-3xl ${theme==='light'?'color-black':'color-white'}}`}
               style={{ color: star <= requestCreateAvaliacao.nota ? '#FFD700' :  '#CCC' }}
             >
               ★
@@ -105,16 +106,16 @@ export default function AvaliacaoModal({ visible, closeModal, idInfraestruturaCi
     <Modal animationType="slide" transparent={true}>
       {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         <View className="flex-row bg-[rgba(0,0,0,0.5)] justify-center h-[100%] w-[100%] items-center">
-          <View className='rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto bg-white'>
-            <Text className='flex-col text-lg font-bold text-center mb-10' >
+          <View className={`rounded-[10px] p-[20px] m-[20px] w-[90%] h-auto ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
+            <Text className={`flex-col text-lg font-bold text-center mb-10 ${theme==='light'?'text-black':'text-white'}`} >
               Avaliar Ciclovia
             </Text>
 
             <View className="mb-4">
-              <Text className='text-[16px] text-matte_gray mb-[5px]' >
+              <Text className={`text-[16px] ${theme==='light'? 'text-matte_gray':'text-color_light_gray'} mb-[5px]`} >
                 Qualidade da Ciclovia:
               </Text> 
-              <Text className="text-xs text-gray-400 text-center py-2">1 ★ = Insatisfatório ||
+              <Text className={`text-xs ${theme==='light'? 'text-black' : 'text-white'} text-center py-2`}>1 ★ = Insatisfatório ||
                  5 ★ = Muito satisfatório</Text>
               {renderStars()}
             </View>
