@@ -18,7 +18,7 @@ interface FormFieldCalendarSelectModalProps {
 export default function FormFieldCalendarSelectModal({ value, handleChangeValue,onFocus, msg, disabled}: FormFieldCalendarSelectModalProps) {
 
     const [showCalendar, setShowCalendar] = useState(false)
-
+    const today = new Date().toISOString().split('T')[0] // Get today's date in YYYY-MM-DD format
 
   return (
     <View className='mb-[20px] mt-5'>
@@ -39,7 +39,8 @@ export default function FormFieldCalendarSelectModal({ value, handleChangeValue,
         {showCalendar && (
             <View className='mt-[10px] border-[1px] border-[#ddd] rounded-[8px] overflow-hidden'>
             <Calendar
-                minDate={new Date().toISOString().split('T')[0]}
+                minDate={today}
+                monthFormat='MMM yyyy'
                 markedDates={
                 value
                     ? {
