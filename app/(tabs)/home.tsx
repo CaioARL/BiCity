@@ -560,7 +560,8 @@ export default function Home() {
           setIsContentLoading(true)
           await Location.startLocationUpdatesAsync(LOCATION_TASK, {
             accuracy: Location.Accuracy.High,
-            timeInterval: 700,
+            distanceInterval: 3,
+            timeInterval: 500,
             showsBackgroundLocationIndicator: true,
              foregroundService: {
               notificationTitle: "Rastreamento de Localização",
