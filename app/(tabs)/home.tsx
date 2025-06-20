@@ -42,6 +42,7 @@ interface LocationError {
 
 import { LOCATION_TASK } from '../../tasks/locationTask'
 import { setUpdateLocationCallback } from 'util/locationFallBack'
+import SearchBar from 'components/SearchBar'
   
 export default function Home() {
   const dateRef = useRef(new Date())
@@ -1067,6 +1068,8 @@ export default function Home() {
                 }}
                 coords={problemaModalNavigationCoords}
               />}
+
+              <SearchBar/>
 
               {navigation &&
                 <TouchableOpacity
