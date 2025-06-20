@@ -45,10 +45,9 @@ const ENDPOINTS = {
     EVENTO_GET_BY_USUARIO: '/evento/usuario/',
 
     ENDERECO_CEP_GET: '/endereco/get/by/cep',
-    ENDERECO_VIACEP_GET: 'https://viacep.com.br/ws/',
+    ENDERECO_VIACEP_GET: '/ws/',
     ENDERECO_LAT_LONG_GET: '/endereco/get/LatAndLon/by/cepAndNumber',
     ENDERECO_CEP_BY_LAT_LONG_GET: '/endereco/get/cep/by/LatAndLon',
-
 
     INFRAESTRUTURA_GET: '/infraestrutura/geojson',
     INFRAESTRUTURA_GET_BY_ID: '/infraestrutura/',
