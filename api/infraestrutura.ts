@@ -20,3 +20,14 @@ export const getInfraestruturaById = async (id: number, abortSignal: AbortContro
     })
     return response.data
 }
+
+export const getPath = async (from : {lat: number, lon: number}, to: {lat: number, lon: number} , abortSignal: AbortController | null) => {
+    console.log(from.lon+','+from.lat+';'+to.lon+','+to.lat)
+    const response = await api.get<InfraestruturaGeoJsonResponse>(ENDPOINTS.INFRAESTRUTURA_ROTA_GET,{
+        params:{
+            coordenadas: from.lon+','+from.lat+';'+to.lon+','+to.lat
+        },
+        signal: abortSignal?.signal
+    })
+    return response.data
+} 

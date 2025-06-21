@@ -51,6 +51,7 @@ const ENDPOINTS = {
 
     INFRAESTRUTURA_GET: '/infraestrutura/geojson',
     INFRAESTRUTURA_GET_BY_ID: '/infraestrutura/',
+    INFRAESTRUTURA_ROTA_GET: '/rota'
 
 
 } as const;

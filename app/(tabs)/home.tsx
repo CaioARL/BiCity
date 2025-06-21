@@ -6,7 +6,7 @@ import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJ
 import { getEventoById, getEventoByRadius } from '../../api/evento'
 import LoadingActivity from '../../components/LoadingActivity'
 import ButtonModal from '../../components/ButtonModal'
-import { getInfraestrutura, getInfraestruturaById } from '../../api/infraestrutura'
+import { getInfraestrutura, getInfraestruturaById, getPath } from '../../api/infraestrutura'
 import { checkCreateViabilityProblema, createProblema, createProblemaImage, getProblemaByRadius } from '../../api/problema'
 import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
@@ -98,6 +98,7 @@ export default function Home() {
   const { eventoId } = useLocalSearchParams<{eventoId: string}>()
 
   const [navigation, setNavigation] = useState<boolean>(false)
+  const [address, setAddress] = useState<{lat : number, lon: number}>()
   
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const locationErrors = {
@@ -762,6 +763,23 @@ export default function Home() {
         }
       }, [navigation])
 
+      useEffect(()=>{
+        if(!address) return
+        if(!userLocation) return
+        getPath({lat: userLocation.latitude ,lon: userLocation.longitude }, address, null)
+        .then((response)=>{
+          setInfraestrutura(mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson(response))
+
+            mapRef.current?.fitToCoordinates([{ latitude: userLocation.latitude, longitude: userLocation.longitude }, { latitude: address.lat, longitude: address.lon }], {
+              edgePadding: { top: 80, right: 80, bottom: 80, left: 80 },
+              animated: true,
+            })
+          
+        })
+        .catch()
+        .finally()
+      },[address])
+
     // --------------------------------------- component ---------------------------------------
 
     if(initalLoading)
@@ -1069,7 +1087,9 @@ export default function Home() {
                 coords={problemaModalNavigationCoords}
               />}
 
-              <SearchBar/>
+              <SearchBar
+                setAddress={setAddress}
+              />
 
               {navigation &&
                 <TouchableOpacity

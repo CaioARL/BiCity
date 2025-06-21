@@ -5,7 +5,13 @@ import { getLatLongByStreetName } from 'api/endereco'
 import { ResponseSearchBarAddress } from 'types'
 import { AxiosError } from 'axios'
 
-export default function SearchBar() {
+
+interface SearchBarProps {
+    setAddress: ({ lat, lon } : {lat: number, lon: number}) => void
+}
+
+
+export default function SearchBar( { setAddress }: SearchBarProps ) {
     const theme = Appearance.getColorScheme()
     const [isSeaching, setIsSearching] = useState<boolean>(false)
     const [addresses, setAddresses] = useState<ResponseSearchBarAddress[]>()
@@ -82,7 +88,7 @@ export default function SearchBar() {
                         className='container'
                         renderItem={({item})=>(
                             <TouchableOpacity key={item.place_id} className={`w-full p-3 mt-1 rounded-[300px] h-[45px] ${theme==='light'?'bg-white':'bg-secondary_black '}`}
-                                onPress={()=>{console.log(item.lat)}}
+                                onPress={()=>{setAddress({lat: parseFloat(item.lat), lon: parseFloat(item.lon)})}}
                             >
                                 <Text className={`text-2xl ${theme==='light'?'text-black':'text-white'}`}>{item.display_name}</Text>
                             </TouchableOpacity>
