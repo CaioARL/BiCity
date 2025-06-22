@@ -73,6 +73,7 @@ export const createEventSchema = z.object(
             numero: z.number(  { message: 'Numero: deve conter numero de endereço' } ).min(1)
         }),
         faixaKm: z.number().max(200, {message: 'faixa em KM de no máximo até 200km'}).min(1, {message: 'faixa em KM de no mínimo 1km'}),
+        valor: z.number().max(10000, { message : "valor máximo de R$ 10.000,00"}).min(0, {message: "Valor Minimo de R$ 0,00 "}).nullish(),
         gratuito: z.boolean({message: 'Gratuito: deve selecionar se é gratuito ou não'}),
         urlSite: z.string().url({message: 'Url do site: deve ser uma url valida'}),
         tipoEvento: z.object({

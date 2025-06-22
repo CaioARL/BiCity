@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, FlatList, Image, Dimensions, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native'
+import { View, Text, FlatList, Image, Dimensions, StyleSheet, TouchableOpacity, ImageBackground, Appearance } from 'react-native'
 import { Evento } from 'types'
 
 const { width } = Dimensions.get('window')
@@ -23,6 +23,7 @@ export default function EventCardCarousel({
 }: EventCardCarouselProps) {
   const flatListRef = useRef<FlatList>(null)
   const [activeTab, setActiveTab] = useState<'eventos' | 'problemas'>('eventos')
+  const theme = Appearance.getColorScheme()
 
   useEffect(() => {
     if (flatListRef.current && hilightedEvento) {
@@ -53,7 +54,7 @@ export default function EventCardCarousel({
   }
 
   return (
-    <View className={`absolute z-20 bottom-[-1%] left-0 w-full bg-white ${!hilightedEvento ? 'hidden' : ''}`}>
+    <View className={`absolute z-20 bottom-[-1%] left-0 w-full ${theme==='light'?'bg-white':'bg-secondary_black'} ${!hilightedEvento ? 'hidden' : ''}`}>
       <View className="flex-row mb-2 mt-1">
         <TouchableOpacity className={`px-6 py-3 items-center`} onPress={() => setActiveTab('eventos')}>
           <Text className={`text-[16px] font-bold ${activeTab === 'eventos' ? 'text-secondary_black_sub_title' : 'text-black'}`}>
@@ -110,7 +111,8 @@ export default function EventCardCarousel({
                 <View className="pt-6 pb-[22px] px-6 flex-col justify-around items-center">
 
                   <View className='w-full mt-1 mb-[8px] h-[70px]'>
-                    <Text className="text-[18px] text-color__text__light font-bold text-center mb-4 capitalize">{item.nome}</Text>
+                    <Text className="text-[18px] text-color__text__light font-bold text-center mb-4 capitalize" numberOfLines={1}
+                      ellipsizeMode="tail">{item.nome}</Text>
                     <Text className="text-color__text__light text-[12px]" numberOfLines={2}
                       ellipsizeMode="tail">{item.descricao}</Text>
                   </View>
@@ -134,7 +136,7 @@ export default function EventCardCarousel({
                   <View className='flex-row justify-around w-full'>
 
                     <View>
-                      <Text className='text-center text-color__text__light font-[12px]'>{item.data.split(' ')[1]}</Text>
+                      <Text className='text-center text-color__text__light font-[12px]'>{item.data.split(' ')[1].slice(0, 5)}</Text>
                       <Text className='text-center text-color__text__light font-bold'>{item.data.split(' ')[0]}</Text>
                     </View>
 

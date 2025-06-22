@@ -12,6 +12,7 @@ export interface Evento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    valor: number
     urlSite: string
     s3Url: string
     aprovado: boolean
@@ -31,6 +32,7 @@ export interface RequestCreateEvento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    valor: number
     urlSite: string
     tipoEvento: TipoEvento
     idUsuario : number
@@ -44,6 +46,7 @@ export interface RequestUpdateEvento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    valor: number
     urlSite: string
     tipoEvento: TipoEvento
     idUsuario : number
@@ -70,6 +73,7 @@ export interface RequestCreateEventoError {
     }
     faixaKm: string
     gratuito: string
+    valor: string
     urlSite: string
     tipoEvento: string
 }
@@ -89,6 +93,7 @@ export interface RequestUpdateEventoError {
     }
     faixaKm: string
     gratuito: string
+    valor: string
     urlSite: string
     tipoEvento: string
 }
@@ -104,6 +109,7 @@ export interface ResponseCreateEvento {
     endereco: EventoEndereco
     faixaKm: number
     gratuito: boolean
+    valor: number
     urlSite: string
     tipoEvento: TipoEvento
 }

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import React, { View , FlatList, TouchableOpacity, ImageBackground, Text, Image,  } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View , FlatList, TouchableOpacity, ImageBackground, Text, Image, Appearance,  } from "react-native";
 import { Evento, RequestCreateEvento, RequestCreateEventoImage, RequestPageEvento, RequestUpdateEvento } from "../../types";
 import { Ionicons} from "@expo/vector-icons";
 import { useAuthProvider } from "../context/AuthProvider";
@@ -9,7 +9,6 @@ import ShowAlert from "../../components/ShowAlert";
 import LoadingActivity from "../../components/LoadingActivity";
 import EventModal from "../../components/EventModal";
 import { router } from "expo-router";
-import { ArrowLeft } from 'lucide-react-native'
 import ScrollUp from '../../components/ScrollUp'; 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,11 +16,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function EventDetail() {
   const [requestPageEvento, setRequestPageEvento] = useState<RequestPageEvento>({ page: 1, nome: null, descricao: null, data: null, cidade: null, estado: null, faixaKm: null, tipoEvento: null, nivelHabilidade: null, gratuito: null, aprovado: null})
   const { authState } = useAuthProvider()
+  const theme = Appearance.getColorScheme()
 
   const [eventos, setEventos] = useState<Evento[] | null>()
   const [isContentLoading, setIsContentLoading] = useState<boolean>(false)
   
-  const abortControllerRef = useRef<AbortController>()
+  const abortControllerRef = useRef<AbortController>(null)
   const currentPageRef = useRef<number>(1)
   const totalPagesRef = useRef<number>(1)
   const totalRegistrosRef = useRef<number>(1)
@@ -170,15 +170,15 @@ export default function EventDetail() {
   }, [scrollY])
 
   return (
-    <SafeAreaView className="bg-white h-full w-full">
+    <SafeAreaView className={`h-full w-full ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
      
       <TouchableOpacity
         style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
           paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-          className='bg-primary_green'
+          className={`${theme==='light'?'bg-primary_green':'bg-secondary_black'}`}
            onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555" />
+        <Ionicons name="arrow-back" size={24} color={theme==='light'?'#555':'white'} />
       </TouchableOpacity>
       
       {isContentLoading && <LoadingActivity/>}
@@ -191,7 +191,7 @@ export default function EventDetail() {
                         paddingBottom: 50,
                       }}
                       ListHeaderComponent={
-                        <Text className='flex-col text-lg font-bold text-center mb-10'>Meus Eventos</Text>
+                        <Text className={`flex-col text-lg font-bold text-center mb-10 ${theme==='light'?'text-black':'text-white'}`}>Meus Eventos</Text>
                       }
                       onScroll={e => setScrolly(e.nativeEvent.contentOffset.y)}
                       onEndReached={loadMorePage}
@@ -262,8 +262,8 @@ export default function EventDetail() {
                   )
                   :
                   <View className="flex-1 justify-center items-center">
-                    <Text className="text-lg font-bold text-center">Nenhum evento encontrado</Text>
-                    <Text className="text-sm text-gray-500">Crie um evento</Text>
+                    <Text className={`text-lg font-bold text-center ${theme==='light'?'text-black':'text-white'}`}>Nenhum evento encontrado</Text>
+                    <Text className={`text-sm ${theme==='light'?'text-matte_gray':'text-white'}`}>Crie um evento</Text>
                   </View>
                 }
 

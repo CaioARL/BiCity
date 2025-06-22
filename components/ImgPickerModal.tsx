@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Modal, TouchableOpacity, Image } from 'react-native'
+import { View, Text, Modal, TouchableOpacity, Image, Appearance } from 'react-native'
 
 interface ImageSelectionPopupProps {
   visible: boolean
@@ -14,6 +14,7 @@ export default function ImageSelectionPopup({
   onTakePhoto,
   onPickFromGallery,
 }: ImageSelectionPopupProps) {
+  const theme = Appearance.getColorScheme()
   return (
     <Modal
       visible={visible}
@@ -22,16 +23,16 @@ export default function ImageSelectionPopup({
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-center items-center bg-[rgba(0,0,0,0.5)]">
-        <View className="bg-white rounded-lg w-[80%] p-5 relative">
+        <View className={`rounded-lg w-[80%] p-5 relative ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
           {/* X Close Button */}
           <TouchableOpacity
             className="absolute top-4 right-2 z-10 w-8 h-8 items-center justify-center"
             onPress={onClose}
           >
-            <Text className="text-gray-500 font-[12] text-xl">✕</Text>
+            <Text className={`text-xl ${theme==='light'?'text-black':'text-white'} `}>✕</Text>
           </TouchableOpacity>
 
-          <Text className="text-lg font-medium text-center mb-5 mt-1">
+          <Text className={`text-lg font-medium text-center mb-5 mt-1  ${theme==='light'?'text-black':'text-white'}`}>
             Selecionar imagem
           </Text>
 
@@ -39,30 +40,30 @@ export default function ImageSelectionPopup({
             className="flex-row items-center py-4 border-b border-color_light_gray"
             onPress={onTakePhoto}
           >
-            <View className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center mr-4">
+            <View className="w-12 h-12 rounded-full items-center justify-center mr-4">
               <Image
                 source={require('../assets/img/camera.png')}
                 resizeMode="cover"
                 className="w-6 h-6 ml-4"
-                style={{ tintColor: 'black' }}
+                style={{ tintColor: theme==='light'?'black':'white'}}
               />
             </View>
-            <Text className="text-base">Tirar foto</Text>
+            <Text className={`text-base ${theme==='light'?'text-black':'text-white'}`}>Tirar foto</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="flex-row items-center py-4"
             onPress={onPickFromGallery}
           >
-            <View className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center mr-4">
+            <View className="w-12 h-12 rounded-full items-center justify-center mr-4">
               <Image
                 source={require('../assets/img/galeria.png')}
                 resizeMode="cover"
                 className="w-6 h-6 ml-4"
-                style={{ tintColor: 'black' }}
+                style={{ tintColor: theme==='light'?'black':'white'}}
               />
             </View>
-            <Text className="text-base">Escolher da galeria</Text>
+            <Text className={`text-base ${theme==='light'?'text-black':'text-white'}`}>Escolher da galeria</Text>
           </TouchableOpacity>
         </View>
       </View>

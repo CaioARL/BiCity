@@ -48,9 +48,6 @@ export default function Index() {
         if (isLoading) return
         
         const loading = async () => {
-            console.log('isLoading: ', isLoading)
-            console.log('authState: ', authState?.authenticated)
-
             if (authState?.authenticated) {
                 fadeIn.start()
                 fallAnimation.start(()=>{

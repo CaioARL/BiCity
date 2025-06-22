@@ -1,24 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet } from 'react-native'
+import { ScrollView, View, Text, TouchableOpacity, ImageBackground, Modal, Animated, StyleSheet, Appearance } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import TokenInput from '../../components/CustomTokenInput'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { checkTokenRecuperacao, sendTokenRecuperacao } from '../../api/token'
 import { router } from 'expo-router'
-import { ArrowLeft } from 'lucide-react-native'
 import ShowAlert from 'components/ShowAlert'
 import { recoverPassword } from 'api/usuario'
 import { validationSchemas } from 'util/validationSchemas'
 import { DefaultErrorResponse } from 'types'
 import { AxiosError } from 'axios'
+import { Ionicons } from "@expo/vector-icons"
+
 
 
 export default function ResetPassword() {
-
-
+  const theme = Appearance.getColorScheme()
+  
   const [isLoading, setIsLoading] = useState(false)
-
+  
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
 
@@ -157,7 +158,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme==='light'?'white':'#1f2937', justifyContent: 'center', alignItems: 'center' }}>
       <ImageBackground
         source={require('../../assets/img/background-fundo-figura.png')}
         style={{ position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -171,10 +172,10 @@ export default function ResetPassword() {
           shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25,
           shadowRadius: 3.84, zIndex: 10,
         }}
-        className='bg-primary_green'
+        className={`${theme==='light'?'bg-primary_green':'bg-secondary_black'}`}
         onPress={prevStep}
       >
-        <ArrowLeft size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color={theme==='light'?'#555':'white'} />
       </TouchableOpacity>
 
       <ScrollView className='container' contentContainerStyle={{ flexGrow: 1 }}>
@@ -215,7 +216,7 @@ export default function ResetPassword() {
               isLoading={isLoading}
               maxLength={4}
             /> */}
-            <Text className="text-center text-gray-600 mt-2">Tempo restante: {formatTime(timer)}</Text>
+            <Text className={`text-center mt-2 ${theme==='light'?'text-black':'text-white'}`}>Tempo restante: {formatTime(timer)}</Text>
             <CustomButton title="Verificar" handlePress={nextStep} isLoading={isLoading} />
           </View>
         )}

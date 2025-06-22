@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, Animated, ScrollView, Button } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, Animated, ScrollView, Button, Appearance } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList';
@@ -26,7 +26,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const fadeAnim = useRef(new Animated.Value(0)).current; // Valor inicial da animação
   const [filterDistance, setFilterDistance] = useState(0)
 
-  
+  const theme = Appearance.getColorScheme()
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]>([])
   const [filterTipoEvento, setFilterTipoEvento] = useState<TipoEvento | null>(null)
@@ -127,11 +127,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
       <Animated.View style={{ height: '100%', opacity: fadeAnim, }}>
 
         <View className='flex-[1] justify-end bg-[rgba(0,0,0,0.5)] '>
-            <View className='bg-white rounded-t-3xl min-h-[50%] p-[20px] '>
+            <View className={`${theme === 'light' ? 'bg-white':'bg-secondary_black'} rounded-t-3xl min-h-[50%] p-[20px]`} >
               <View className='flex-row justify-between mb-[20px]'>
-                <Text className='text-[18px] font-bold' >Filtros</Text>
+                <Text className={`text-[18px] font-bold ${theme==='light'?'text-black':'text-white'}`} >Filtros</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <Ionicons name="close" size={24} color="#555" />
+                  <Ionicons name="close" size={24} color={theme==='light'?'#555':'#FFF'} />
                 </TouchableOpacity>
               </View>
 
@@ -149,7 +149,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
               {/* Distance Slider */}
               <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                <Text className={`text-[16px] mb-[10px] ${theme === 'light' ? 'text-black' : 'text-white'}`}>
                   Distância: {filterDistance}km
                 </Text>
                 <Slider
@@ -183,7 +183,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               <ButtonModal
                 handlePress={cleanFilters}
                 title='Limpar Filtros'
-                textStyles='font-bold text-center'
+                textStyles={`font-bold text-center text-color_red_error`}
                 customStyles='w-full mt-[20px]'
                 customColor='#fff'
               />

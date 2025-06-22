@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, Image, BackHandler} from 'react-native'
+import { View, Text, TouchableOpacity, Image, Alert, Linking, Appearance} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Circle, Geojson, MapMarker, Marker} from 'react-native-maps'
+import MapView, { Circle, Geojson, Marker} from 'react-native-maps'
 import * as Location from 'expo-location'
 import { DefaultErrorResponse, Evento, InfraestruturaGeoJson, InfraestruturaGeoJsonFeature, Problema, RequestCreateAvaliacao, RequestCreateProblema, RequestCreateProblemaImage, RequestEventoByRadius, RequestInfraestruturaByRadius, RequestPageAvaliacao, RequestProblemaByRadius } from '../../types'
 import { getEventoById, getEventoByRadius } from '../../api/evento'
@@ -12,7 +12,7 @@ import ShowAlert from '../../components/ShowAlert'
 import ProblemaModal from '../../components/ProblemaModal'
 import ProblemaView from '../../components/ProblemaView'
 import AvaliacaoModal from '../../components/AvaliacaoModal'
-import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate, calculateBearing, isPointNearPoint} from '../../util'
+import { isPointNearLine , isRegionWithinBounds, animateToUserLocation, mapInfraestruturaGeoJsonResponseToInfraestruturaGeoJson, isSameDate, calculateBearing, isPointNearPoint } from '../../util'
 import OpsModal from '../../components/OpsModalMap'
 import { createAvaliacao } from '../../api/avaliacao'
 import AvaliacaoView from '../../components/AvaliacaoView'
@@ -22,10 +22,10 @@ import EventCardCarousel from 'components/EventCardCarousel'
 import icons from 'constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AudioSpeaker } from 'util/audioSpeaker'
-import { createAudioPlayer } from 'expo-audio'
 import { sounds, prompts } from '../../constants'
 import { AxiosError } from 'axios'
 import ProblemaModalNavigation from 'components/ProblemaModalNavigation'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 
 interface Region {
   latitude: number
@@ -40,11 +40,16 @@ interface LocationError {
   message: string
 }
 
+import { LOCATION_TASK } from '../../tasks/locationTask'
+import { setUpdateLocationCallback } from 'util/locationFallBack'
+  
 export default function Home() {
   const dateRef = useRef(new Date())
+  const theme = Appearance.getColorScheme()
   const [menuVisible, setMenuVisible] = useState<boolean>(false)
   
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
+  const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number | null }  |  null>(null)
+  // const { userLocation } = useLocation() 
 
   const [initialRegion, setInitialRegion] = useState<Region>({latitude:-23.556312, longitude: -46.637752, latitudeDelta:0.0043, longitudeDelta:0.0034})
   const [currentViewLocation, setCurrentViewLocation] = useState<Region | null>(null)
@@ -55,7 +60,7 @@ export default function Home() {
 
   const [requestInfraestrutura, setRequestInfraestrutura] = useState<RequestInfraestruturaByRadius>()
   const [infraestrutura, setInfraestrutura] = useState<InfraestruturaGeoJson>()
-
+  // const [strokeWidth, setStrokeWidth] = useState<number>(10)
 
   const [requestCreateProblema, setRequestCreateProblema] = useState<RequestCreateProblema | null>()
   const [requestProblemas, setRequestProblemas] = useState<RequestProblemaByRadius>()
@@ -77,7 +82,7 @@ export default function Home() {
 
   const [hilightedEvento, setHilightedEvento] = useState<{evento :Evento, interno: boolean} | null>(null)
 
-  const abortControllerRef = useRef<AbortController>()
+  const abortControllerRef = useRef<AbortController>(null)
   const [initalLoading, setInitalLoading] = useState<boolean>(true)
   
   // const [isRequestInProgress, setIsRequestInProgress] = useState(false)
@@ -105,8 +110,6 @@ export default function Home() {
     features: [],
   }
 
-  
-
     const getCurrentLocation = async (): Promise<void>  => {
       setInitalLoading(true)
       await Location.hasServicesEnabledAsync()
@@ -127,38 +130,62 @@ export default function Home() {
         setCurrentLocationError(locationErrors.PERMISSION)
         setInitalLoading(false)
         return
-    }
+      }
     
-    await Location.getCurrentPositionAsync({})
-    .then((response) => {
-      setCurrentLocation(response)
-      setRequestInfraestrutura({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
-        raio: 750
+      Location.getCurrentPositionAsync()
+      .then((location) => { 
+        setUserLocation(location.coords)
+        setInitialRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0043,
+          longitudeDelta: 0.0034
+        })
+          //startBackgroundLocationTracking()
+        setRequestInfraestrutura({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 1200
+        })
+        setRequestProblemas({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 1200
+        })   
+        setRequestEventos({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          raio: 7000
+        })
+        setInitialRegion({latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
+          
       })
-      setRequestProblemas({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
-        raio: 750
-      })   
-      setRequestEventos({
-        latitude: response.coords.latitude,
-        longitude: response.coords.longitude,
-        raio: 7000
-      })
-      setInitialRegion({latitude: response.coords.latitude, longitude: response.coords.longitude, latitudeDelta:0.0043, longitudeDelta:0.0034})
-    })
-    .catch((error) => {
-      setCurrentLocationError(locationErrors.ERROR)
-      setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error})
-    }).finally(() => {
-      setInitalLoading(false)
-    })
+      .catch(() => {setCurrentLocationError(locationErrors.ERROR)})
+      .finally(()=>{setInitalLoading(false)})
+
+    
   }
 
+  useEffect(() => {
+    // Set the callback for updating user location
+    setUpdateLocationCallback(async (location) => {
+      setUserLocation({ ...location, heading: location.heading ?? null })
+    })
+
+    // Cleanup on unmount
+    return () =>{ 
+      setUpdateLocationCallback(()=>{})
+      stopBackgroundLocationTracking()
+      sound.current?.stop()
+    }
+  }, [])
+
+      //   setCurrentLocationError(locationErrors.ERROR)
+      // setUserAlert({ type: 'error', message: "Error ao obter localização: "+ error}
+
+
   useEffect(()=>{
-    if(!currentLocation){
+    if(!userLocation){
       getCurrentLocation()
     }
   // setInterval(
@@ -280,20 +307,20 @@ export default function Home() {
     const getEventsOnViewLocation = ({latitude, longitude}: {longitude: number, latitude:number}) => {
       abortControllerRef.current?.abort()
       setRequestInfraestrutura({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 750
-        })
-        setRequestProblemas({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 750
-        })
-        setRequestEventos({
-          latitude: latitude,
-          longitude: longitude,
-          raio: 7000
-        })
+        latitude: latitude,
+        longitude: longitude,
+        raio: 1200
+      })
+      setRequestProblemas({
+        latitude: latitude,
+        longitude: longitude,
+        raio: 1200
+      })
+      setRequestEventos({
+        latitude: latitude,
+        longitude: longitude,
+        raio: 7000
+      })
     }
 
     const searchOnViewLocation = () => {
@@ -301,20 +328,20 @@ export default function Home() {
       if(!currentViewLocation){return}
       setIsContentLoading(true)
       setRequestInfraestrutura({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 750
-        })
-        setRequestProblemas({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 750
-        })
-        setRequestEventos({
-          latitude: currentViewLocation.latitude,
-          longitude: currentViewLocation.longitude,
-          raio: 7000
-        })
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 1200
+      })
+      setRequestProblemas({
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 1200
+      })
+      setRequestEventos({
+        latitude: currentViewLocation.latitude,
+        longitude: currentViewLocation.longitude,
+        raio: 7000
+      })
     }
 
     // --------------------------------------- create avaliacao  ---------------------------------------
@@ -412,10 +439,10 @@ export default function Home() {
     const handleMyLocationPress = () => {
       if(navigation) return
       if(!mapRef.current) return
-      if(!currentLocation) return
+      if(!userLocation) return
       mapRef.current.animateToRegion({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         latitudeDelta:0.0043, longitudeDelta:0.0034
       })
     }
@@ -483,6 +510,7 @@ export default function Home() {
         setShowOpsModal(true)
       })
       .catch((error: AxiosError<DefaultErrorResponse>)=>{
+        console.log("")
         setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local: " + error.response?.data.message || error.message})
       })
       .finally(()=>{
@@ -493,7 +521,9 @@ export default function Home() {
 
     // --------------------------------------- map city navigation ---------------------------------------
     
-      const headingRef = useRef<number | null>(null)
+      
+
+      const [infraHeading, setInfraHeading] = useState<number | null>(null)
       const [nearProblems, setNearProblems] = useState<Problema[]>([])
       const [infraProblems, setInfraProblems] = useState<Problema[]>([])
       const notifiedProblemsId = useRef<number[]>([])
@@ -501,15 +531,15 @@ export default function Home() {
       const lastUserLocation = useRef<{ latitude: number, longitude: number } | null>(null)
       const lastInfra = useRef<InfraestruturaGeoJsonFeature | null>(null)
       const headingExtremesRef = useRef<[number, number]>([0, 0])
-      const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number, heading: number }>({ latitude: 0, longitude: 0, heading: 0 })
       const [problemaModalNavigationCoords, setProblemaModalNavigationCoords] = useState<{latitude: number, longitude: number} | null>(null)
-      
-      const speechRef = useRef(new AudioSpeaker())  
+        
+      const sound = useRef(new AudioSpeaker())  
+
 
       const checkNavigationViabilityProblema = async (latitude: number, longitude: number) => {
         abortControllerRef.current?.abort()
         abortControllerRef.current = new AbortController
-        checkCreateViabilityProblema(userLocation.latitude, userLocation.longitude, null)
+        checkCreateViabilityProblema(userLocation?.latitude || 0 , userLocation?.longitude || 0, null)
         .then((reponse) => {
             if(!reponse){
               setUserAlert({ type: 'error', message: "Não é possível criar um problema nesse local. Procure uma ciclovia próxima"})
@@ -522,7 +552,45 @@ export default function Home() {
           })
       } 
 
+      const startBackgroundLocationTracking = async () => { 
+        console.log("Starting background location tracking")
+        const { status } = await Location.requestBackgroundPermissionsAsync()
+        console.log("Background location permission status: ", status)
+        if (status === 'granted') {
+          setIsContentLoading(true)
+          await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+            accuracy: Location.Accuracy.High,
+            distanceInterval: 3,
+            timeInterval: 500,
+            showsBackgroundLocationIndicator: true,
+             foregroundService: {
+              notificationTitle: "Rastreamento de Localização",
+              notificationBody: "Rastreamento de localização em segundo plano ativo",
+            },
+          }).catch((error)=>{
+            console.log("Error starting background location tracking: ", error)
+          })
+          .finally(()=>{
+            setIsContentLoading(false)
+          })
+          setNavigation(true) //----------------------------------------------------------------------------------------------IMPORTANT
+        } else {
+          Alert.alert("Permissão de localização em segundo plano negada", "Para usar o rastreamento de localização em segundo plano, você precisa conceder permissão nas configurações do aplicativo. Selecione a opção: PERMITIR O TEMPO TODO",
+            [
+              { text: "Tentar Novamente", onPress: async () => await Location.requestBackgroundPermissionsAsync().then((response) => {response.status === 'granted' ? startBackgroundLocationTracking(): Linking.openSettings()}) },
+              { text: "Cancelar", style: "cancel" },
+            ]
+          )
+        }
+      }
+
+      const stopBackgroundLocationTracking = async () => {
+        setIsContentLoading(true)
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK).finally(()=>setIsContentLoading(false))
+      }
+
       useEffect(() => {
+        if (!navigation) return
         if (!userLocation) return
         // Check if the user has moved significantly
         if (lastRequestLocation.current) {
@@ -537,16 +605,17 @@ export default function Home() {
         setRequestInfraestrutura({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          raio: 750,
+          raio: 1200,
         })
         setRequestProblemas({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          raio: 750,
+          raio: 1200,
         })
       },[userLocation])
 
       useEffect(() => {
+        if (!navigation) return
         if (!infraestrutura) return
         if (!userLocation) return
         const currentLocation = { latitude: userLocation.latitude, longitude: userLocation.longitude }
@@ -580,8 +649,9 @@ export default function Home() {
             )
           }
         }
+
         if(!matchedFeature) {
-          headingRef.current = null
+          setInfraHeading(null)
           return
         }
         
@@ -623,19 +693,20 @@ export default function Home() {
             next[1],
             next[0],
           )
-          headingRef.current = bearing
+          setInfraHeading(bearing)
         }
       }
 
        useEffect(() => {
         // console.log("User location changed:", userLocation)
+        if (!navigation) return
         if (!userLocation) return
         let h
-        if (!headingRef.current) {
+        if (!infraHeading) {
           h = userLocation.heading
         } else {
           const [left, right] = headingExtremesRef.current
-          h = (userLocation.heading >= left && userLocation.heading <= right) ? headingRef.current : headingRef.current - 180 >= 0 ? headingRef.current - 180 : headingRef.current + 180
+          h = (userLocation.heading || 0 >= left && userLocation.heading || 0 <= right) ? infraHeading : infraHeading - 180 >= 0 ? infraHeading - 180 : infraHeading + 180
         }
         if (!mapRef.current) return
         mapRef.current.animateCamera({
@@ -644,35 +715,51 @@ export default function Home() {
             longitude: userLocation.longitude,
           },
           pitch: 50, // Lays the map down
-          heading: h,
+          heading: h || undefined,
           zoom: 18,
         })
       },[userLocation])
 
       useEffect(() => {
-        if (!headingRef.current) return
-        headingExtremesRef.current = extremesOfOneDirection(headingRef.current)
-      }, [headingRef.current])
+        if (!infraHeading) return
+        headingExtremesRef.current = extremesOfOneDirection(infraHeading)
+      }, [infraHeading])
     
+      const playNearProblemsSounds = async () => {
+        for (const problema of nearProblems){
+          if(notifiedProblemsId.current.includes(problema.id)) return
+          notifiedProblemsId.current.push(problema.id)
+          await sound.current.playSound(sounds.problem_notification)          
+        }
+      }
+
+      const playInfraProblemsSounds = async () => {
+        sound.current.playSound(sounds.beep)
+        for (const problema of infraProblems) {
+          await sound.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || "Problema detectado próximo a você")
+        }
+      }
+      
       useEffect(() => {
         if (nearProblems.length <= 0) return
-        nearProblems.forEach((problema) => {
-          if (notifiedProblemsId.current.includes(problema.id)) return
-          notifiedProblemsId.current.push(problema.id)
-          speechRef.current.playSound(sounds.problem_notification)
-        })
+        playNearProblemsSounds()
       }, [nearProblems])
-    
+      
       useEffect(() => {
         if (!infraProblems || infraProblems.length <= 0) return
         console.log("Problemas de infraestrutura detectados:")
-          infraProblems.forEach((problema) => {
-              speechRef.current.playSound().then(()=>{
-                speechRef.current.speak(prompts.problema.find(p => (problema.tipoProblema.id === p.id))?.prompt || `Problema detectado próximo a você.`)
-              })
-              console.log(`Problema de tipo ${problema.tipoProblema.descricao} detectado na infraestrutura próxima a você.`)
-          })
+        playInfraProblemsSounds()
       }, [infraProblems])
+
+
+      useEffect(() => {
+        if(navigation) {
+          activateKeepAwakeAsync()
+          setMenuVisible(false)
+        }else {
+          deactivateKeepAwake()
+        }
+      }, [navigation])
 
     // --------------------------------------- component ---------------------------------------
 
@@ -680,10 +767,10 @@ export default function Home() {
       return (
         <LoadingActivity/>
       )
-    else if (!currentLocation)
+    else if (!userLocation)
       return (
         <SafeAreaView>
-          <View className='flex-col h-full w-full justify-center items-center'>
+          <View className={`flex-col h-full w-full justify-center items-center ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
  
               <Image
                 source={require('../../assets/notificacoesErro/localização.webp')}
@@ -691,14 +778,14 @@ export default function Home() {
                 resizeMode="cover"
               />
 
-              <Text className='text-[14px] text-secondary_black_sub_title mb-[5px]'>
+              <Text className={`text-[14px] ${theme==='light'?'text-secondary_black_sub_title':'text-white'} mb-[5px]`}>
                 {currentLocationError && currentLocationError.message}
               </Text>
               <TouchableOpacity 
               className='bg-primary_green mt-4 p-[10px] rounded-[5px] w-[45%] flex-row items-center justify-center'
               onPress={()=>getCurrentLocation()}
               >
-                <Text className='text-[14px] text-black mb-[5px]'>
+                <Text className={`text-[14px] text-black mb-[5px]`}>
                   Tentar Novamente
                 </Text>
               </TouchableOpacity>
@@ -714,15 +801,15 @@ export default function Home() {
               mapPadding={{top: 60, right: 0, bottom: 0, left: 0}}
               initialRegion={initialRegion}
               showsMyLocationButton={false} 
-              showsUserLocation={true}
-              onUserLocationChange={(e) => {
-                if (navigation && e.nativeEvent.coordinate) {
-                  const { latitude, longitude , heading} = e.nativeEvent.coordinate
-                  if (latitude && longitude) {
-                    setUserLocation( { latitude, longitude, heading: heading || 0 })
-                  }
-                }
-              }}
+              // showsUserLocation={true}
+              // onUserLocationChange={(e) => {
+              //   if (navigation && e.nativeEvent.coordinate) {
+              //     const { latitude, longitude , heading} = e.nativeEvent.coordinate
+              //     if (latitude && longitude) {
+              //       setUserLocation( { latitude, longitude, heading: heading || 0 })
+              //     }
+              //   }
+              // }}
               zoomEnabled={!navigation}
               scrollEnabled={!navigation}
               rotateEnabled={true}
@@ -736,7 +823,7 @@ export default function Home() {
                   setIsMoved(isGestureRef.current)
                   isGestureRef.current = false
                   if (!isRegionWithinBounds(region)) {
-                    animateToUserLocation(mapRef, currentLocation)
+                    animateToUserLocation(mapRef.current , userLocation)
                     setUserAlert({ type: 'error', message: 'Você saiu da área de São Paulo. Retornando à sua localização.'})
                   }
                 }
@@ -823,19 +910,22 @@ export default function Home() {
 
               <Geojson
                 geojson={infraestrutura || emptyGeoJson}
-                strokeWidth={10}
+                // strokeWidth={strokeWidth}
+                strokeWidth={8}
+                tracksViewChanges={false}
+                tappable={false}
               />
               
-              {navigation && 
-                <Marker
-                  // icon={icons.mapa_bike_pino}
-                  tracksViewChanges={false}
-                  coordinate={userLocation}
-                  focusable={false}
-                  titleVisibility='hidden'
-                  image={icons.mapa_bike_pino}
-                />
-              }
+               
+              <Marker
+                // icon={icons.mapa_bike_pino}
+                tracksViewChanges={false}
+                coordinate={userLocation || { latitude: 0, longitude: 0, heading: null }}
+                focusable={false}
+                titleVisibility='hidden'
+                image={icons.mapa_bike_pino}
+              />
+              
     
             </MapView>
 
@@ -894,10 +984,10 @@ export default function Home() {
               }
 
                 <TouchableOpacity
-                  className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-[rgba(195,255,0,0.15)] max-w-fit rounded-r-[30px] items-start justify-center ${menuVisible? 'hidden': ''}`}
+                  className={`absolute z-0 bottom-[40px] left-[0px] h-[68px] bg-primary_green max-w-fit rounded-r-[30px] items-start p-2 opacity-[0.7] justify-center ${menuVisible? 'hidden': ''}`}
                   onPress={()=>setMenuVisible(!menuVisible)}
                 >
-                  <Ionicons name="caret-forward" size={39} color="#C3FF00"/>
+                  <Ionicons name="return-up-back-outline" size={30} color="#555"/>
                 </TouchableOpacity>
 
               
@@ -915,9 +1005,26 @@ export default function Home() {
               <View className='absolute top-[40px] px-[5%] flex-row gap-[10%] items-center justify-center h-fit w-full'>
                   <TouchableOpacity
                     className='bg-primary_green p-[10px] rounded-[30px] justify-center items-center'
-                    onPress={()=>{
-                      !navigation && setMenuVisible(false) 
-                      setNavigation(!navigation)
+                    onPress={async () =>{
+                      if(navigation) {
+                        await stopBackgroundLocationTracking()
+                        setNavigation(false)
+                      } else {
+                        Alert.alert("Navegação", "Você vai entrar em modo navegação, o que significa que o aplicativo continuará rodando em segundo plano para te guiar. Você pode desativar a navegação a qualquer momento clicando no botão de navegação novamente.",
+                          [
+                            {
+                              text: "Ir para Navegação",
+                              onPress: () => {
+                                startBackgroundLocationTracking()
+                              },
+                              style: "default"
+                            },
+                            {
+                              text: "Cancelar",
+                              style: "cancel",
+                            },
+                          ])
+                      }
                     }}
                   >
                     <Ionicons name={`${navigation ? 'arrow-back' : 'navigate' }`} size={24} color="black" />
@@ -964,7 +1071,7 @@ export default function Home() {
               {navigation &&
                 <TouchableOpacity
                     className='absolute bottom-[10%] right-[3%] flex-row bg-primary_green p-[10px] rounded-[37px] justify-center items-center'
-                    onPress={() => checkNavigationViabilityProblema(userLocation.latitude, userLocation.longitude)}
+                    onPress={() => checkNavigationViabilityProblema(userLocation?.latitude || 0 , userLocation?.longitude || 0)}
                     >
                     <Ionicons name="warning-outline" size={37} color="black" />
                     <Text className='font-roboto font-bold'>Reportar</Text>
@@ -972,10 +1079,11 @@ export default function Home() {
               }
 
               <TouchableOpacity
-                className={`absolute z-0 bottom-[0px] right-[0px] transparent max-h-fit max-w-fit  items-center justify-center`}
+                className={`absolute z-0 bottom-[35px] right-[1px] transparent max-h-fit max-w-fit  items-center justify-center bg-primary_green p-[3px] rounded-[30px] opacity-[0.7]`}
                 onPress={()=>{router.push('/help-modal')}}
               >
-                <Ionicons name="help-circle-sharp" size={40} color="rgba(195,255,0,0.5)"/>
+                <Ionicons name="help-outline" size={30} color="#555"/>
+                
               </TouchableOpacity>
               
 

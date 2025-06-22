@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { View, Text, TextInput, Appearance } from 'react-native';
 
 interface TokenInputProps {
   title: string;
@@ -13,7 +13,8 @@ interface TokenInputProps {
 
 const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText, msg, isValid, maxLength, onFocus }) => {
   const [token, setToken] = useState<string[]>(['', '', '', '']);
-  const inputRefs = useRef<(TextInput | null)[]>([]);
+  const inputRefs = useRef<TextInput[] | null[]>([]);
+  const theme = Appearance.getColorScheme()
 
   useEffect(() => {
     if (value) {
@@ -56,14 +57,14 @@ const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText,
 
   return (
     <View className="my-2">
-      <Text className="text-base color-secondary_black mb-5 text-center">{title}</Text>
-      <View className="flex-row justify-between w-4/5 self-center">
+      <Text className={`text-base ${theme==='light'?'text-secondary_black':'text-white'} mb-5 text-center`}>{title}</Text>
+      <View className={`flex-row justify-between w-4/5 self-center`}>
         {token.map((digit: string, index: number) => (
           <TextInput
             key={index}
-            ref={(ref) => (inputRefs.current[index] = ref)}
+            ref={(ref) => { inputRefs.current[index] = ref; }}
             autoCapitalize='none'
-            className={`w-12 h-12 border rounded-lg text-lg text-center ${getBorderColor(index)}`}
+            className={`w-12 h-12 border rounded-lg text-lg text-center ${getBorderColor(index)} ${theme==='light'?'text-black': 'text-white bg-color__lightGray border-white'} `}
             value={digit}
             onChangeText={(text) => handleInputChange(text, index)}
             maxLength={1}
@@ -71,7 +72,7 @@ const TokenInput: React.FC<TokenInputProps> = ({ title, value, handleChangeText,
           />
         ))}
       </View>
-      {msg && <Text className="text-red-500 text-xs mt-1 text-center">{msg}</Text>}
+      {msg && <Text className="text-color_red_error text-xs mt-1 text-center">{msg}</Text>}
     </View>
   );
 };

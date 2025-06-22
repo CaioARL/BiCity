@@ -3,7 +3,7 @@
  * duration: The duration of the sound in seconds.
  */
 export interface Sound {
-    src: any
+    src: number
     duration: number
 }
 
@@ -12,21 +12,21 @@ export interface Sound {
  * src: The path to the sound file.
  * duration: The duration of the sound in seconds.
  */
-export const sounds: Record<string, Sound> = {
+export const sounds = {
     beep: {
         src: require('../assets/sounds/beep.wav'),
-        duration: 1.5,
+        duration: 2.5,
     },
     horn: {
         src: require('../assets/sounds/horn.mp3'),
-        duration: 1.5,
+        duration: 2.5,
     },
     alert: {
         src: require('../assets/sounds/alert.wav'),
-        duration: 2.0,
+        duration: 3.0,
     },
     problem_notification: {
         src: require('../assets/sounds/problem_notify.wav'),
-        duration: 2.5,
+        duration: 3.5,
     },
 }

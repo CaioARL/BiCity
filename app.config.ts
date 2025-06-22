@@ -15,7 +15,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: "#ffffff"
   },
   ios: {
-    supportsTablet: true
+    supportsTablet: true,
+    infoPlist: {
+      UIBackgroundModes: ["location", "audio"],
+    }
   },
   android: {
     adaptiveIcon: {
@@ -28,11 +31,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       }
     },
     permissions: [
-      "android.permission.ACCESS_COARSE_LOCATION",
-      "android.permission.ACCESS_FINE_LOCATION",
-      "android.permission.RECORD_AUDIO",
-      "android.permission.MODIFY_AUDIO_SETTINGS",
-      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.ACCESS_BACKGROUND_LOCATION",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_LOCATION",
       "android.permission.ACCESS_FINE_LOCATION",
       "android.permission.RECORD_AUDIO",
       "android.permission.MODIFY_AUDIO_SETTINGS"
@@ -84,4 +85,4 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   updates: {
     url: "https://u.expo.dev/7ee7e78d-b218-47d4-bda7-ff42e3d86c26"
   }
-});
+})

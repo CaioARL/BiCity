@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, ScrollView, ImageBackground, Image } from 'react-native'
+import { View, Text, ScrollView, ImageBackground, Image, Appearance } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
@@ -17,7 +17,8 @@ export default function SignIn() {
   const { onLogin, errorLoading } = useAuthProvider()
   const [isLoading, setIsLoading] = useState(false)
   const abortControlRef = useRef<AbortController | null>(null)
-  
+  const theme = Appearance.getColorScheme()
+
   const [filterModalVisible, setFilterModalVisible] = useState(false)
   const [login, setLogin] = useState<{credencial: string, senha: string}>({credencial: '', senha: ''})
   const [requestLogin, setRequestLogin] = useState<RequestLogin | undefined>()
@@ -119,7 +120,7 @@ export default function SignIn() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme==='light'?'white':'#1f2937' }}>
       <ImageBackground
         source={require('../../assets/img/background-fundo-figura.png')}
         style={{ flex: 1, position: 'absolute', width: '100%', top: 0, height: 335 }}
@@ -135,8 +136,8 @@ export default function SignIn() {
             />
           </View>
           
-          <Text className="text-2xl font-bold text-center text-secondary_black mb-4">
-            BICITY
+          <Text className={`text-2xl font-bold text-center mb-4 ${theme==='light'?'text-secondary_black':'text-white'}`}>
+            BiCity
           </Text>
 
           <FormField
@@ -169,24 +170,24 @@ export default function SignIn() {
           />
 
           <View className="flex-row justify-center mt-16">
-            <Text className="text-secondary_black_sub_title">
+            <Text className={`${theme==='light'?'text-secondary_black_sub_title':'text-color__text__light'}`}>
               Não tem uma conta?{' '}
             </Text>
             <Text
               onPress={() => setFilterModalVisible(true)}
-               className="text-blue-500 font-bold"
+               className={`font-bold ${theme==='light'?'text-black':'text-white'}`}
             >
               Inscrever-se
             </Text>
           </View>
 
           <View className="flex-row justify-center mt-4">
-            <Text className="text-secondary_black_sub_title">
+            <Text className={`${theme==='light'?'text-secondary_black_sub_title':'text-color__text__light'}`}>
               Esqueceu a senha?{' '}
             </Text>
             <Text
               onPress={() => router.push('/forgot-password')}
-              className={'text-blue-500 font-bold'}
+              className={`font-bold ${theme==='light'?'text-black':'text-white'}`}
             >
               Redefina
             </Text>

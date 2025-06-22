@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity} from 'react-native'
+import { View, Text, Modal, Animated, ScrollView, Image, TouchableOpacity, Appearance} from 'react-native'
 import { Region } from 'react-native-maps'
 import { ListTipoEvento, TipoEvento } from '../types/tipo-evento'
 import FormFieldDropdownSelectList from './FormFieldDropdownSelectList'
@@ -29,6 +29,8 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
   const { authState } = useAuthProvider()
 
+  const theme = Appearance.getColorScheme()
+
   // const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const abortControllerRef = useRef(new AbortController())
@@ -41,15 +43,25 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
   const [mapViewRegion, setMapViewRegion] = useState<Region | null>(null)
 
   const [isCepLoading, setIsCepLoading] = useState<boolean>()
-  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
+  const [requestCreateEvento, setRequestCreateEvento] = useState<RequestCreateEvento>({ nome: evento?.nome || '', descricao: evento?.descricao || '', data: { horario: evento?.data.split(' ')[1] || '' , data: evento?.data.split(' ')[0].split('/').reverse().join('-') || ''} as Horario, endereco: evento?.endereco || {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: 0, latitude: 0, longitude: 0}, faixaKm: evento?.faixaKm || 0, gratuito: evento?.gratuito || false, valor: evento?.valor || 0 , urlSite: evento?.urlSite || '' , tipoEvento: evento?.tipoEvento || {id: 0, nome: '', nivelHabilidade: {id: 0, descricao: '', nome: '' }}, idUsuario: authState?.user?.id || 0  })
 
-  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: {data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '', urlSite: '' , tipoEvento: ''})
+  const [novoEventoError, setNovoEventoError] = useState<RequestCreateEventoError>({ nome: '', descricao: '', data: {data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero: '' }, faixaKm: '', gratuito: '',valor: '', urlSite: '' , tipoEvento: ''})
 
   const [showImagePopup, setShowImagePopup] = useState(false)
 
   const [listTipoEvento, setListTipoEvento] = useState<ListTipoEvento[]> ([])
 
   const [showTimePicker, setShowTimePicker] = useState<boolean>()
+
+  /**
+   * NUMBER FIELDS
+   */
+  const [valor, setValor] = useState<string>('')
+  const [faixaKm, setFaixaKm] = useState<string>('')
+
+  useEffect(()=>{
+    requestCreateEvento.gratuito && setValor('')
+  },[requestCreateEvento.gratuito])
   // useEffect(() => {
   //   if (visible) {
   //     Animated.timing(fadeAnim, {
@@ -130,7 +142,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
 
   const validateEventAndClose = () => {
-    setNovoEventoError({ nome: '', descricao: '', data: { data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', urlSite: '', tipoEvento: ''})
+    setNovoEventoError({ nome: '', descricao: '', data: { data: '', horario: ''}, endereco: {cep: '', cidade: '', estado: '', bairro: '' , rua: '' ,  numero:'' }, faixaKm: '', gratuito: '', valor: '', urlSite: '', tipoEvento: ''})
     const result = createEventSchema.safeParse(requestCreateEvento)
     if(!result.success){
       result.error.issues.forEach((issue) => {
@@ -244,6 +256,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
   }, [mapRegion])
 
   const updateCampoNovoEvento = (campo: string, valor: string | NivelHabilidade | number | TipoEvento | boolean) => {
+    // console.log(requestCreateEvento.valor)
     setRequestCreateEvento(prev => ({
       ...prev,
       [campo]: valor
@@ -312,7 +325,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
 
     <Modal visible={visible} animationType="slide" transparent={true} >
         <ScrollView className='bg-[rgba(0,0,0,0.5)]'>
-        <View className='bg-white rounded-[10px] p-[20px] m-[20px]'>
+        <View className={`${theme ==='light'? 'bg-white':'bg-secondary_black'} rounded-[10px] p-[20px] m-[20px]`}>
             {/* <Animated.View style={{ opacity: fadeAnim }}> */}
 
                <View  className='mb-[2px]'>
@@ -342,9 +355,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                     <Text className='text-color_red_error  my-2'>{'*'+mapPlotError}</Text>
                   )}
                     
-                  <Text>Selecione o local do evento:</Text> 
-                  <Text>1. Clique no mapa para selecionar o local, ou</Text>
-                  <Text>2. Digite o CEP abaixo:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>Selecione o local do evento:</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>1. Clique no mapa para selecionar o local, ou</Text>
+                  <Text className={`${theme === 'dark' ? 'color-white' : 'color-secondary_black'}`}>2. Digite o CEP abaixo:</Text>
                 </View>
                
               <FormFieldModal
@@ -352,7 +365,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 value={requestCreateEvento.endereco.cep}
                 otherStyles='mt-[2px]'
                 handleChangeText={text => updateCampoNovoEventoEndereco('cep', text )}
-                validantionCheck={ e=> {
+                endEditing={ e=> {
                   if (requestCreateEvento.endereco.cep.length === 8) {
                     checkCep(requestCreateEvento.endereco.cep);
                     updateCampoNovoEventoEndereco('cep', e.nativeEvent.text)
@@ -452,9 +465,11 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
               <FormFieldModal
                 title="Tamanho do Percurso"
                 placeholder="Tamanho do percurso (km)"
-                value={requestCreateEvento.faixaKm === 0? '' : requestCreateEvento.faixaKm.toString()}
-                handleChangeText={text => {updateCampoNovoEvento('faixaKm', parseInt(text || '0', 10))}}
+                value={faixaKm}
+                handleChangeText={setFaixaKm}
+                mode='numeric'
                 onFocus={()=>updateCampoNovoEventoError('faixaKm','')}
+                endEditing={()=>updateCampoNovoEvento('faixaKm', parseInt(faixaKm))}
                 msg={novoEventoError.faixaKm}
                 keyboardType="number-pad"
               />
@@ -467,15 +482,28 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                 option_2='Pago'
               />
 
+             {!requestCreateEvento.gratuito &&
+                <FormFieldModal
+                  title="Valor mínimo do ingresso"
+                  placeholder="R$ 00,00"
+                  value={valor}
+                  handleChangeText={setValor}
+                  mode='decimal'
+                  onFocus={()=>updateCampoNovoEventoError('valor','')}
+                  msg={novoEventoError.valor}
+                  endEditing={()=>updateCampoNovoEvento('valor', parseFloat(valor))}
+                  keyboardType="number-pad"
+                />}
+
               <TouchableOpacity     
                   className='border-[1px] mt-5 border-color_light_gray rounded-[8px] p-[10px] flex-row items-center justify-between' 
                   onPress={() => setShowTimePicker(!showTimePicker )}
                   onPressIn={()=>{updateCampoNovoEventoErrorData('horario','')}}
               >
-                <Text className='text-matte_gray'>
+                <Text className={`${theme==='light'?'text-matte_gray':'text-white'}`}>
                 {requestCreateEvento.data.horario.replace(':00', '') || 'Selecione a hora do evento'}
                 </Text>
-                <Ionicons name="time-outline" size={24} color="#666" />
+                <Ionicons name="time-outline" size={24} color={theme==='light'?'#666':'#FFF'} />
               </TouchableOpacity>
               {novoEventoError.data.horario && (<Text className='text-color_red_error'>*{novoEventoError.data.horario}</Text>)}
               
@@ -499,9 +527,9 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
                         </Text>
                       </View>
                     ) : (
-                      <View className="h-[120px] w-[100%] mb-4 bg-[#f0f0f0] rounded-[10px] items-center justify-center">
-                        <Text className="text-gray-500 mb-2">Toque para adicionar uma imagem</Text>
-                        <Text className="text-xs text-gray-400">Você pode tirar uma foto ou escolher da galeria</Text>
+                      <View className={`h-[120px] w-[100%] mb-4 rounded-[10px] items-center justify-center ${theme==='light'?'bg-[#f0f0f0]':'bg-[#131212a4]'}`}>
+                        <Text className={`text-gray-500 mb-2 ${theme==='light'?'text-black':'text-white'}`}>Toque para adicionar uma imagem</Text>
+                        <Text className={`text-xs text-gray-400 ${theme==='light'?'text-black':'text-white'}`}>Você pode tirar uma foto ou escolher da galeria</Text>
                       </View>
                     )}
               </TouchableOpacity>

@@ -113,3 +113,10 @@
         return bearing
       }
     
+  export const calculateStrokeWidth = (latitudeDelta : number) => {
+    const baseWidth = 10
+    const scaleFactor = 0.1
+    const zoomFactor = Math.log10(1 / latitudeDelta)
+    const scaledWidth = baseWidth * zoomFactor * scaleFactor 
+    return Math.min(Math.max(scaledWidth, 1), 10)
+  }

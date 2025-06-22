@@ -1,26 +1,31 @@
-import { AudioPlayer, useAudioPlayer } from 'expo-audio'
+import { Sound } from '../constants'
+import { AudioPlayer, useAudioPlayer, AudioModule} from 'expo-audio'
 import * as Speech from 'expo-speech'
-import { Sound, sounds } from '../constants'
 
 export class AudioSpeaker {
-    player : AudioPlayer  
-
+    player : AudioPlayer
 
     constructor() {
-        this.player = useAudioPlayer(sounds.beep.src)
-    }
-
-    playSound = async (sound : Sound = sounds.beep ) => {
-        await new Promise<void>((resolve) => {
-            this.player.replace(sound.src)
-            this.player.play()
-            setTimeout(() => {
-                this.player.seekTo(0)
-                resolve()
-            }, sound.duration * 1000)
+        this.player = useAudioPlayer()
+        AudioModule.setAudioModeAsync({
+            shouldPlayInBackground: true,
+            interruptionModeAndroid: "duckOthers",
+            interruptionMode: "duckOthers",
+            playsInSilentMode: true,
         })
     }
-    
+
+    playSound = async (sound : Sound) => {
+        return new Promise<void>((resolve) => {
+            this.player.replace(sound.src)
+            this.player.seekTo(0)
+            this.player.play()
+            setTimeout(() => { 
+                // player.seekTo(0)
+                resolve()
+            }, sound.duration * 1000 || 2000)
+        })
+    }
 
     speak = async (text: string) => {
         await new Promise<void>((resolve, reject) => {

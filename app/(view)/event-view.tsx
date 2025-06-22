@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity, Share } from 'react-native'
+import { Image, Linking, ScrollView, View, Animated, Dimensions, TouchableOpacity, Share, Appearance } from 'react-native'
 import { getEventoById } from '../../api/evento'
 import { Evento } from '../../types'
 import { Text } from 'react-native'
@@ -8,12 +8,12 @@ import ShowAlert from '../../components/ShowAlert'
 import LoadingActivity from '../../components/LoadingActivity'
 import CustomEvents from '../../css/CustomEvents';
 import { Ionicons } from "@expo/vector-icons";
-import { ArrowLeft } from 'lucide-react-native'
 import { useAuthProvider } from 'app/context/AuthProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import icons from 'constants/icons'
 
 export default function EventV() {
-
+  const theme = Appearance.getColorScheme()
   const { eventoId, isFromLocation } = useLocalSearchParams<{eventoId: string, isFromLocation: string}>()
   const { authState } = useAuthProvider()
   
@@ -65,7 +65,7 @@ export default function EventV() {
       const title = `Evento: ${item.nome}`;
       
       // Conteúdo
-      const shareMessage = `🎉 *${item.nome}*\n\n${item.descricao}\n\n📍 *Local:* ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.cidade} - ${item.endereco.estado}\n\n📆 *Data:* ${item.data}\n🏃 *Distância:* ${item.faixaKm} km\n💰 *Tipo:* ${item.gratuito ? 'Gratuito' : 'Pago'}\n\n [©] 2025 BiCity`;
+      const shareMessage = `🎉 *${item.nome}*\n\n${item.descricao}\n\n📍 *Local:* ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.cidade} - ${item.endereco.estado}\n\n📆 *Data:* ${item.data}\n🏃 *Distância:* ${item.faixaKm} km\n🚴‍♀️ *Tipo:* ${item.tipoEvento.nome}\n\n${item.gratuito ? '💰 *Gratuito*' : '💰 *A partir de:* R$ ' + item.valor }\n\n Compartilhado usando o app BiCity`
       
       // Construir opções de compartilhamento
       const shareOptions = {
@@ -102,14 +102,14 @@ if(isContentLoading){
   return  <LoadingActivity/>
 } else if (!evento){
   return (
-    <SafeAreaView className="flex-col justify-center bg-white h-full w-full">
+    <SafeAreaView className={`flex-col justify-center h-full w-full ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
       <TouchableOpacity
         style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
           paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-          className='bg-primary_green'
+          className={`${theme==='light'?'bg-primary_green':'bg-secondary_black'}`}
           onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555"/>
+        <Ionicons name='arrow-back' size={24} color={theme==='light'?'#555':'white'}/>
         </TouchableOpacity>
       <Text className="text-center text-red-500 mt-4">
         Algo deu errado ao carregar o evento. Tente novamente mais tarde.
@@ -118,14 +118,14 @@ if(isContentLoading){
   )
 } else
   return (
-    <SafeAreaView className="bg-white h-full w-full">
+    <SafeAreaView className={`h-full w-full ${theme==='light'?'bg-white':'bg-color__lightGray'}`}>
        <TouchableOpacity
         style={{ position: 'absolute', top: 45, right: 20, borderRadius: '50%',  paddingHorizontal: 15,
           paddingVertical: 15, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, zIndex: 10,}} 
-          className='bg-primary_green'
+          className={`${theme==='light'?'bg-primary_green':'bg-secondary_black'}`}
           onPress={() => router.back()}
         >
-        <ArrowLeft size={24} color="#555"/>
+        <Ionicons name='arrow-back' size={24} color={theme==='light'?'#555':'white'}/>
         </TouchableOpacity>
 
       {errorMessage && (
@@ -158,8 +158,8 @@ if(isContentLoading){
         </Animated.View>
 
         {/* Box de informações com gradiente e animação */}
-        <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 18, paddingHorizontal:20 , position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
-          className=" h-[402px] rounded-xl">
+        <Animated.View style={{ transform: [{ translateY: slideAnim }], backgroundColor: theme==='light'?'white':'#1f2937', borderTopLeftRadius: 16, borderTopRightRadius: 18, paddingHorizontal:20 , position: 'absolute', bottom: 0, left: 0, right: 0, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, }}
+          className=" h-[402px]">
           <ScrollView showsVerticalScrollIndicator={false}>
             <View className="flex-col items-center py-[10px]">
               {evento && (
@@ -174,7 +174,7 @@ if(isContentLoading){
                       <Ionicons name="location-outline" size={20} color="white" />
                       <Text className="text-white font-bold ml-2">Ver no Mapa</Text>
                     </TouchableOpacity>
-                    <Text className=" text-matte_gray font-bold text-left w-[50%]">
+                    <Text className={`${theme==='light'?'text-matte_gray':'text-white'} font-bold text-left w-[50%]`}>
                     Endereço: {evento.endereco.rua}, {evento.endereco.numero},{' '}
                     {evento.endereco.bairro}, {evento.endereco.cidade} - {evento.endereco.estado}
                   </Text>
@@ -197,32 +197,49 @@ if(isContentLoading){
                   </View>
 
                   <View className='w-full mt-1'>
-                    <Text className="text-[31px] font-bold text-matte_gray text-center">{evento.nome}</Text>
-                    <Text className="text-matte_gray text-[12px]">{evento.descricao}</Text>
+                    <Text className={`text-[31px] font-bold text-center ${theme==='light'?'text-matte_gray':'text-white'}`}>{evento.nome}</Text>
+                    <Text className={` text-base ${theme==='light'?'text-matte_gray':'text-white'}`}>{evento.descricao}</Text>
                   </View>
                   
                   <View className='flex-row justify-around mt-4 w-full'>
                     
                     <View>
-                      <Text className='text-center text-matte_gray font-[12px]'>{evento.data.split(' ')[1]}</Text>
-                      <Text className='text-center text-matte_gray font-bold'>{evento.data.split(' ')[0]}</Text>
+                      <Text className={`text-center ${theme==='light'?'text-matte_gray':'text-white'} font-[12px]`}>{evento.data.split(' ')[1].slice(0, 5)}</Text>
+                      <Text className={`text-center ${theme==='light'?'text-matte_gray':'text-white'} font-bold`}>{evento.data.split(' ')[0]}</Text>
                     </View>
 
                     <View>
-                      <Text className='text-center text-matte_gray font-[12px]'>{evento.faixaKm} km</Text>
-                      <Text className='text-center text-matte_gray font-bold'>Faixa</Text>
+                      <Text className={`text-center ${theme==='light'?'text-matte_gray':'text-white'} font-[12px]`}>{evento.faixaKm} km</Text>
+                      <Text className={`text-center ${theme==='light'?'text-matte_gray':'text-white'} font-bold`}>Faixa</Text>
                     </View>
 
-                    <View>
-                      <Text className='text-center text-matte_gray font-[12px]'>{evento.gratuito ? 'Gratuito' : 'Pago'} </Text>
-                      <Text className='text-center text-matte_gray font-bold'>Tipo</Text>
-                    </View>
                   </View>
                  
               
+
+                 <View className="flex-row items-center justify-between mt-3 px-4">
+                    <View className="w-[90px] flex-row items-center">
+                      <Image
+                        source={evento.gratuito ? icons.mapa_pino_evento_gratuito : icons.mapa_pino_evento_pago}
+                        style={{ width: 55, height: 55, marginRight: 8 }}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <View className="w-[100] flex-col items-center justify-end">
+                      <View className="flex-row items-center justify-center">
+                        <Ionicons name="cash-outline" size={20} color={theme==='light'?'#555':'white'} style={{ marginRight: evento.gratuito? 0:8 }} />
+                        {!evento.gratuito &&
+                          <Text className={`${theme==='light'?'text-color_light_gray_2':'text-white'} text-base`}>
+                            R$: {evento.valor}
+                          </Text>}
+                      </View>
+                      <Text className={`${theme==='light'?'text-color_light_gray_2':'text-white'} text-[12px] mt-1`}>{evento.gratuito ? 'Gratuito' : 'A partir de'}</Text>
+                    </View>
+                  </View>
+
                   {evento.urlSite && (
                   <View className="flex-row items-center justify-center mt-3">
-                    <Text className="text-color__text__link text-[12px]">
+                    <Text className="text-color__text__link text-[14.5px]">
                       Site:{' '}
                       <Text onPress={() => Linking.openURL(evento.urlSite)}>
                         {evento.urlSite}
@@ -244,6 +261,7 @@ if(isContentLoading){
                 </Text> 
               )}
             </View>
+            
           </ScrollView>
         </Animated.View>
       </View>

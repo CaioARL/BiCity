@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Appearance } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons';
 
@@ -14,9 +14,10 @@ interface FormSelectFieldModalProps {
 
 
 export default function FormSelectFieldModal({ handleChangeValue, value , title, option_1 , option_2, disableEdit}: FormSelectFieldModalProps) {
-  return (
+    const theme = Appearance.getColorScheme()    
+return (
     <View >
-        <Text className='text-[16px] text-[#555] mb-[5px]'>{title}</Text>
+        <Text className={`text-[16px] text-[#555] mb-[5px] ${theme==='light'?'text-black':'text-white'}`}>{title}</Text>
             <View className='flex-row w-[100%] justify-between'>
                 <TouchableOpacity
                     className={`flex-row items-center w-[50%] mb-[15px] py-[10px] ${value && ''}`}
@@ -26,9 +27,9 @@ export default function FormSelectFieldModal({ handleChangeValue, value , title,
                     <Ionicons 
                     name={value ? "checkmark-circle" : "square-outline"} 
                     size={20} 
-                    color={value ? "#C3FF00" : "#333"} 
+                    color={value ? "#C3FF00" : theme==='light'?'#333':'white'} 
                     />
-                    <Text className='text-[16px] ml-[10px] '>{option_1}</Text>
+                    <Text className={`text-[16px] ml-[10px] ${theme==='light'?'text-black':'text-white'}`}>{option_1}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className={`flex-row items-center w-[50%] mb-[15px] py-[10px] ${!value && ''}`}
@@ -38,9 +39,9 @@ export default function FormSelectFieldModal({ handleChangeValue, value , title,
                     <Ionicons 
                     name={!value ? "checkmark-circle" : "square-outline"} 
                     size={20} 
-                    color={!value ? "#C3FF00" : "#333"} 
+                    color={!value ? "#C3FF00" : theme==='light'?'#333':'white'} 
                     />
-                    <Text className='text-[16px] ml-[10px]' >{option_2}</Text>
+                    <Text className={`text-[16px] ml-[10px]  ${theme==='light'?'text-black':'text-white'}`}>{option_2}</Text>
                 </TouchableOpacity>
             </View>
     </View>

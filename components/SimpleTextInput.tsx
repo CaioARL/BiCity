@@ -1,4 +1,4 @@
-import { Text, TextInput } from 'react-native'
+import { Text, TextInput, Appearance } from 'react-native'
 import React from 'react'
 
 interface SimpleTextInputProps {
@@ -12,10 +12,13 @@ interface SimpleTextInputProps {
 }
 
 export default function SimpleTextInput( {value, errorMessage: errorMessage, handleChange, onFocus, type, max, editable } : SimpleTextInputProps ) {
+  const theme = Appearance.getColorScheme()
   return (
     <>
         <TextInput
-            className={`h-[40px] border-[#ccc] border-[1px] rounded-[5px] mb-[10px] px-[10px]`}
+            className={`h-[40px] border-[#ccc] border-[1px] rounded-[5px] mb-[10px$ px-[10px]
+              ${theme === 'light'? 'bg-white text-black': 'bg-secondary_black text-white'}  
+            `}
             value={value}
             onChangeText={handleChange}
             keyboardType={type}
