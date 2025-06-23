@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Problema, RequestProblemaReport } from '../types'
-import { Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { Text, View, Image, TouchableOpacity, ScrollView, Appearance } from 'react-native'
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from 'react'
 import { useAuthProvider } from 'app/context/AuthProvider';
@@ -12,6 +12,7 @@ interface ProblemaViewProps {
 }
 
 export default function ProblemaView( { problema , onClose} : ProblemaViewProps) {
+    const theme = Appearance.getColorScheme()
     const [requestProblemaReport,setRequestProblemaReport] = useState<RequestProblemaReport | null >(null)
     const [erroMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
@@ -44,15 +45,15 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
     <View className=" absolute top-0 left-0 z-10 flex-col justify-center items-center w-full h-full py-[20%]">
         <TouchableOpacity className="w-full h-full" onPress={onClose} />
  
-     <View className="p-[30px] bg-white rounded-lg shadow-md h-fit w-[94%] justify-start">
+     <View className={`p-[30px] rounded-lg shadow-md h-fit w-[94%] justify-start ${theme==='light'?'bg-white':'bg-secondary_black'}`}>
         <View className='flex-row justify-between items-center mb-[8px]'>
    
             <View style={{width: 24}} />
-            <Text className='text-lg font-bold'>Problema da Ciclovia</Text>
+            <Text className={`text-lg font-bold ${theme==='light'?'text-black':'text-white'}`}>Problema da Ciclovia</Text>
         
         
             <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={24} color="#555" />
+                <Ionicons name="close" size={24} color={theme==='light'?'#555':'white'} />
             </TouchableOpacity>
         </View>
 
@@ -86,12 +87,12 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
             </View>
 
             <View className='flex-col flex-grow-[2px] w-[60%] p-[10px] justify-between text-left my-4 border-color_light_gray rounded-[10px]' style={{ borderWidth: 1, borderRadius: 10 }}>
-            <Text className="text-[12px] text-matte_gray mb-[5px] font-bold capitalize">{problema.tipoProblema.descricao}</Text>
+            <Text className={`text-[12px] mb-[5px] font-bold capitalize ${theme==='light'?'text-matte_gray':'text-white'}`}>{problema.tipoProblema.descricao}</Text>
 
-            <Text className='text-[12px] text-matte_gray mb-[5px]'>{problema.descricao}</Text>
+            <Text className={`text-[12px] text-matte_gray mb-[5px] ${theme==='light'?'text-matte_gray':'text-color_lightGray'}`}>{problema.descricao}</Text>
             
                 <View className="w-full flex-row justify-end">
-                    <Text className='text-[12px] text-matte_gray'>
+                    <Text className={`text-[12px] ${theme==='light'?'text-matte_gray':'text-color_lightGray'}`}>
                     {problema.dtCriacao}
                     </Text>
                 </View>
@@ -107,7 +108,7 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
         :
         (<View className='flex-row w-full h-fit p-[10px] justify-center items-center my-4 rounded-[10px]'
             style={{borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10}}>
-            <Ionicons name="image-outline" size={24} color="#555" style={{ marginLeft: 5 }} />
+            <Ionicons name="image-outline" size={24} color={theme==='light'?'#555':'white'}style={{ marginLeft: 5 }} />
         </View>)
         } 
 
@@ -122,8 +123,9 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
                 disabled={loading}
                 onPress={()=> authState?.user ? setRequestProblemaReport({problemaId: problema.id, usuarioId: authState.user.id, exists: true}) : setErrorMessage('Você precisa estar logado para reportar um problema')}
                 >
-                    <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/ativo.png')} />
-                    <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Sim, ainda ativo</Text>
+                    {/* <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/ativo.png')} /> */}
+                    <Ionicons name='thumbs-up-outline' size={20} className={`border-[1px] p-[5px] rounded-full border-color_green_success ${theme==='light'?'text-matte_gray':'text-white'}`} color={theme==='light'?'black':'white'}/>
+                    <Text className={`ml-2 text-[12px] font-semibold ${theme==='light'?'text-matte_gray':'text-white'}`}>Sim, ainda ativo</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -131,8 +133,9 @@ export default function ProblemaView( { problema , onClose} : ProblemaViewProps)
                 disabled={loading}
                 onPress={()=> authState?.user ? setRequestProblemaReport({problemaId: problema.id, usuarioId: authState.user.id, exists: false}) : setErrorMessage('Você precisa estar logado para reportar um problema')}
                 >
-                    <Image style={{ width: 30, height: 30, objectFit: 'cover' }} source={require('../assets/img/desativo.png')} />
-                    <Text className='ml-2 text-[12px] text-matte_gray font-semibold'>Não, já foi resolvido</Text>
+                    {/* <Image style={{ width: 30, height: 30, objectFit: 'cover'}} source={require('../assets/img/desativo.png')} /> */}
+                    <Ionicons name='thumbs-down-outline' size={20} className={`border-[1px] p-[5px] rounded-full border-color_red_error ${theme==='light'?'text-matte_gray':'text-white'}`} color={theme==='light'?'black':'white'}/>
+                    <Text className={`ml-2 text-[12px] font-semibold ${theme==='light'?'text-matte_gray':'text-white'}`}>Não, já foi resolvido</Text>
                 </TouchableOpacity>
             </>)
             }
