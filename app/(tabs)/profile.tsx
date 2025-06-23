@@ -18,7 +18,7 @@ import { Appearance } from 'react-native'
 
 
 export default function Profile(){
-  const { onLogout, authState, fetchUser } = useAuthProvider()
+  const { authState, fetchUser } = useAuthProvider()
   
   const theme = Appearance.getColorScheme()
 
@@ -169,19 +169,6 @@ export default function Profile(){
     setShowMoreInfo(!showMoreInfo)
   }
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout()
-        .then((response) => {
-          // setSuccessMessage(response)
-          router.replace('sign-in')
-        })
-        .catch((error) => {
-          setErrorMessage(error)
-        });
-    }
-  }
-
   const updateCampoUsuarioError = (campo: string, valor: string) => {
     setUpdateUsuarioError((prev)=>({
       ...prev,
@@ -221,13 +208,18 @@ export default function Profile(){
       scrollEventThrottle={16} 
       contentContainerStyle={{ paddingBottom: 107 }}
       >
-      
+      <View className='bg-primary_green flex justify-end items-end px-[20px]'>
+        <TouchableOpacity 
+          className='flex items-center justify-center h-[50px] w-[50px]' onPress={()=>router.push('settings')}>
+          <Ionicons name='settings' size={30} color={theme==='light'?'#555':'black'}/>
+        </TouchableOpacity>
+      </View>
         <View style={{...CustomProfile.profileCard, backgroundColor: theme==='light'?'white':'#1f2937', shadowColor: '#000'}}>
 
 
           {isLoading && <LoadingActivity></LoadingActivity>}
 
-          <View style={{ ...CustomProfile.topSection, backgroundColor: '#C3FF00'  }} >
+          <View style={{ ...CustomProfile.topSection, backgroundColor: '#C3FF00'  }} className='p-safe' >
             <View style={CustomProfile.imageContainer}>
               <Image source={require('../../assets/greengradient.png')} style={CustomProfile.gradientOverlay} />
 
@@ -351,7 +343,7 @@ export default function Profile(){
 
               </View>}
 
-                {isEditing ? (
+                {isEditing && 
                     <TouchableOpacity
                     style={CustomProfile.button2}
                     className='bg-primary_green p-[15px] rounded-[5px] '
@@ -359,8 +351,8 @@ export default function Profile(){
                     >
                     <Text className='text-black text-[14px] font-bold'>Salvar</Text>
                     </TouchableOpacity>
-                )
-                :
+                }
+                {/* :
                 (
                   <TouchableOpacity 
                   style={CustomProfile.button2}  
@@ -369,7 +361,7 @@ export default function Profile(){
                   >
                       <Text className='text-black text-[14px] font-bold'>Sair</Text>
                   </TouchableOpacity>
-                )}
+                )} */}
               </View>
             
            
