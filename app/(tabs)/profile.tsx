@@ -117,8 +117,8 @@ export default function Profile(){
 
               <View className={`w-[350px] h-[350px] rounded-[350px] border-[3px] mr-[10px] items-center ${theme === 'dark' ? 'bg-[#1f2937] border-[black] ' : 'bg-white border-[white]'}`}>
            
-                {authState?.user?.s3Url ?
-                (<Image style={CustomProfile.profileImage} src={authState.user.s3Url} />)
+                {authState?.user?.s3Url && !updateImage  ?
+                (<Image style={CustomProfile.profileImage} source={{uri: authState.user.s3Url , cache: 'reload'}} />)
                 :
                 (<Text className={`text-[245px] ${theme==='light'?'text-black':'text-white'}`}>
                   {authState?.user?.nome && authState.user.nome[0].toUpperCase()}
