@@ -52,7 +52,7 @@ const CustomProfile = StyleSheet.create({
     borderWidth: 2,
   },
   bottomSection: {
-    paddingTop: 60,
+    paddingTop: 30, //60 was the default
     paddingHorizontal: 20,
     paddingBottom: 20,
   },

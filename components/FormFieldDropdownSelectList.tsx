@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue, Appearance } from 'react-native'
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, VirtualizedList, DimensionValue, Appearance } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons } from "@expo/vector-icons";
 
@@ -16,14 +16,14 @@ interface FormFieldDropdownSelectList<T> {
     msg?: string
     isValid?: boolean
     otherStyles?: string
-    disableEdit?: boolean
+    editable?: boolean
     isLoading?: boolean
   }
 
 
 
 
-export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, onFocus, msg, isValid, otherStyles, disableEdit, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
+export default function FormFieldDropdownSelectList( {title, selectedValue, options, handleChange, onFocus, msg, isValid, otherStyles, editable, isLoading, dropDownSize }: FormFieldDropdownSelectList<any> ) {
 
   const [eventTypeOptionsVisible, setEventTypeOptionsVisible] = useState<boolean> (false)
   const theme = Appearance.getColorScheme()
@@ -34,13 +34,13 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
         <View className={`mb-[10] ${otherStyles} `}>
         <Text className={`text-[16px] ${theme==='light'?'text-matte_gray':'text-white'} mb-[5px]`}>{title}</Text>
         <TouchableOpacity 
-              className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px] ${theme==='light'?'bg-white':'bg-secondary_black'}`}
+              className={`flex-row items-center border-[1px] border-[#ddd] rounded-[8] p-[10] mb-[6px] ${editable? theme==='light'?'bg-white':'bg-secondary_black' : 'bg-color_lightGray'}`}
               onPress={() => {setEventTypeOptionsVisible(prev => !prev)}}
               onPressIn={onFocus}
-              disabled={disableEdit}
+              disabled={!editable}
               >
   
-            <Text className={`capitalize flex-1 ${theme==='light'?'text-matte_gray':'text-white'} `}>
+            <Text className={`capitalize flex-1 ${editable? theme==='light'?'text-matte_gray':'text-white':'black'} `}>
             {selectedValue?.nome ? selectedValue.nome : 'Selecione uma opção'}
             
             </Text>
@@ -50,7 +50,7 @@ export default function FormFieldDropdownSelectList( {title, selectedValue, opti
                       color='#0000ff'
                     />
                   ): (
-                    <Ionicons name="chevron-down" size={20} color={theme==='light'?'#555':'#FFF'} />
+                    <Ionicons name={editable? "chevron-down":"ribbon-outline"} size={20} color={editable? theme==='light'?'#555':'#FFF':'black'} />
                   )}
         </TouchableOpacity>
         {msg && (<Text className='text-color_red_error'>{msg}</Text>)}

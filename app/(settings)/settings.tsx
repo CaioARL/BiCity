@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Appearance, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Appearance, Alert, Linking } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -35,21 +35,25 @@ export default function Settings() {
         <Text className={`text-3xl text-center my-safe-offset-5 ${theme==='light'?'text-black':'text-white'}`}>Configurações</Text>
         
         <ScrollView className='container h-full w-full flex-col'>
-            <TouchableOpacity className='flex-row justify-start items-center border-t-[1px] mb-2 border-color__lightGray h-[45px]'
+            <TouchableOpacity className='flex-row justify-start items-center border-b-[1px] mb-2 border-color__lightGray h-[45px]'
                 onPress={()=>router.push('appearance')}
             >
                 <Ionicons size={24} name='color-fill' color={theme==='light'?'#555':'white'}/>
                 <Text className={`text-lg text-bold ml-[10px] ${theme==='light'?'text-black':'text-white'} `}>Aparência</Text>
             </TouchableOpacity>
-            <TouchableOpacity className='flex-row justify-start items-center border-t-[1px] mb-2 border-color__lightGray h-[45px]'>
+            <TouchableOpacity className='flex-row justify-start items-center border-b-[1px] mb-2 border-color__lightGray h-[45px]'
+                onPress={()=>router.push('account')}
+            >
                 <Ionicons size={24} name='person' color={theme==='light'?'#555':'white'}/>
                 <Text className={`text-lg text-bold ml-[10px] ${theme==='light'?'text-black':'text-white'} `}>Conta</Text>
             </TouchableOpacity>
-            <TouchableOpacity className='flex-row justify-start items-center border-t-[1px] mb-2 border-color__lightGray h-[45px]'>
-                <Ionicons size={24} name='book' color={theme==='light'?'#555':'white'}/>
+            <TouchableOpacity className='flex-row justify-start items-center border-b-[1px] mb-2 border-color__lightGray h-[45px]'
+                onPress={()=>Linking.openURL('https://drive.google.com/file/d/1rfst-lPvq6RCBmVTPb_-E8X3000Pf87k/view?usp=sharing')}
+            >
+                <Ionicons size={24} name='receipt' color={theme==='light'?'#555':'white'}/>
                 <Text className={`text-lg text-bold ml-[10px] ${theme==='light'?'text-black':'text-white'} `}>Política de Privacidade</Text>
             </TouchableOpacity>
-            <TouchableOpacity className='flex-row justify-start items-center border-t-[1px] mb-2 border-color__lightGray h-[45px]'
+            <TouchableOpacity className='flex-row justify-start items-center border-b-[1px] mb-2 border-color__lightGray h-[45px]'
                 onPress={()=>{
                     Alert.alert("Sair", `Tem certeza de que quer sair da conta: ${authState?.user?.nome} `,
                         [
