@@ -1,21 +1,22 @@
 import { Text, Appearance, ScrollView, TouchableOpacity, View, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario, RequestUpdateUsuarioError } from 'types'
+import { DefaultErrorResponse, ListNivelHabilidade, NivelHabilidade, RequestUpdateUsuario, RequestUpdateUsuarioError } from 'types'
 import { useAuthProvider } from 'app/context/AuthProvider'
 import SimpleTextInput from 'components/SimpleTextInput'
 import FormFieldDropdownSelectList from 'components/FormFieldDropdownSelectList'
-import { updateUser } from 'api/usuario'
+import { deleteUser, updateUser } from 'api/usuario'
 import { updateUsuario } from 'util/validationSchemas'
 import { getHabilidades } from 'storage'
 import LoadingActivity from 'components/LoadingActivity'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import ShowAlert from 'components/ShowAlert'
+import { AxiosError } from 'axios'
 
 export default function Account() {
     const theme = Appearance.getColorScheme()
-    const { authState , fetchUser } = useAuthProvider()
+    const { authState , fetchUser, onLogout } = useAuthProvider()
 
     const [isLoading, setIsLoading] = useState(false)
 
@@ -56,6 +57,22 @@ export default function Account() {
 
     if(authState?.user === usuario ) return setUserAlert({type:'error' ,message:'Nada mudou'})
         setRequestUpdateUsuario(usuario)
+    }
+
+    const handleDeleteUser = () => {
+        setIsLoading(true)
+        deleteUser()
+        .then((response)=>{
+            setUserAlert({type:'success', message: 'Conta deletada com sucesso !' + response})
+            console.log("RESPONSE DELETE "+ response)
+            setTimeout(()=>onLogout,3000)
+        })
+        .catch((error:AxiosError<DefaultErrorResponse>)=>{
+            setUserAlert({type:'error', message: 'Error ao deletar !' + error.response?.data.message || error.message })
+        })
+        .finally(()=>{
+            setIsLoading(false)
+        })
     }
 
     useEffect(() => {
@@ -267,7 +284,7 @@ export default function Account() {
                         "DELETAR A CONTA",
                         "Tem certeza que você quer deletar a contar? Essa ação é irreversível.",
                         [
-                            { text: "Confirmar", onPress: () => console.log("Account Deleted") },
+                            { text: "Confirmar", onPress:handleDeleteUser },
                             { text: "Cancelar", style: "cancel" },
                         ]
                     )
