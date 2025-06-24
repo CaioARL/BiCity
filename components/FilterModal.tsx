@@ -138,6 +138,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               
               <FormFieldDropdownSelectList
                 options={listTipoEvento}
+                editable={true}
                 handleChange={setFilterTipoEvento}
                 title='Tipo de Evento'
                 selectedValue={filterTipoEvento}

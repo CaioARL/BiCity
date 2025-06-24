@@ -168,6 +168,7 @@ export default function ProblemaModal({ visible, closeModal, coords }: ModalProp
               />
               <FormFieldDropdownSelectList
                 title="Tipo de Problema"
+                editable={true}
                 selectedValue={listTipoProblema.find((item) => item.id === problema.idTipoProblema)}
                 options={listTipoProblema}
                 handleChange={(e) => {

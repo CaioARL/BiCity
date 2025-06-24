@@ -16,7 +16,7 @@ interface FormFieldDropdownSelectList<T> {
     msg?: string
     isValid?: boolean
     otherStyles?: string
-    editable?: boolean
+    editable: boolean
     isLoading?: boolean
   }
 
