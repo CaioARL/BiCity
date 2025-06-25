@@ -1,5 +1,5 @@
 
-import api from "./index";
+import api, { viaCepApi } from "./index";
 import { CepInfo, Endereco, ResponseGetCepByLatAndLon } from "../types";
 import ENDPOINTS from "./endpoints";
 
@@ -53,10 +53,12 @@ export const getCepByLatAndLong = async (latitude: number, longitude: number, ab
 
 
 export const getViaCep = async (cep : string ,abortSignal : AbortController) : Promise<CepInfo> => {
-    const response = await api.get<CepInfo>(ENDPOINTS.ENDERECO_VIACEP_GET+ cep + '/json')
-        {
-            signal: abortSignal.signal
-        }
+    const response = await viaCepApi.get<CepInfo>(ENDPOINTS.ENDERECO_VIACEP_GET+ cep + '/json',{
+        headers: {
+            'Content-Type':'application/json'
+        },
+        signal: abortSignal.signal,
+    })
 
     return response.data
 }

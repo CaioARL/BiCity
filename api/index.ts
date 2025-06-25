@@ -1,6 +1,6 @@
-import axios, { AxiosError } from "axios";
-import { router } from "expo-router";
-import { DefaultErrorResponse } from "types";
+import axios, { AxiosError } from "axios"
+import { router } from "expo-router"
+import { DefaultErrorResponse } from "types"
 
 const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -46,4 +46,14 @@ api.interceptors.response.use(
 )
 
 
-export default api;
+export default api
+
+
+export const viaCepApi = axios.create({
+    timeout: 30000,
+    baseURL: 'https://viacep.com.br',
+    headers: {
+        'X-Access-Key': undefined,
+        'Content-Type': "application/json",
+    },
+})
