@@ -152,8 +152,8 @@ if(isContentLoading){
             style={{ borderRadius: 50}}
             onPress={() => evento && handleToshareEvent(evento)}
             >
-            <Text className="text-matte_gray font-bold align-items-center">Compartilhe</Text>
-            <Ionicons name="navigate-outline" size={20} color="#555" style={{ paddingLeft: 8 }} />
+            <Text className="text-matte_gray font-bold align-items-center">Compartilhar</Text>
+            <Ionicons name="share-social" size={20} color="#555" style={{ paddingLeft: 8 }} />
           </TouchableOpacity>
         </Animated.View>
 
@@ -237,20 +237,22 @@ if(isContentLoading){
                     </View>
                   </View>
 
-                  {evento.urlSite && (
                   <View className="flex-row items-center justify-center mt-3">
-                    <Text className="text-color__text__link text-[14.5px]">
-                      Site:{' '}
-                      <Text onPress={() => Linking.openURL(evento.urlSite)}>
-                        {evento.urlSite}
-                      </Text>
+                    <Text className={`text-[14.5px] ${theme==='light'?'text-color_light_gray_2':'text-white'} `}>
+                        Tipo de Evento: {evento.tipoEvento.nome}
                     </Text>
-                    <Ionicons name="ticket-outline" size={12} color="#555" style={{ marginLeft: 5 }} />
+                    <Ionicons name="ticket" size={12} color={theme==='light'?'#555':'white'}  style={{ marginLeft: 5 }} />
                   </View>
+                  {evento.urlSite && (
+                    <TouchableOpacity className="flex-row justify-center items-center gap-2 rounded-[50px] text-center mt-3 bg-primary_green w-full p-5"
+                      onPress={() => Linking.openURL(evento.urlSite)}
+                    >
+                      <Text className='text-base text-color_light_gray_2'>
+                        Ir para o site
+                      </Text>
+                      <Ionicons name='navigate' size={14}/>
+                    </TouchableOpacity>
                   )}
-                  <Text className="text-color_light_gray_2 text-[12px] text-center mt-3 bg-primary_green w-full p-5" style={{ borderRadius: 50}}>
-                    Tipo de Evento: {evento.tipoEvento.nome}
-                  </Text>
               
                 </>
               )}
