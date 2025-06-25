@@ -100,7 +100,7 @@ export default function Home() {
   
   const [currentLocationError, setCurrentLocationError] = useState<LocationError | null> ()
   const locationErrors = {
-    PERMISSION : {key: 'PERMISSION', message: 'Permissão de localização negada, cheque as permissões do aplicativo'},
+    PERMISSION : {key: 'PERMISSION', message: 'Precisamos da permissão para usar a localização. Para identificar sua posição atual com alta precisão, permitir a busca por ciclovias e eventos próximos a você, e ajudar na navegação durante seus trajetos na cidade.'},
     SERVICE : {key: 'SERVICE', message: 'Serviço de localização desativado'},
     ERROR : {key: 'ERROR', message: 'Erro ao obter localização'}
   }

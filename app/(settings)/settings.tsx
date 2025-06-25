@@ -48,7 +48,7 @@ export default function Settings() {
                 <Text className={`text-lg text-bold ml-[10px] ${theme==='light'?'text-black':'text-white'} `}>Conta</Text>
             </TouchableOpacity>
             <TouchableOpacity className='flex-row justify-start items-center border-b-[1px] mb-2 border-color__lightGray h-[45px]'
-                onPress={()=>Linking.openURL('https://drive.google.com/file/d/1rfst-lPvq6RCBmVTPb_-E8X3000Pf87k/view?usp=sharing')}
+                onPress={()=>Linking.openURL('https://docs.google.com/document/d/e/2PACX-1vQWTC7d5oj9jrOKxehgLNilsAryq0VBlcnnI7UGWHmQYa9_JvvOqc_ASVb_2W6r2cug4UK1c7S9ETMw/pub')}
             >
                 <Ionicons size={24} name='receipt' color={theme==='light'?'#555':'white'}/>
                 <Text className={`text-lg text-bold ml-[10px] ${theme==='light'?'text-black':'text-white'} `}>Política de Privacidade</Text>

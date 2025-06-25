@@ -1,5 +1,5 @@
 import { View, Text, FlatList, ImageBackground, TouchableOpacity, TextInput, Image, Appearance } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Ionicons, Feather } from "@expo/vector-icons";
 import CustomEvents from '../../css/CustomEvents';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { Evento, RequestPageEvento, TipoEvento, Usuario } from '../../types';
 import { getEvento } from '../../api/evento';
 import ShowAlert from '../../components/ShowAlert';
 import LoadingActivity from '../../components/LoadingActivity';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import ScrollUp from '../../components/ScrollUp'; 
 
 // interface EventItem {
@@ -94,7 +94,19 @@ export default function Events() {
     }
     console.log('detalhes de usuario carregados no evento')
   },[])
-  
+
+  useFocusEffect(
+    useCallback(() => {
+      // Invoked whenever the route is focused.
+      // console.log("Hello, I'm focused!");
+      router.setParams({tabBarVisible: 'yes'})
+
+      // Return function is invoked whenever the route gets out of focus.
+      return () => {
+        // console.log('This route is now unfocused.');
+      }
+    }, [])
+  )
 
   useEffect(() => {
       if(requestPageEvento.page === currentPageRef.current ) return 

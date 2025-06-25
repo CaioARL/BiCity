@@ -64,8 +64,11 @@ export default function Account() {
         deleteUser()
         .then((response)=>{
             setUserAlert({type:'success', message: 'Conta deletada com sucesso !' + response})
-            console.log("RESPONSE DELETE "+ response)
-            setTimeout(()=>onLogout,3000)
+            // console.log("RESPONSE DELETE "+ response)
+            setTimeout(()=>{
+                onLogout && onLogout()
+                router.replace('/sign-in')
+            },3000)
         })
         .catch((error:AxiosError<DefaultErrorResponse>)=>{
             setUserAlert({type:'error', message: 'Error ao deletar !' + error.response?.data.message || error.message })
