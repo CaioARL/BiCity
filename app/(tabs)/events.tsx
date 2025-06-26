@@ -222,7 +222,7 @@ export default function Events() {
                 { authState?.user?.s3Url ? 
                 
                 <Image
-                  src={authState.user.s3Url}
+                  source={{uri:authState.user.s3Url, cache:'reload'}}
                   // className='w-[65px] h-[70px] rounded-[50px] border-[1px] mr-[10px] items-center'
                   className="w-20 h-20 rounded-full border-color_light_gray"
                   style={{ width: 65, height: 65, borderRadius: 50, borderWidth: 1,  marginRight: 10 }}
