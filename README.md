@@ -236,7 +236,7 @@ O presente projeto tem como objetivo criar um aplicativo que permita aos usuári
 
 ## 💻 Layout BiCity
 
-https://github.com/user-attachments/assets/71116178-0b32-4b62-b666-cb5bd0bf7524
+https://github.com/user-attachments/assets/4aaa1250-317f-4d07-bf07-d8ebcb70bd8e
 
 
 
