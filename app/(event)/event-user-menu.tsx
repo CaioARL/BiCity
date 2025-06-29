@@ -249,6 +249,7 @@ export default function EventDetail() {
                                     </Text>
                                      <Text style={CustomEvents.cardDate}>Data: {item.data.split(' ')[0]}</Text>
                                     <Text style={CustomEvents.cardDate}>Horário: {item.data.split(' ')[1]}</Text>
+                                    <Text className={`text-base rounded-[10px] px-2 ${item.aprovado===null?'bg-[yellow] text-black':item.aprovado? 'bg-primary_green text-black':'bg-color_red_error text-white'}`}>{item.aprovado===null?'Pendente' : item.aprovado?'Aprovado':'Reprovado'}</Text>
                                   </View>
                                   
                                 </View>

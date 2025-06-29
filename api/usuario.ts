@@ -115,3 +115,8 @@ export const recoverPassword = async (novaSenha: string,token: string, abortSign
     })
     return response.data
 }
+
+export const deleteUser = async () => {
+    const response = await api.delete<any>(ENDPOINTS.USUARIO,{})
+    return response.data
+}

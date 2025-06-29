@@ -31,7 +31,7 @@ export default function Terms({ visible, onClose }: TermsProps) {
   }, [visible, fadeAnim]);
 
   const handleOpenDocument = () => {
-    const pdfPath = 'https://drive.google.com/file/d/1rfst-lPvq6RCBmVTPb_-E8X3000Pf87k/view?usp=sharing';
+    const pdfPath = 'https://docs.google.com/document/d/e/2PACX-1vQWTC7d5oj9jrOKxehgLNilsAryq0VBlcnnI7UGWHmQYa9_JvvOqc_ASVb_2W6r2cug4UK1c7S9ETMw/pub';
     Linking.openURL(pdfPath);
   };
 

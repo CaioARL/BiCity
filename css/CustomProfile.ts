@@ -10,7 +10,7 @@ const CustomProfile = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    // elevation: 5,
   },
   topSection: {
     height: 400,
@@ -52,7 +52,7 @@ const CustomProfile = StyleSheet.create({
     borderWidth: 2,
   },
   bottomSection: {
-    paddingTop: 60,
+    paddingTop: 30, //60 was the default
     paddingHorizontal: 20,
     paddingBottom: 20,
   },

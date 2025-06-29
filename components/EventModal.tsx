@@ -455,6 +455,7 @@ export default function EventModal({ visible, closeModal, evento }: EventModalPr
             
               <FormFieldDropdownSelectList
                 title='Tipos de Eventos'
+                editable={true}
                 selectedValue={requestCreateEvento.tipoEvento}
                 options={listTipoEvento}
                 handleChange={(value) => updateCampoNovoEventoTipoEvento(value)}

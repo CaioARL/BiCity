@@ -6,9 +6,10 @@ import api from '../../api/index'
 import { getNivelHabilidade } from 'api/nivel-habilidade'
 import { getTipoEvento } from 'api/tipo-evento'
 import { getTipoProblema } from 'api/tipo-problema'
-import { checkHabilidades, checkTipoProblema, checkTiposEvento, storeHabilidades, storeTipoProblema, storeTiposEvento } from 'storage'
+import { checkHabilidades, checkTheme, checkTipoProblema, checkTiposEvento, getTheme, storeHabilidades, storeTipoProblema, storeTiposEvento } from 'storage'
 import { AxiosError } from 'axios'
 import { checkStoredVersion } from 'util/versioning'
+import { Appearance } from 'react-native'
 
 
 
@@ -91,6 +92,7 @@ export default function AuthProvider({children}: any) {
         const isHabilidadeLoaded = await checkHabilidades()
         const isTiposEvento = await checkTiposEvento()
         const isTipoProblema = await checkTipoProblema()
+        const isTheme = await checkTheme()
 
         if(!isHabilidadeLoaded || !isUpdated ) {
           await getNivelHabilidade()
@@ -119,6 +121,13 @@ export default function AuthProvider({children}: any) {
           })
           .catch((error : AxiosError<DefaultErrorResponse>)=>{
             setErrorLoading("Erro ao carregar dados: " + error?.response?.data?.message || error.message)
+          })
+        }
+
+        if(isTheme){
+          await getTheme()
+          .then((response)=>{
+            Appearance.setColorScheme(response)
           })
         }
 
@@ -158,10 +167,8 @@ export default function AuthProvider({children}: any) {
         } catch (error) {
           reject('Error on logout' + error)
         }
-      })
-      
+      })      
     }
-
 
     const onRegister = async (usuarioCadastro: CriarUsuarioResponse) => {
        //api folder
@@ -203,7 +210,7 @@ export default function AuthProvider({children}: any) {
         <AuthContext.Provider value={{onLogin, onLogout, onRegister, fetchUser, authState, isLoading, errorLoading}}>
             {children}
         </AuthContext.Provider>
-  )
+    )
 
 
 

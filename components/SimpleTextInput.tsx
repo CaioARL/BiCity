@@ -16,8 +16,8 @@ export default function SimpleTextInput( {value, errorMessage: errorMessage, han
   return (
     <>
         <TextInput
-            className={`h-[40px] border-[#ccc] border-[1px] rounded-[5px] mb-[10px$ px-[10px]
-              ${theme === 'light'? 'bg-white text-black': 'bg-secondary_black text-white'}  
+            className={`h-[40px] border-[#ccc] border-[1px] rounded-[5px] mb-[10px] px-[10px]
+              ${editable ? theme === 'light'? 'bg-white text-black' : 'bg-secondary_black text-white' : 'bg-color_lightGray text-black'}  
             `}
             value={value}
             onChangeText={handleChange}

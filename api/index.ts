@@ -1,6 +1,6 @@
-import axios, { AxiosError } from "axios";
-import { router } from "expo-router";
-import { DefaultErrorResponse } from "types";
+import axios, { AxiosError } from "axios"
+import { router } from "expo-router"
+import { DefaultErrorResponse } from "types"
 
 const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,

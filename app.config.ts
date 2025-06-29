@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "BiCity",
   slug: "BiCity",
   scheme: "bicity",
-  version: "1.0.0",
+  version: "1.0.1",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -35,7 +35,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
       "android.permission.ACCESS_FINE_LOCATION",
-      "android.permission.RECORD_AUDIO",
       "android.permission.MODIFY_AUDIO_SETTINGS"
     ],
     package: "com.gabuh.BiCity"
@@ -57,17 +56,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         photosPermission: "The app accesses your photos to let you share them with your friends."
       }
     ],
-    [
-      'expo-build-properties',
-        {
-            android: {
-                usesCleartextTraffic: true, // ? enable HTTP requests
-            },
-            ios: {
-                flipper: true,
-            },
-        },
-    ],
+    // [
+    //   'expo-build-properties',
+    //     {
+    //         android: {
+    //             usesCleartextTraffic: true, // ? enable HTTP requests
+    //         },
+    //         ios: {
+    //             flipper: true,
+    //         },
+    //     },
+    // ],
     "expo-video",
     "expo-audio"
   ],

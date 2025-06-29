@@ -42,7 +42,7 @@ export const getEvento = async (requestPageEvento: RequestPageEvento, abortSigna
             tipoEvento: requestPageEvento.tipoEvento?.id,
             nivelHabilidade: requestPageEvento.nivelHabilidade?.id,
             gratuito: requestPageEvento.gratuito,
-            aprovado: requestPageEvento.aprovado
+            aprovado: requestPageEvento.aprovado || true
         }, 
         signal: abortSignal.signal
     })
